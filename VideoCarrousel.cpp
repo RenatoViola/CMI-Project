@@ -26,7 +26,7 @@ void VideoCarrousel::update() {
 	}
 }
 
-void VideoCarrousel::draw(int numFilesToShow, int width, int height, int gridSpacing) {
+void VideoCarrousel::drawAsList(int numFilesToShow, int width, int height, int gridSpacing) {
 
 	// Calculate the total width of the videos including spacing
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
@@ -60,6 +60,33 @@ void VideoCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 	}
 }
 
+void VideoCarrousel::drawAsRevolver(int radius, int width, int height) {
+	int centerX = ofGetWidth() / 2;
+	int centerY = ofGetHeight() / 2;
+
+	float angleStep = TWO_PI / videos.size(); // The angle between each video
+
+	for (size_t i = 0; i < videos.size(); ++i) {
+		float angle = i * angleStep;
+
+		// Position videos in a circular layout
+		int xPosition = centerX + cos(angle) * radius;
+		int yPosition = centerY + sin(angle) * radius;
+
+		// Determine the size of the video, larger if it's the selected index
+		int videoWidth = (i == current) ? width + 40 : width;
+		int videoHeight = (i == current) ? height + 30 : height;
+
+		// Adjust positions to draw from the center of each video
+		xPosition -= videoWidth / 2;
+		yPosition -= videoHeight / 2;
+
+		// Draw the video
+		videos[i].draw(xPosition, yPosition, videoWidth, videoHeight);
+	}
+}
+
+
 void VideoCarrousel::displayCurrent() {
 	float vWidth = videos[current].getWidth(), vHeight = videos[current].getHeight();
 
@@ -84,8 +111,7 @@ void VideoCarrousel::displayCurrent() {
 void VideoCarrousel::next() {
 	if (dir.size() > 0) {
 		videos[current].setPaused(true);
-		current++;
-		current %= dir.size();
+		++current %= dir.size();
 		videos[current].play();
 	}
 }
@@ -93,8 +119,8 @@ void VideoCarrousel::next() {
 void VideoCarrousel::previous() {
 	if (dir.size() > 0) {
 		videos[current].setPaused(true);
-		current--;
-		current %= dir.size();
+		if (--current == -1)
+			current = dir.size() - 1;
 		videos[current].play();
 	}
 }
