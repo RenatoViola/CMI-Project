@@ -26,5 +26,5 @@ public:
 	ImageCarrousel imageCarrousel;
 	VideoCarrousel videoCarrousel;
 
-	bool openedImage, openedVideo;
+	bool openedImage, openedVideo, displayAsList;
 };

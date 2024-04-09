@@ -13,6 +13,7 @@ void ofApp::setup() {
 
 	openedImage = false;
 	openedVideo = false;
+	displayAsList = true;
 
 	ofSetVerticalSync(true);
 }
@@ -25,8 +26,14 @@ void ofApp::update() {
 void ofApp::draw() {
 	if (!openedImage && ! openedVideo)
 	{
-		imageCarrousel.draw(5, 320, 240, 30);
-		videoCarrousel.draw(5, 320, 240, 30);
+		if (displayAsList) {
+			imageCarrousel.drawAsList(5, 320, 240, 30);
+			videoCarrousel.drawAsList(5, 320, 240, 30);
+		}
+		else {
+			imageCarrousel.drawAsRevolver(250, 120, 90);
+			videoCarrousel.drawAsRevolver(450, 120, 90);
+		}
 	}
 	else if (openedImage)
 	{
@@ -70,6 +77,9 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'k':
 		if(!openedVideo) openedImage = !openedImage;
+		break;
+	case 'd':
+		displayAsList = !displayAsList;
 		break;
 	}
 }
