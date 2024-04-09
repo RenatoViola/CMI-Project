@@ -18,10 +18,6 @@ void ImageCarrousel::setup(const std::string& path) {
 	current = 0;
 }
 
-void ImageCarrousel::update() {
-
-}
-
 void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpacing) {
 
 	// Calculate the total width of the videos including spacing
@@ -30,12 +26,12 @@ void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 	// Calculate the starting x position so the selected video is in the center
 	int startX = (ofGetWidth() - totalWidth) / 2;
 
-	int yPosition = (ofGetHeight() - height) / 2; // Vertically center
+	int yPos = (ofGetHeight() - height) / 2; // Vertically center
 
-	yPosition -= height; // ...
+	yPos -= height; // ...
 
 	ofSetColor(ofColor::black);
-	ofDrawBitmapString("IMAGES", startX + totalWidth / 2 - 18, yPosition - 50);
+	ofDrawBitmapString("IMAGES", startX + totalWidth / 2 - 18, yPos - 50);
 
 	ofSetColor(ofColor::white);
 	for (int i = 0; i < numFilesToShow; i++) {
@@ -43,17 +39,38 @@ void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 		int displayIndex = (current - (numFilesToShow / 2) + i + images.size()) % images.size();
 
 		// Calculate x and y position for the current video
-		int xPosition = startX + i * (width + gridSpacing);
+		int xPos = startX + i * (width + gridSpacing);
 
 		// Draw the video at the calculated position
 		if (displayIndex == current)
 		{
-			images[displayIndex].draw(xPosition - 16, yPosition - 8, width + 32, height + 16);
+			images[displayIndex].draw(xPos - 20, yPos - 15, width + 40, height + 30);
 		}
 		else {
-			images[displayIndex].draw(xPosition, yPosition, width, height); // Draw each video at (xPosition, 0)
+			images[displayIndex].draw(xPos, yPos, width, height); // Draw each video at (xPosition, 0)
 		}
 	}
+}
+
+void ImageCarrousel::displayCurrent() {
+	float iWidth = images[current].getWidth(), iHeight = images[current].getHeight();
+
+	float sWidth = ofGetWidth(), sHeight = ofGetHeight();
+
+	ofSetColor(ofColor::black);
+	ofDrawRectangle(0, 0, sWidth, sHeight);
+
+	float scale = 1.0f;
+
+	if (iWidth > sWidth || iHeight > sHeight)
+		scale = std::min(sWidth / iWidth, sHeight / iHeight);
+
+	float displayWidth = iWidth * scale, displayHeight = iHeight * scale;
+
+	float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
+
+	ofSetColor(ofColor::white);
+	images[current].draw(xPos, yPos, displayWidth, displayHeight);
 }
 
 void ImageCarrousel::next() {

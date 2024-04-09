@@ -11,6 +11,9 @@ void ofApp::setup() {
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
 
+	openedImage = false;
+	openedVideo = false;
+
 	ofSetVerticalSync(true);
 }
 
@@ -20,8 +23,18 @@ void ofApp::update() {
 }
 
 void ofApp::draw() {
-	imageCarrousel.draw(5, 320, 240, 30);
-	videoCarrousel.draw(5, 320, 240, 30);
+	if (!openedImage && ! openedVideo)
+	{
+		imageCarrousel.draw(5, 320, 240, 30);
+		videoCarrousel.draw(5, 320, 240, 30);
+	}
+	else if (openedImage)
+	{
+		imageCarrousel.displayCurrent();
+	}
+	else {
+		videoCarrousel.displayCurrent();
+	}
 }
 
 
@@ -31,11 +44,14 @@ void ofApp::keyPressed(int key) {
 	case 'p':
 		videoCarrousel.pause();
 		break;
+	case 'b':
+		videoCarrousel.previous();
+		break;
 	case 'n':
 		videoCarrousel.next();
 		break;
-	case 'b':
-		videoCarrousel.previous();
+	case 'm':
+		if(!openedImage) openedVideo = !openedVideo;
 		break;
 	case OF_KEY_LEFT:
 		videoCarrousel.previousFrame();
@@ -51,6 +67,9 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'j':
 		imageCarrousel.next();
+		break;
+	case 'k':
+		if(!openedVideo) openedImage = !openedImage;
 		break;
 	}
 }

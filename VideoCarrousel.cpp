@@ -34,11 +34,12 @@ void VideoCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 	// Calculate the starting x position so the selected video is in the center
 	int startX = (ofGetWidth() - totalWidth) / 2;
 
-	int yPosition = (ofGetHeight() - height) / 2; // Vertically center
-	yPosition += height; // ...
+	int yPos = (ofGetHeight() - height) / 2; // Vertically center
+
+	yPos += height; // ...
 
 	ofSetColor(ofColor::black);
-	ofDrawBitmapString("VIDEOS", startX + totalWidth / 2 - 18, yPosition - 50);
+	ofDrawBitmapString("VIDEOS", startX + totalWidth / 2 - 18, yPos - 50);
 
 	ofSetColor(ofColor::white);
 	for (int i = 0; i < numFilesToShow; i++) {
@@ -46,18 +47,38 @@ void VideoCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 		int displayIndex = (current - (numFilesToShow / 2) + i + videos.size()) % videos.size();
 
 		// Calculate x and y position for the current video
-		int xPosition = startX + i * (width + gridSpacing);
+		int xPos = startX + i * (width + gridSpacing);
 		
-
 		// Draw the video at the calculated position
 		if (displayIndex == current)
 		{
-			videos[displayIndex].draw(xPosition - 16, yPosition - 8, width + 32, height + 16);
+			videos[displayIndex].draw(xPos - 20, yPos - 15, width + 40, height + 30);
 		}
 		else {
-			videos[displayIndex].draw(xPosition, yPosition, width, height); // Draw each video at (xPosition, 0)
+			videos[displayIndex].draw(xPos, yPos, width, height); // Draw each video at (xPosition, 0)
 		}
 	}
+}
+
+void VideoCarrousel::displayCurrent() {
+	float vWidth = videos[current].getWidth(), vHeight = videos[current].getHeight();
+
+	float sWidth = ofGetWidth(), sHeight = ofGetHeight();
+
+	ofSetColor(ofColor::black);
+	ofDrawRectangle(0, 0, sWidth, sHeight);
+	
+	float scale = 1.0f;
+
+	if (vWidth > sWidth || vHeight > sHeight)
+		scale = std::min(sWidth / vWidth, sHeight / vHeight);
+
+	float displayWidth = vWidth * scale, displayHeight = vHeight * scale;
+
+	float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
+
+	ofSetColor(ofColor::white);
+	videos[current].draw(xPos, yPos, displayWidth, displayHeight);
 }
 
 void VideoCarrousel::next() {
