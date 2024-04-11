@@ -14,7 +14,6 @@ void ofApp::setup() {
 
 	openedImage = false;
 	openedVideo = false;
-	displayAsList = true;
 	displayCamera = false;
 	detectionEnabled = false;
 
