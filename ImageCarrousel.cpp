@@ -19,6 +19,9 @@ void ImageCarrousel::setup(const std::string& path) {
 }
 
 void ImageCarrousel::drawAsList(int numFilesToShow, int width, int height, int gridSpacing) {
+	int space = width + gridSpacing;
+	// Calculate progressive step 
+	step = ofLerp(step, space, 0.05);
 
 	// Calculate the total width of the videos including spacing
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
@@ -39,7 +42,7 @@ void ImageCarrousel::drawAsList(int numFilesToShow, int width, int height, int g
 		int displayIndex = (current - (numFilesToShow / 2) + i + images.size()) % images.size();
 
 		// Calculate x and y position for the current video
-		int xPos = startX + i * (width + gridSpacing);
+		int xPos = startX + i * space + (space - step);
 
 		// Draw the video at the calculated position
 		if (displayIndex == current)
@@ -103,6 +106,8 @@ void ImageCarrousel::next() {
 	if (dir.size() > 0) {
 		++current %= dir.size();
 	}
+	step = 0;
+
 }
 
 void ImageCarrousel::previous() {

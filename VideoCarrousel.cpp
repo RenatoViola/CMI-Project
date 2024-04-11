@@ -15,6 +15,9 @@ void VideoCarrousel::setup(const std::string& path) {
 		videos[i].load(dir.getPath(i));
 	}
 
+	step = 0;
+	currentWidth = 40;
+	currentHeight = 30;
 	current = 0;
 	videos[current].setLoopState(OF_LOOP_NORMAL);
 	videos[current].play();
@@ -27,6 +30,10 @@ void VideoCarrousel::update() {
 }
 
 void VideoCarrousel::drawAsList(int numFilesToShow, int width, int height, int gridSpacing) {
+	int space = width + gridSpacing;
+
+	// Calculate progressive step 
+	step = ofLerp(step, space,0.05);
 
 	// Calculate the total width of the videos including spacing
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
@@ -47,12 +54,15 @@ void VideoCarrousel::drawAsList(int numFilesToShow, int width, int height, int g
 		int displayIndex = (current - (numFilesToShow / 2) + i + videos.size()) % videos.size();
 
 		// Calculate x and y position for the current video
-		int xPos = startX + i * (width + gridSpacing);
+		int xPos = startX + i * space + (space - step);
 		
 		// Draw the video at the calculated position
 		if (displayIndex == current)
 		{
-			videos[displayIndex].draw(xPos - 20, yPos - 15, width + 40, height + 30);
+			currentWidth = ofLerp(currentWidth, 40, 0.05);
+			currentHeight = ofLerp(currentHeight, 30, 0.05);
+
+			videos[displayIndex].draw(xPos - 20, yPos - 15, width + currentWidth, height + currentHeight);
 		}
 		else {
 			videos[displayIndex].draw(xPos, yPos, width, height); // Draw each video at (xPosition, 0)
@@ -67,6 +77,7 @@ void VideoCarrousel::drawAsRevolver(int radius, int width, int height) {
 	float angleStep = TWO_PI / videos.size(); // The angle between each video
 
 	for (size_t i = 0; i < videos.size(); ++i) {
+		
 		float angle = i * angleStep;
 
 		// Position videos in a circular layout
@@ -113,6 +124,9 @@ void VideoCarrousel::next() {
 		videos[current].setPaused(true);
 		++current %= dir.size();
 		videos[current].play();
+		step = 0;
+		currentHeight = 0;
+		currentWidth = 0;
 	}
 }
 

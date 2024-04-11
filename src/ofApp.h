@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "../ImageCarrousel.h"
 #include "../VideoCarrousel.h"
+#include "../VideoGrabber.h"
 
 class ofApp : public ofBaseApp {
 
@@ -25,6 +26,7 @@ public:
 
 	ImageCarrousel imageCarrousel;
 	VideoCarrousel videoCarrousel;
+	VideoGrabber videoGrabber;
 
-	bool openedImage, openedVideo, displayAsList;
+	bool openedImage, openedVideo, displayAsList, displayCamera;
 };

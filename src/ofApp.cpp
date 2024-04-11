@@ -10,10 +10,12 @@ void ofApp::setup() {
 	
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
+	videoGrabber.setup(1280, 720);
 
 	openedImage = false;
 	openedVideo = false;
 	displayAsList = true;
+	displayCamera = false;
 
 	ofSetVerticalSync(true);
 }
@@ -21,10 +23,11 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
 	videoCarrousel.update();
+	videoGrabber.update();
 }
 
 void ofApp::draw() {
-	if (!openedImage && ! openedVideo)
+	if (!openedImage && ! openedVideo && !displayCamera)
 	{
 		if (displayAsList) {
 			imageCarrousel.drawAsList(5, 320, 240, 30);
@@ -34,6 +37,9 @@ void ofApp::draw() {
 			imageCarrousel.drawAsRevolver(250, 120, 90);
 			videoCarrousel.drawAsRevolver(450, 120, 90);
 		}
+	}
+	else if (displayCamera) {
+		videoGrabber.drawCamera();
 	}
 	else if (openedImage)
 	{
@@ -81,6 +87,8 @@ void ofApp::keyPressed(int key) {
 	case 'd':
 		displayAsList = !displayAsList;
 		break;
+	case 'c':
+		displayCamera = !displayCamera;
 	}
 }
 

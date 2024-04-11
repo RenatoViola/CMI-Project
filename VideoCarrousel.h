@@ -20,6 +20,10 @@ public:
 	void firstFrame();
 
 	bool frameByframe;
+
+	float currentWidth;
+	float currentHeight;
+
 	vector<ofVideoPlayer> videos;
 };
 

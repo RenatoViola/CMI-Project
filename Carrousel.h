@@ -14,6 +14,7 @@ public:
 	virtual void previous() = 0;
 
 	int current;
+	float step;
 
 	ofDirectory dir;
 };
