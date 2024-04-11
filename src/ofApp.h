@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
-#include "../ImageCarrousel.h"
-#include "../VideoCarrousel.h"
-#include "../VideoGrabber.h"
+#include "ImageCarrousel.h"
+#include "VideoCarrousel.h"
+#include "VideoGrabber.h"
 
 class ofApp : public ofBaseApp {
 
@@ -28,5 +28,5 @@ public:
 	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 
-	bool openedImage, openedVideo, displayAsList, displayCamera;
+	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 };
