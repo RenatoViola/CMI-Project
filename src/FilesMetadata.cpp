@@ -1,9 +1,10 @@
 #include "FilesMetadata.h"
 
+const string PATH = "";
 
 //--------------------------------------------------------------
 void FilesMetadata::setup() {
-	currentFileName = "testeXml.xml";
+	currentFileName = PATH + "testeXml.xml";
 	if (!xml.load("testeXml.xml")) {
 		ofLogError() << "Couldn't load file:" << currentFileName << ";";
 	}
@@ -12,7 +13,7 @@ void FilesMetadata::setup() {
 //--------------------------------------------------------------
 void FilesMetadata::load(string filename) {
 	
-	if (!xml.load(filename)) {
+	if (!xml.load(PATH + filename)) {
 		ofLogError() << "Couldn't load file:" << filename << ";";
 	}
 	else {
@@ -23,7 +24,7 @@ void FilesMetadata::load(string filename) {
 
 //--------------------------------------------------------------
 void FilesMetadata::save(string filename) {
-	if (!xml.save(filename)) {
+	if (!xml.save(PATH + filename)) {
 		ofLogError() << "Couldn't save file:" << filename << ";";
 	}
 }
@@ -46,29 +47,39 @@ vector<string> FilesMetadata::getFileTags() {
 void FilesMetadata::createFile(string fileName, vector<string> tags) {
 	xml.clear();
 
-	auto file = xml.appendChild("File");
+	auto metadata = xml.appendChild("File");
 
 	// Set the FileName
-	file.appendChild("FileName").set(fileName);
-	
+	metadata.appendChild("FileName").set(fileName);
 
 	// Adds file tags
-	auto xmlTags = file.appendChild("tags");
+	auto xmlTags = metadata.appendChild("tags");
 	for (auto tag : tags) {
 		auto tagName = xmlTags.appendChild("TagName");
 		tagName.set(tag);
 	}
 
 	// add Luminance
-	file.appendChild("luminance");
+	metadata.appendChild("luminance");
 	
 	// add color
-	file.appendChild("color");
+	auto color = metadata.appendChild("color");
+	color.appendChild("red");
+	color.appendChild("green");
+	color.appendChild("blue");
 
 	// add Number of faces
-	file.appendChild("NFaces");
+	metadata.appendChild("num_faces");
 
-	xml.save(fileName);
+	metadata.appendChild("edge_distribution");
+	
+	metadata.appendChild("texture_characteristics");
+	
+	metadata.appendChild("object_ocurrences");
+
+
+
+	xml.save(PATH + fileName);
 }
 
 //--------------------------------------------------------------
