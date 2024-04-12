@@ -23,7 +23,15 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
 	videoCarrousel.update();
-	videoGrabber.update(detectionEnabled);
+
+	if (displayCamera)
+	{
+		videoGrabber.update(detectionEnabled);
+	}
+	else
+	{
+		detectionEnabled = false;
+	}
 }
 
 void ofApp::draw() {

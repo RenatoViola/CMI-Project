@@ -28,6 +28,7 @@ void VideoGrabber::setup(int width, int height) {
 	img.allocate(width, height, OF_IMAGE_COLOR);
 
 	finder.setup("haarcascade_frontalface_default.xml");
+	finder.setScaleHaar(2);
 }
 
 void VideoGrabber::update(bool detectionEnabled) {
@@ -54,10 +55,9 @@ void VideoGrabber::drawCamera(bool detectionEnabled) {
 	if (detectionEnabled)
 	{
 		ofNoFill();
-		ofSetColor(ofColor::black);
-		for (unsigned int i = 0; i < finder.blobs.size(); i++) {
-			ofRectangle cur = finder.blobs[i].boundingRect;
-			ofDrawRectangle(cur.x, cur.y, cur.width, cur.height);
+		ofSetColor(ofColor::blueSteel);
+		for (int i = 0; i < finder.blobs.size(); i++) {
+			ofDrawRectangle(finder.blobs[i].boundingRect);
 		}
 		ofFill();
 	}

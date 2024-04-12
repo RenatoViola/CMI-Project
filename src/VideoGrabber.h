@@ -13,7 +13,6 @@ class VideoGrabber {
 
 		ofVideoGrabber vidGrabber;
 
-		ofxCvColorImage	colorImg;
 		ofxCvHaarFinder finder;
 		ofImage img;
 
