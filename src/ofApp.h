@@ -4,6 +4,7 @@
 #include "ImageCarrousel.h"
 #include "VideoCarrousel.h"
 #include "VideoGrabber.h"
+#include "FilesMetadata.h"
 
 class ofApp : public ofBaseApp {
 
@@ -27,6 +28,7 @@ public:
 	ImageCarrousel imageCarrousel;
 	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
+	FilesMetadata filesMetadata;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 };

@@ -28,7 +28,7 @@ void VideoGrabber::setup(int width, int height) {
 	img.allocate(width, height, OF_IMAGE_COLOR);
 
 	finder.setup("haarcascade_frontalface_default.xml");
-	finder.setScaleHaar(2);
+	finder.setScaleHaar(1.5);
 }
 
 void VideoGrabber::update(bool detectionEnabled) {

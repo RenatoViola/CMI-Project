@@ -11,6 +11,11 @@ void ofApp::setup() {
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
 	videoGrabber.setup(1280, 720);
+	filesMetadata.setup();
+	
+	// Ignore this, used for debugging
+	//filesMetadata.getFileTags();
+	//filesMetadata.createFile("other.xml", { "9s","2b" });
 
 	openedImage = false;
 	openedVideo = false;
