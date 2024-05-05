@@ -12,8 +12,10 @@ void ImageCarrousel::setup(const std::string& path) {
 	}
 
 	// you can now iterate through the files and load them into the ofImage vector
-	for (int i = 0; i < (int)dir.size(); i++) 
+	for (int i = 0; i < (int)dir.size(); i++) {
 		images[i].load(dir.getPath(i));
+		Metadata::load(dir.getName(i), xml, true);
+	}
 	
 	current = 0;
 }

@@ -13,6 +13,7 @@ void VideoCarrousel::setup(const std::string& path) {
 	for (size_t i = 0; i < dir.size(); ++i) {
 		// Load each video into an ofVideoPlayer object
 		videos[i].load(dir.getPath(i));
+		Metadata::load(dir.getName(i), xml, false);
 	}
 
 	step = 0;

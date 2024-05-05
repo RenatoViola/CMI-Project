@@ -19,26 +19,28 @@ void VideoGrabber::setup(int width, int height) {
 		}
 	}
 
-	vidGrabber.setDeviceID(0);
-	vidGrabber.setDesiredFrameRate(30);
+	//vidGrabber.setDeviceID(0);
+	//vidGrabber.setDesiredFrameRate(30);
 
 	vidGrabber.setVerbose(true);
-	vidGrabber.setup(width, camHeight);
+	vidGrabber.setup(width, height);
 
-	img.allocate(width, height, OF_IMAGE_COLOR);
+	colorImg.allocate(width, height);
+	grayImg.allocate(width, height);
 
 	finder.setup("haarcascade_frontalface_default.xml");
-	finder.setScaleHaar(1.5);
+	// finder.setScaleHaar(1.5);
 }
 
 void VideoGrabber::update(bool detectionEnabled) {
 	vidGrabber.update();
 
 	if (vidGrabber.isFrameNew()) {
-		img.setFromPixels(vidGrabber.getPixels());
+		colorImg.setFromPixels(vidGrabber.getPixels());
 		if (detectionEnabled)
 		{
-			finder.findHaarObjects(img);
+			grayImg = colorImg;
+			finder.findHaarObjects(grayImg);
 		}
 	}
 
@@ -50,7 +52,7 @@ void VideoGrabber::drawCamera(bool detectionEnabled) {
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 	ofSetColor(ofColor::white);
-	img.draw(ofGetWidth() / 2 - camWidth / 2, ofGetHeight() / 2 - camHeight / 2);
+	colorImg.draw(ofGetWidth() / 2 - camWidth / 2, ofGetHeight() / 2 - camHeight / 2);
 
 	if (detectionEnabled)
 	{

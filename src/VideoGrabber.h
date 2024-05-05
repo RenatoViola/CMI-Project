@@ -14,7 +14,8 @@ class VideoGrabber {
 		ofVideoGrabber vidGrabber;
 
 		ofxCvHaarFinder finder;
-		ofImage img;
+		ofxCvColorImage colorImg;
+		ofxCvGrayscaleImage grayImg;
 
 		vector <ofRectangle> faceRects;
 

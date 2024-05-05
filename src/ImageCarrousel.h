@@ -1,5 +1,6 @@
 #pragma once
 #include "Carrousel.h"
+#include "Metadata.h"
 
 class ImageCarrousel : public Carrousel
 {
@@ -12,5 +13,6 @@ public:
 	virtual void previous();
 
 	vector<ofImage> images;
+	ofXml xml;
 };
 

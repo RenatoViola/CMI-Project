@@ -1,5 +1,6 @@
 #pragma once
 #include "Carrousel.h"
+#include "Metadata.h"
 
 class VideoCarrousel : public Carrousel
 {
@@ -25,5 +26,7 @@ public:
 	float currentHeight;
 
 	vector<ofVideoPlayer> videos;
+	ofXml xml;
+
 };
 
