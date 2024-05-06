@@ -1,5 +1,5 @@
 #include "Metadata.h"
-
+#include "ofxCvHaarFinder.h"
 
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
@@ -52,6 +52,7 @@ vector<string> Metadata::getTags(ofXml& XML) {
 void Metadata::createImageFile(string filename, ofXml& XML) {
 
 	ofImage img;
+	ofPixels& pixels = img.getPixels();
 
 	img.load("images/" + filename);
 	auto metadata = XML.appendChild("IMAGE");
@@ -62,7 +63,7 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	// Adds tags section
 	auto xmlTags = metadata.appendChild("TAGS");
 
-	ofColor color = calculateAverageColorInFrame(img.getPixels());
+	ofColor color = calculateAverageColorInFrame(pixels);
 	int luminance = calculateLuminance(color);
 
 	// add Luminance
@@ -75,7 +76,8 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	colorSection.appendChild("BLUE").set(color.b);
 
 	// add Number of faces
-	metadata.appendChild("NUM_FACES");
+	int num_faces = numberOfFaces(pixels);
+	metadata.appendChild("NUM_FACES").set(num_faces);
 
 	metadata.appendChild("EDGE_DISTRIBUTION");
 
@@ -111,7 +113,8 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 	colorSection.appendChild("BLUE").set(color.b);
 
 	// add Number of faces
-	metadata.appendChild("NUM_FACES");
+	int num_faces = numberOfFaces(pixels);
+	metadata.appendChild("NUM_FACES").set(num_faces);
 
 	metadata.appendChild("EDGE_DISTRIBUTION");
 
@@ -161,4 +164,21 @@ ofPixels& Metadata::pixelsFromFirstFrame(ofVideoPlayer& video) {
 
 int Metadata::calculateLuminance(ofColor color) {
 	return 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
+}
+
+int Metadata::numberOfFaces(ofPixels& pixels) {
+	ofxCvHaarFinder finder;
+	ofxCvColorImage colorImg;
+	ofxCvGrayscaleImage grayImg;
+	int width = pixels.getWidth(), height = pixels.getHeight();
+
+	colorImg.allocate(width,height);
+	grayImg.allocate(width, height);
+	finder.setup("haarcascade_frontalface_default.xml");
+
+	colorImg.setFromPixels(pixels);
+	grayImg = colorImg;
+	finder.findHaarObjects(grayImg);
+
+	return finder.blobs.size();
 }

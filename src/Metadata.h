@@ -16,5 +16,6 @@ private:
 	static ofColor calculateAverageColorInFrame(ofPixels& pixels);
 	static ofPixels& pixelsFromFirstFrame(ofVideoPlayer& video);
 	static int calculateLuminance(ofColor color);
+	static int numberOfFaces(ofPixels& pixels);
 };
 

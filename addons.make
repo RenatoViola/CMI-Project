@@ -1,5 +1,3 @@
 ofxGui
-ofxKinect
 ofxOpenCv
-ofxVectorGraphics
 ofxXmlSettings
