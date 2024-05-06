@@ -11,11 +11,15 @@ void ofApp::setup() {
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
 	videoGrabber.setup(1280, 720);
+	
+	// Ignore this, used for debugging
+	//filesMetadata.getFileTags();
+	//filesMetadata.createFile("other.xml", { "9s","2b" });
 
 	openedImage = false;
 	openedVideo = false;
-	displayAsList = true;
 	displayCamera = false;
+	detectionEnabled = false;
 
 	ofSetVerticalSync(true);
 }
@@ -23,30 +27,34 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
 	videoCarrousel.update();
-	videoGrabber.update();
+
+	if (displayCamera)
+	{
+		videoGrabber.update(detectionEnabled);
+	}
+	else
+	{
+		detectionEnabled = false;
+	}
 }
 
 void ofApp::draw() {
-	if (!openedImage && ! openedVideo && !displayCamera)
+
+	if (displayCamera) 
 	{
-		if (displayAsList) {
-			imageCarrousel.drawAsList(5, 320, 240, 30);
-			videoCarrousel.drawAsList(5, 320, 240, 30);
-		}
-		else {
-			imageCarrousel.drawAsRevolver(250, 120, 90);
-			videoCarrousel.drawAsRevolver(450, 120, 90);
-		}
-	}
-	else if (displayCamera) {
-		videoGrabber.drawCamera();
+		videoGrabber.drawCamera(detectionEnabled);
 	}
 	else if (openedImage)
 	{
 		imageCarrousel.displayCurrent();
 	}
-	else {
+	else if (openedVideo) 
+	{
 		videoCarrousel.displayCurrent();
+	}
+	else {
+		imageCarrousel.draw(5, 320, 240, 30);
+		videoCarrousel.draw(5, 320, 240, 30);
 	}
 }
 
@@ -54,6 +62,9 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	switch (key) {
+	case 'f':
+		detectionEnabled = !detectionEnabled;
+		break;
 	case 'p':
 		videoCarrousel.pause();
 		break;
@@ -84,11 +95,9 @@ void ofApp::keyPressed(int key) {
 	case 'k':
 		if(!openedVideo) openedImage = !openedImage;
 		break;
-	case 'd':
-		displayAsList = !displayAsList;
-		break;
 	case 'c':
 		displayCamera = !displayCamera;
+		break;
 	}
 }
 

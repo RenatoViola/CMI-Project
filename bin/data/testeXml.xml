@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<metadata>
+	<FileName>testeXml.xml</FileName>
+	<tags>
+		<tagName>2b</tagName>
+		<tagName>9s</tagName>
+		<tagName>nier</tagName>
+		<tagName>apocalypse</tagName>
+	</tags>
+	<luminance> 210 </luminance>
+	<color>
+		<red>200</red>
+		<green>100</green>
+		<blue>27</blue>
+	</color>
+	<num_faces> 2 </num_faces>
+	<edge_distribution> ? </edge_distribution>
+	<texture_characteristics> ? </texture_characteristics>
+	<object_ocurrences> 0 </object_ocurrences>
+</metadata>
