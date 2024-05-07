@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include "ofxCvHaarFinder.h"
 
 class Metadata
 {
@@ -14,8 +14,10 @@ private:
 	static void createImageFile(string fileName, ofXml& XML);
 	static void createVideoFile(string fileName, ofXml& XML);
 	static ofColor calculateAverageColorInFrame(ofPixels& pixels);
-	static ofPixels& pixelsFromFirstFrame(ofVideoPlayer& video);
+	static ofColor Metadata::calculateAverageColor(vector<ofPixels> frames);
+	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
 	static int calculateLuminance(ofColor color);
-	static int numberOfFaces(ofPixels& pixels);
+	static int numberOfFacesInFrame(ofPixels& pixels, ofxCvHaarFinder& finder);
+	static int numberOfFaces(vector<ofPixels> frames);
 };
 

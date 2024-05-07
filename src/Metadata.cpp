@@ -1,5 +1,5 @@
 #include "Metadata.h"
-#include "ofxCvHaarFinder.h"
+
 
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
@@ -52,9 +52,9 @@ vector<string> Metadata::getTags(ofXml& XML) {
 void Metadata::createImageFile(string filename, ofXml& XML) {
 
 	ofImage img;
-	ofPixels& pixels = img.getPixels();
-
 	img.load("images/" + filename);
+	vector<ofPixels> frames{ img.getPixels() };
+
 	auto metadata = XML.appendChild("IMAGE");
 
 	// Set the FileName
@@ -63,7 +63,7 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	// Adds tags section
 	auto xmlTags = metadata.appendChild("TAGS");
 
-	ofColor color = calculateAverageColorInFrame(pixels);
+	ofColor color = calculateAverageColor(frames);
 	int luminance = calculateLuminance(color);
 
 	// add Luminance
@@ -76,7 +76,7 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	colorSection.appendChild("BLUE").set(color.b);
 
 	// add Number of faces
-	int num_faces = numberOfFaces(pixels);
+	int num_faces = numberOfFaces(frames);
 	metadata.appendChild("NUM_FACES").set(num_faces);
 
 	metadata.appendChild("EDGE_DISTRIBUTION");
@@ -90,6 +90,8 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 
 	ofVideoPlayer video;
 	video.load("videos/" + filename);
+	vector<ofPixels> frames = extractFrames(video, 4);
+	ofPixels& firstFrame = frames.at(0);
 
 	auto metadata = XML.appendChild("VIDEO");
 
@@ -99,8 +101,8 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 	// Adds tags section
 	auto xmlTags = metadata.appendChild("TAGS");
 
-	ofPixels& pixels = pixelsFromFirstFrame(video);
-	ofColor color = calculateAverageColorInFrame(pixels);
+	ofColor color = calculateAverageColor(frames);
+	
 	int luminance = calculateLuminance(color);
 
 	// add Luminance
@@ -113,7 +115,7 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 	colorSection.appendChild("BLUE").set(color.b);
 
 	// add Number of faces
-	int num_faces = numberOfFaces(pixels);
+	int num_faces = numberOfFaces(frames);
 	metadata.appendChild("NUM_FACES").set(num_faces);
 
 	metadata.appendChild("EDGE_DISTRIBUTION");
@@ -124,13 +126,50 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 }
 
 
+vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
+	vector<ofPixels> frames;
+
+	videoPlayer.setPaused(true);
+
+	for (int i = 0; i < videoPlayer.getTotalNumFrames(); i += skip + 1) {
+		videoPlayer.setFrame(i);
+		videoPlayer.update();
+
+		frames.push_back(videoPlayer.getPixels());
+	}
+
+	return frames;
+}
+
+ofColor Metadata::calculateAverageColor(vector<ofPixels> frames) {
+
+	long long r = 0, g = 0, b = 0;
+
+	for (ofPixels& f : frames)
+	{
+		ofColor color = calculateAverageColorInFrame(f);
+		r += color.r;
+		g += color.g;
+		b += color.b;
+	}
+
+	int nFrames = frames.size();
+
+	r /= nFrames;
+	g /= nFrames;
+	b /= nFrames;
+
+	return ofColor(r, g, b);
+}
+
 ofColor Metadata::calculateAverageColorInFrame(ofPixels& pixels) {
 
 	int nPixels = pixels.getWidth() * pixels.getHeight();
 
-	int r = 0, g = 0, b = 0;
-	for (int i = 0; i < nPixels; i++) {
-		int index = i * 3;
+	long long r = 0, g = 0, b = 0;
+
+	for (size_t i = 0; i < nPixels; i++) {
+		size_t index = i * 3;
 		r += pixels[index];
 		g += pixels[index + 1];
 		b += pixels[index + 2];
@@ -143,38 +182,33 @@ ofColor Metadata::calculateAverageColorInFrame(ofPixels& pixels) {
 	return ofColor(r, g, b);
 }
 
-ofPixels& Metadata::pixelsFromFirstFrame(ofVideoPlayer& video) {
-	video.play();
-
-	ofSleepMillis(500);
-
-	video.setPaused(true);
-
-	video.update();
-
-	while (!video.isFrameNew())
-	{
-		video.nextFrame();
-		video.update();
-	}
-
-	return video.getPixels();
-}
-
 
 int Metadata::calculateLuminance(ofColor color) {
 	return 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
 }
 
-int Metadata::numberOfFaces(ofPixels& pixels) {
+int Metadata::numberOfFaces(vector<ofPixels> frames) {
 	ofxCvHaarFinder finder;
+	finder.setup("haarcascade_frontalface_default.xml");
+
+	int nFaces = 0;
+
+	for (ofPixels& f : frames)
+	{
+		nFaces += numberOfFacesInFrame(f, finder);
+	}
+
+	return nFaces / frames.size();
+}
+
+int Metadata::numberOfFacesInFrame(ofPixels& pixels, ofxCvHaarFinder& finder) {
+
 	ofxCvColorImage colorImg;
 	ofxCvGrayscaleImage grayImg;
 	int width = pixels.getWidth(), height = pixels.getHeight();
 
-	colorImg.allocate(width,height);
+	colorImg.allocate(width, height);
 	grayImg.allocate(width, height);
-	finder.setup("haarcascade_frontalface_default.xml");
 
 	colorImg.setFromPixels(pixels);
 	grayImg = colorImg;
