@@ -13,11 +13,9 @@ public:
 private:
 	static void createImageFile(string fileName, ofXml& XML);
 	static void createVideoFile(string fileName, ofXml& XML);
-	static ofColor calculateAverageColorInFrame(ofPixels& pixels);
-	static ofColor Metadata::calculateAverageColor(vector<ofPixels> frames);
+	static void calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance);
+	static void calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColor& color, float* luminance);
 	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
-	static int calculateLuminance(ofColor color);
-	static int numberOfFacesInFrame(ofPixels& pixels, ofxCvHaarFinder& finder);
 	static int numberOfFaces(vector<ofPixels> frames);
 };
 

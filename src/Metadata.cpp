@@ -63,8 +63,9 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	// Adds tags section
 	auto xmlTags = metadata.appendChild("TAGS");
 
-	ofColor color = calculateAverageColor(frames);
-	int luminance = calculateLuminance(color);
+	ofColor color;
+	float luminance;
+	calculateAverageColorAndLuminance(frames, color, &luminance);
 
 	// add Luminance
 	metadata.appendChild("LUMINANCE").set(luminance);
@@ -101,9 +102,9 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 	// Adds tags section
 	auto xmlTags = metadata.appendChild("TAGS");
 
-	ofColor color = calculateAverageColor(frames);
-	
-	int luminance = calculateLuminance(color);
+	ofColor color;
+	float luminance;
+	calculateAverageColorAndLuminance(frames, color, &luminance);
 
 	// add Luminance
 	metadata.appendChild("LUMINANCE").set(luminance);
@@ -126,6 +127,83 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 }
 
 
+void Metadata::calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColor& color, float* luminance) {
+
+	long long r = 0, g = 0, b = 0;
+	float totalLuminance = 0.0;
+
+	for (ofPixels& f : frames)
+	{
+		ofColor colorInFrame;
+		float luminanceInFrame;
+		calculateAverageColorAndLuminanceInFrame(f, colorInFrame, &luminanceInFrame);
+
+		r += colorInFrame.r;
+		g += colorInFrame.g;
+		b += colorInFrame.b;
+		totalLuminance += luminanceInFrame;
+	}
+
+	int nFrames = frames.size();
+
+	color.r = r / nFrames;
+	color.g = g / nFrames;
+	color.b = b / nFrames;
+
+	*luminance = totalLuminance / nFrames;
+}
+
+void Metadata::calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance) {
+
+	int nPixels = pixels.getWidth() * pixels.getHeight();
+	long long r = 0, g = 0, b = 0;
+	float totalLuminance = 0.0;
+
+	for (size_t i = 0; i < nPixels; i++) {
+		size_t index = i * 3;
+		unsigned char R = pixels[index];
+		unsigned char G = pixels[index + 1];
+		unsigned char B = pixels[index + 2];
+
+		r += R;
+		g += G;
+		b += B;
+		totalLuminance += 0.2125 * R + 0.7154 * G + 0.0721 * B;
+	}
+
+	color.r = r / nPixels;
+	color.g = g / nPixels;
+	color.b = b / nPixels;
+
+	*luminance = totalLuminance / nPixels;
+}
+
+
+int Metadata::numberOfFaces(vector<ofPixels> frames) {
+	ofxCvHaarFinder finder;
+	finder.setup("haarcascade_frontalface_default.xml");
+
+	int nFaces = 0;
+	ofxCvColorImage colorImg;
+	ofxCvGrayscaleImage grayImg;
+	int width = frames.at(0).getWidth(), height = frames.at(0).getHeight();
+
+	colorImg.allocate(width, height);
+	grayImg.allocate(width, height);
+
+	for (ofPixels& f : frames)
+	{
+		colorImg.setFromPixels(f);
+		grayImg = colorImg;
+		finder.findHaarObjects(grayImg);
+
+		nFaces += finder.blobs.size();
+	}
+
+	return nFaces / frames.size();
+}
+
+
 vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
 	vector<ofPixels> frames;
 
@@ -139,80 +217,4 @@ vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
 	}
 
 	return frames;
-}
-
-ofColor Metadata::calculateAverageColor(vector<ofPixels> frames) {
-
-	long long r = 0, g = 0, b = 0;
-
-	for (ofPixels& f : frames)
-	{
-		ofColor color = calculateAverageColorInFrame(f);
-		r += color.r;
-		g += color.g;
-		b += color.b;
-	}
-
-	int nFrames = frames.size();
-
-	r /= nFrames;
-	g /= nFrames;
-	b /= nFrames;
-
-	return ofColor(r, g, b);
-}
-
-ofColor Metadata::calculateAverageColorInFrame(ofPixels& pixels) {
-
-	int nPixels = pixels.getWidth() * pixels.getHeight();
-
-	long long r = 0, g = 0, b = 0;
-
-	for (size_t i = 0; i < nPixels; i++) {
-		size_t index = i * 3;
-		r += pixels[index];
-		g += pixels[index + 1];
-		b += pixels[index + 2];
-	}
-
-	r /= nPixels;
-	g /= nPixels;
-	b /= nPixels;
-
-	return ofColor(r, g, b);
-}
-
-
-int Metadata::calculateLuminance(ofColor color) {
-	return 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
-}
-
-int Metadata::numberOfFaces(vector<ofPixels> frames) {
-	ofxCvHaarFinder finder;
-	finder.setup("haarcascade_frontalface_default.xml");
-
-	int nFaces = 0;
-
-	for (ofPixels& f : frames)
-	{
-		nFaces += numberOfFacesInFrame(f, finder);
-	}
-
-	return nFaces / frames.size();
-}
-
-int Metadata::numberOfFacesInFrame(ofPixels& pixels, ofxCvHaarFinder& finder) {
-
-	ofxCvColorImage colorImg;
-	ofxCvGrayscaleImage grayImg;
-	int width = pixels.getWidth(), height = pixels.getHeight();
-
-	colorImg.allocate(width, height);
-	grayImg.allocate(width, height);
-
-	colorImg.setFromPixels(pixels);
-	grayImg = colorImg;
-	finder.findHaarObjects(grayImg);
-
-	return finder.blobs.size();
 }
