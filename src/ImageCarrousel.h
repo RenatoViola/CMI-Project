@@ -1,6 +1,7 @@
 #pragma once
 #include "Carrousel.h"
 #include "Metadata.h"
+#include "FilterPanel.h"
 
 class ImageCarrousel : public Carrousel
 {
@@ -14,5 +15,7 @@ public:
 
 	vector<ofImage> images;
 	ofXml xml;
+	FilterPanel panel;
+
 };
 

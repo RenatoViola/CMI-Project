@@ -18,6 +18,7 @@ void ImageCarrousel::setup(const std::string& path) {
 	}
 	
 	current = 0;
+	panel.setup();
 }
 
 void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpacing) {
@@ -77,6 +78,7 @@ void ImageCarrousel::displayCurrent() {
 
 	ofSetColor(ofColor::white);
 	images[current].draw(xPos, yPos, displayWidth, displayHeight);
+	panel.draw();
 }
 
 void ImageCarrousel::next() {
