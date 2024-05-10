@@ -18,6 +18,7 @@ private:
 	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
 	static int numberOfFaces(vector<ofPixels>& frames);
 	static void detectEdges(ofPixels& pixels, ofXml& XML);
-	static void calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML);
+	static void calculateStats(const string& filterName, Mat& filteredMat, ofXml& XML, bool thresholdOn);
+	static void detectTextureCharacteristics(ofPixels& pixels, ofXml& XML);
 };
 

@@ -77,7 +77,8 @@ void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, of
 
 	ofPixels& firstFrame = frames.at(0);
 	detectEdges(firstFrame, XML.appendChild("EDGE_DISTRIBUTION"));
-	XML.appendChild("TEXTURE_CHARACTERISTICS");
+	detectTextureCharacteristics(firstFrame, XML.appendChild("TEXTURE_CHARACTERISTICS"));
+	
 	XML.appendChild("OBJECT_OCCURRENCES");
 }
 
@@ -168,30 +169,64 @@ void Metadata::detectEdges(ofPixels& pixels, ofXml& XML) {
 
 	kernel = (Mat_<char>(2, 2) << 1, -1, 1, -1);
 	cv::filter2D(src, dst, src.depth(), kernel);
-	calculateEdgesAndStats("VERTICAL", dst, XML);
+	calculateStats("VERTICAL", dst, XML, true);
 
 	kernel = (Mat_<char>(2, 2) << 1, 1, -1, -1);
 	cv::filter2D(src, dst, src.depth(), kernel);
-	calculateEdgesAndStats("HORIZONTAL", dst, XML);
+	calculateStats("HORIZONTAL", dst, XML, true);
 
 	kernel = (Mat_<char>(2, 2) << sqrt(2), 0, 0, -sqrt(2));
 	cv::filter2D(src, dst, src.depth(), kernel);
-	calculateEdgesAndStats("DEGREES_45", dst, XML);
+	calculateStats("DEGREES_45", dst, XML, true);
 
 	kernel = (Mat_<char>(2, 2) << 0, sqrt(2), -sqrt(2), 0);
 	cv::filter2D(src, dst, src.depth(), kernel);
-	calculateEdgesAndStats("DEGREES_135", dst, XML);
+	calculateStats("DEGREES_135", dst, XML, true);
 
 	kernel = (Mat_<char>(2, 2) << 2, -2, -2, 2);
 	cv::filter2D(src, dst, src.depth(), kernel);
-	calculateEdgesAndStats("NON_DIRECTIONAL", dst, XML);
+	calculateStats("NON_DIRECTIONAL", dst, XML, true);
 }
 
-void Metadata::calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML) {
-	Mat binaryMat;
-	threshold(filteredMat, binaryMat, 0, 255, THRESH_BINARY | THRESH_OTSU);
 
-	int numEdges = countNonZero(binaryMat);
+void Metadata::detectTextureCharacteristics(ofPixels& pixels, ofXml& XML) {
+
+	Mat src(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+	cvtColor(src, src, COLOR_RGB2GRAY);
+
+	Mat dst, kernel;
+
+	Size ksize = Size(5, 5);
+	double lambd = 50.0;   
+	double gamma = 0.5;
+
+	int kernel_id = 0;
+
+	for (size_t theta = 30; theta <= 180; theta += 30)
+	{
+		for (size_t sigma = 10; sigma <= 40; sigma += 10) {
+			kernel = getGaborKernel(ksize, sigma, theta, lambd, gamma);
+			cv::filter2D(src, dst, src.depth(), kernel);
+			string kernel_name = "GABOR_KERNEL_" + to_string(++kernel_id);
+			calculateStats(kernel_name, dst, XML, false);
+		}
+	}
+}
+
+void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml& XML, bool thresholdOn) {
+
+	int numEdges;
+
+	if (thresholdOn)
+	{
+		Mat binaryMat;
+		threshold(filteredMat, binaryMat, 0, 255, THRESH_BINARY | THRESH_OTSU);
+		numEdges = countNonZero(binaryMat);
+	}
+	else
+	{
+		numEdges = countNonZero(filteredMat);
+	}
 
 	Scalar mean, deviation;
 	meanStdDev(filteredMat, mean, deviation);
