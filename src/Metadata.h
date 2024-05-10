@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxCvHaarFinder.h"
+using namespace cv;
 
 class Metadata
 {
@@ -17,5 +18,7 @@ private:
 	static void calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColor& color, float* luminance);
 	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
 	static int numberOfFaces(vector<ofPixels> frames);
+	static void detectEdges(ofPixels& pixels, ofXml& XML);
+	static void calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML);
 };
 

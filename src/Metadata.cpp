@@ -53,7 +53,8 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 
 	ofImage img;
 	img.load("images/" + filename);
-	vector<ofPixels> frames{ img.getPixels() };
+	ofPixels& firstFrame = img.getPixels();
+	vector<ofPixels> frames{ firstFrame };
 
 	auto metadata = XML.appendChild("IMAGE");
 
@@ -80,7 +81,8 @@ void Metadata::createImageFile(string filename, ofXml& XML) {
 	int num_faces = numberOfFaces(frames);
 	metadata.appendChild("NUM_FACES").set(num_faces);
 
-	metadata.appendChild("EDGE_DISTRIBUTION");
+	auto edgeSection = metadata.appendChild("EDGE_DISTRIBUTION");
+	detectEdges(firstFrame, edgeSection);
 
 	metadata.appendChild("TEXTURE_CHARACTERISTICS");
 
@@ -119,7 +121,8 @@ void Metadata::createVideoFile(string filename, ofXml& XML) {
 	int num_faces = numberOfFaces(frames);
 	metadata.appendChild("NUM_FACES").set(num_faces);
 
-	metadata.appendChild("EDGE_DISTRIBUTION");
+	auto edgeSection = metadata.appendChild("EDGE_DISTRIBUTION");
+	detectEdges(firstFrame, edgeSection);
 
 	metadata.appendChild("TEXTURE_CHARACTERISTICS");
 
@@ -131,6 +134,8 @@ void Metadata::calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColo
 
 	long long r = 0, g = 0, b = 0;
 	float totalLuminance = 0.0;
+	
+	int count = 0;
 
 	for (ofPixels& f : frames)
 	{
@@ -203,18 +208,75 @@ int Metadata::numberOfFaces(vector<ofPixels> frames) {
 	return nFaces / frames.size();
 }
 
+void Metadata::detectEdges(ofPixels& pixels, ofXml& XML) {
+
+	Mat input(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+	cvtColor(input, input, COLOR_RGB2GRAY);
+
+	Mat vertMat, horMat, d45Mat, d135Mat, ndMat, kernel;
+
+	kernel = (Mat_<char>(2, 2) << 1, -1, 1, -1);
+	cv::filter2D(input, vertMat, input.depth(), kernel);
+	calculateEdgesAndStats("VERTICAL", vertMat, XML);
+
+	kernel = (Mat_<char>(2, 2) << 1, 1, -1, -1);
+	cv::filter2D(input, horMat, input.depth(), kernel);
+	calculateEdgesAndStats("HORIZONTAL", horMat, XML);
+
+	kernel = (Mat_<char>(2, 2) << sqrt(2), 0, 0, -sqrt(2));
+	cv::filter2D(input, d45Mat, input.depth(), kernel);
+	calculateEdgesAndStats("DEGREES_45", d45Mat, XML);
+
+	kernel = (Mat_<char>(2, 2) << 0, sqrt(2), -sqrt(2), 0);
+	cv::filter2D(input, d135Mat, input.depth(), kernel);
+	calculateEdgesAndStats("DEGREES_135", d135Mat, XML);
+
+	kernel = (Mat_<char>(2, 2) << 2, -2, -2, 2);
+	cv::filter2D(input, ndMat, input.depth(), kernel);
+	calculateEdgesAndStats("NON_DIRECTIONAL", ndMat, XML);
+}
+
+void Metadata::calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML) {
+	Mat binaryMat;
+	threshold(filteredMat, binaryMat, 0, 255, THRESH_BINARY | THRESH_OTSU);
+
+	int numEdges = countNonZero(binaryMat);
+
+	Scalar mean, deviation;
+	meanStdDev(filteredMat, mean, deviation);
+
+	auto filterSection = XML.appendChild(filterName);
+	filterSection.appendChild("NUM_EDGES").set(numEdges);
+	filterSection.appendChild("MEAN").set(mean[0]);
+	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
+}
 
 vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
 	vector<ofPixels> frames;
 
+	videoPlayer.update();
+	videoPlayer.play();
+
+	ofSleepMillis(500);
+
 	videoPlayer.setPaused(true);
+	videoPlayer.update();
 
-	for (int i = 0; i < videoPlayer.getTotalNumFrames(); i += skip + 1) {
-		videoPlayer.setFrame(i);
-		videoPlayer.update();
+	int currentFrame = 0;
+	int totalFrames = videoPlayer.getTotalNumFrames();
 
-		frames.push_back(videoPlayer.getPixels());
+	while (currentFrame < totalFrames) {
+		if (currentFrame % (skip + 1) == 0) {
+			while (!videoPlayer.isFrameNew())
+			{
+				videoPlayer.update();
+			}
+			frames.push_back(videoPlayer.getPixels());
+		}
+		videoPlayer.nextFrame();
+		currentFrame++;
 	}
+	videoPlayer.stop();
 
 	return frames;
 }
