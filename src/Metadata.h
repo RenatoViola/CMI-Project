@@ -12,12 +12,11 @@ public:
 	static vector<string> getTags(ofXml& XML);
 
 private:
-	static void createImageFile(string fileName, ofXml& XML);
-	static void createVideoFile(string fileName, ofXml& XML);
+	static void processFileMetadata(string fileName, vector<ofPixels>& frames, ofXml& XML);
 	static void calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance);
-	static void calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColor& color, float* luminance);
+	static void calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofColor& color, float* luminance);
 	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
-	static int numberOfFaces(vector<ofPixels> frames);
+	static int numberOfFaces(vector<ofPixels>& frames);
 	static void detectEdges(ofPixels& pixels, ofXml& XML);
 	static void calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML);
 };

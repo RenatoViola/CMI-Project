@@ -11,11 +11,19 @@ void Metadata::load(string filename, ofXml& XML, bool isImage) {
 		XML.clear();
 		if (isImage)
 		{
-			createImageFile(filename, XML);
+			ofImage img;
+			img.load("images/" + filename);
+			vector<ofPixels> frames{ img.getPixels() };
+
+			processFileMetadata(filename, frames, XML.appendChild("IMAGE"));
 		}
 		else
 		{
-			createVideoFile(filename, XML);
+			ofVideoPlayer video;
+			video.load("videos/" + filename);
+			vector<ofPixels> frames = extractFrames(video, 10);
+
+			processFileMetadata(filename, frames, XML.appendChild("VIDEO"));
 		}
 		save(filename, XML, isImage);
 	}
@@ -49,88 +57,32 @@ vector<string> Metadata::getTags(ofXml& XML) {
 }
 
 //--------------------------------------------------------------
-void Metadata::createImageFile(string filename, ofXml& XML) {
+void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, ofXml& XML) {
 
-	ofImage img;
-	img.load("images/" + filename);
-	ofPixels& firstFrame = img.getPixels();
-	vector<ofPixels> frames{ firstFrame };
-
-	auto metadata = XML.appendChild("IMAGE");
-
-	// Set the FileName
-	metadata.appendChild("FILENAME").set(filename);
-
-	// Adds tags section
-	auto xmlTags = metadata.appendChild("TAGS");
+	XML.appendChild("FILENAME").set(filename);
+	auto xmlTags = XML.appendChild("TAGS");
 
 	ofColor color;
 	float luminance;
 	calculateAverageColorAndLuminance(frames, color, &luminance);
+	XML.appendChild("LUMINANCE").set(luminance);
 
-	// add Luminance
-	metadata.appendChild("LUMINANCE").set(luminance);
-
-	// add color
-	auto colorSection = metadata.appendChild("COLOR");
+	auto colorSection = XML.appendChild("COLOR");
 	colorSection.appendChild("RED").set(color.r);
 	colorSection.appendChild("GREEN").set(color.g);
 	colorSection.appendChild("BLUE").set(color.b);
 
-	// add Number of faces
 	int num_faces = numberOfFaces(frames);
-	metadata.appendChild("NUM_FACES").set(num_faces);
+	XML.appendChild("NUM_FACES").set(num_faces);
 
-	auto edgeSection = metadata.appendChild("EDGE_DISTRIBUTION");
-	detectEdges(firstFrame, edgeSection);
-
-	metadata.appendChild("TEXTURE_CHARACTERISTICS");
-
-	metadata.appendChild("OBJECT_OCCURRENCES");
-}
-
-void Metadata::createVideoFile(string filename, ofXml& XML) {
-
-	ofVideoPlayer video;
-	video.load("videos/" + filename);
-	vector<ofPixels> frames = extractFrames(video, 4);
 	ofPixels& firstFrame = frames.at(0);
-
-	auto metadata = XML.appendChild("VIDEO");
-
-	// Set the FileName
-	metadata.appendChild("FILENAME").set(filename);
-
-	// Adds tags section
-	auto xmlTags = metadata.appendChild("TAGS");
-
-	ofColor color;
-	float luminance;
-	calculateAverageColorAndLuminance(frames, color, &luminance);
-
-	// add Luminance
-	metadata.appendChild("LUMINANCE").set(luminance);
-
-	// add color
-	auto colorSection = metadata.appendChild("COLOR");
-	colorSection.appendChild("RED").set(color.r);
-	colorSection.appendChild("GREEN").set(color.g);
-	colorSection.appendChild("BLUE").set(color.b);
-
-	// add Number of faces
-	int num_faces = numberOfFaces(frames);
-	metadata.appendChild("NUM_FACES").set(num_faces);
-
-	auto edgeSection = metadata.appendChild("EDGE_DISTRIBUTION");
-	detectEdges(firstFrame, edgeSection);
-
-	metadata.appendChild("TEXTURE_CHARACTERISTICS");
-
-	metadata.appendChild("OBJECT_OCCURRENCES");
+	detectEdges(firstFrame, XML.appendChild("EDGE_DISTRIBUTION"));
+	XML.appendChild("TEXTURE_CHARACTERISTICS");
+	XML.appendChild("OBJECT_OCCURRENCES");
 }
 
 
-void Metadata::calculateAverageColorAndLuminance(vector<ofPixels> frames, ofColor& color, float* luminance) {
+void Metadata::calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofColor& color, float* luminance) {
 
 	long long r = 0, g = 0, b = 0;
 	float totalLuminance = 0.0;
@@ -183,8 +135,7 @@ void Metadata::calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColo
 	*luminance = totalLuminance / nPixels;
 }
 
-
-int Metadata::numberOfFaces(vector<ofPixels> frames) {
+int Metadata::numberOfFaces(vector<ofPixels>& frames) {
 	ofxCvHaarFinder finder;
 	finder.setup("haarcascade_frontalface_default.xml");
 
@@ -210,30 +161,30 @@ int Metadata::numberOfFaces(vector<ofPixels> frames) {
 
 void Metadata::detectEdges(ofPixels& pixels, ofXml& XML) {
 
-	Mat input(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
-	cvtColor(input, input, COLOR_RGB2GRAY);
+	Mat src(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+	cvtColor(src, src, COLOR_RGB2GRAY);
 
-	Mat vertMat, horMat, d45Mat, d135Mat, ndMat, kernel;
+	Mat dst, kernel;
 
 	kernel = (Mat_<char>(2, 2) << 1, -1, 1, -1);
-	cv::filter2D(input, vertMat, input.depth(), kernel);
-	calculateEdgesAndStats("VERTICAL", vertMat, XML);
+	cv::filter2D(src, dst, src.depth(), kernel);
+	calculateEdgesAndStats("VERTICAL", dst, XML);
 
 	kernel = (Mat_<char>(2, 2) << 1, 1, -1, -1);
-	cv::filter2D(input, horMat, input.depth(), kernel);
-	calculateEdgesAndStats("HORIZONTAL", horMat, XML);
+	cv::filter2D(src, dst, src.depth(), kernel);
+	calculateEdgesAndStats("HORIZONTAL", dst, XML);
 
 	kernel = (Mat_<char>(2, 2) << sqrt(2), 0, 0, -sqrt(2));
-	cv::filter2D(input, d45Mat, input.depth(), kernel);
-	calculateEdgesAndStats("DEGREES_45", d45Mat, XML);
+	cv::filter2D(src, dst, src.depth(), kernel);
+	calculateEdgesAndStats("DEGREES_45", dst, XML);
 
 	kernel = (Mat_<char>(2, 2) << 0, sqrt(2), -sqrt(2), 0);
-	cv::filter2D(input, d135Mat, input.depth(), kernel);
-	calculateEdgesAndStats("DEGREES_135", d135Mat, XML);
+	cv::filter2D(src, dst, src.depth(), kernel);
+	calculateEdgesAndStats("DEGREES_135", dst, XML);
 
 	kernel = (Mat_<char>(2, 2) << 2, -2, -2, 2);
-	cv::filter2D(input, ndMat, input.depth(), kernel);
-	calculateEdgesAndStats("NON_DIRECTIONAL", ndMat, XML);
+	cv::filter2D(src, dst, src.depth(), kernel);
+	calculateEdgesAndStats("NON_DIRECTIONAL", dst, XML);
 }
 
 void Metadata::calculateEdgesAndStats(const string& filterName, Mat& filteredMat, ofXml& XML) {
