@@ -7,6 +7,7 @@
 #include "Metadata.h"
 #include "ScreenSaver.h"
 
+
 class ofApp : public ofBaseApp {
 
 public:
@@ -30,6 +31,8 @@ public:
 	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
+	ScreenSaver screenSaverPage;
+
 	ScreenSaver screenSaverPage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
