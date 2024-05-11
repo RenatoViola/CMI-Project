@@ -2,6 +2,7 @@
 
 void ImageCarrousel::setup(const std::string& path) {
 
+	Carrousel::setup(path);
 	dir.allowExt("jpg");
 	dir.allowExt("png");
 	dir.listDir(path);
@@ -19,38 +20,9 @@ void ImageCarrousel::setup(const std::string& path) {
 	}
 
 	startY = horizontalMiddle - vHeight; // Top half of the screen
-
 	fullCarrousel.set(startX, startY, totalWidth, vHeight);
-
+	int xPos = startX + 2 * space;
 	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, vWidth + currentWidth, vHeight + currentHeight);
-
-	ofAddListener(ofEvents().mousePressed, this, &ImageCarrousel::mousePressed);
-	ofAddListener(ofEvents().mouseReleased, this, &ImageCarrousel::mouseReleased);
-}
-
-void ImageCarrousel::exit() {
-	ofRemoveListener(ofEvents().mousePressed, this, &ImageCarrousel::mousePressed);
-	ofRemoveListener(ofEvents().mouseReleased, this, &ImageCarrousel::mouseReleased);
-}
-
-void ImageCarrousel::mousePressed(ofMouseEventArgs& args) {
-	lastX = args.x;  // Initialize lastX when the mouse is first pressed.
-}
-
-void ImageCarrousel::mouseReleased(ofMouseEventArgs& args) {
-
-	if (!fullCarrousel.inside(args.x, args.y)) return; // should only drag on the top half of the screen
-
-	int deltaX = args.x - lastX; // Calculate the change in x position
-
-	int threshold = 50;
-	
-	if (deltaX < -threshold) { // Dragged right2left
-		next();
-	}
-	else if (deltaX > threshold) { // Dragged left2right
-		previous();
-	}
 }
 
 

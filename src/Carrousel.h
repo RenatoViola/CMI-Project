@@ -3,15 +3,42 @@
 
 class Carrousel {
 public:
-	virtual ~Carrousel() {}
+	virtual ~Carrousel() {
+		exit();
+	}
 
-	virtual void setup(const std::string& path) = 0;
-	virtual void exit() = 0;
+	virtual void setup(const std::string& path) {
+		ofAddListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
+		ofAddListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
+	}
+	
+	virtual void exit() {
+		ofRemoveListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
+		ofRemoveListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
+	}
+
 	virtual void draw() = 0;
 	virtual void displayCurrent() = 0;
 
-	virtual void mousePressed(ofMouseEventArgs& args) = 0;
-	virtual void mouseReleased(ofMouseEventArgs& args) = 0;
+	virtual void mousePressed(ofMouseEventArgs& args) {
+		lastX = args.x;
+	}
+
+	virtual void mouseReleased(ofMouseEventArgs& args) {
+
+		if (!fullCarrousel.inside(args.x, args.y)) return;
+
+		int deltaX = args.x - lastX;
+
+		int threshold = 50;
+
+		if (deltaX < -threshold) { // Dragged from right to left
+			next();
+		}
+		else if (deltaX > threshold) { // Dragged from left to right
+			previous();
+		}
+	}
 	
 	virtual void next() = 0;
 	virtual void previous() = 0;
@@ -22,7 +49,6 @@ public:
 	int horizontalMiddle = (ofGetHeight() - vHeight) / 2;
 	int space = vWidth + gridSpacing;
 	int startX = (ofGetWidth() - totalWidth) / 2;
-	int xPos = startX + 2 * space;
 	int startY;
 	float step = 0;
 	int lastX;

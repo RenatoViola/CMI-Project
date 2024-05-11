@@ -2,6 +2,7 @@
 
 void VideoCarrousel::setup(const std::string& path) {
 	
+	Carrousel::setup(path);
 	dir.allowExt("mp4"); // Filter for mp4 files
 	dir.listDir(path); // List files in the directory
 	dir.sort();
@@ -19,40 +20,9 @@ void VideoCarrousel::setup(const std::string& path) {
 	videos[current].play();
 
 	startY = horizontalMiddle + vHeight; // Bottom half of the screen
-
 	fullCarrousel.set(startX, startY, totalWidth, vHeight);
-
+	int xPos = startX + 2 * space;
 	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, vWidth + currentWidth, vHeight + currentHeight);
-
-	ofAddListener(ofEvents().mousePressed, this, &VideoCarrousel::mousePressed);
-	ofAddListener(ofEvents().mouseReleased, this, &VideoCarrousel::mouseReleased);
-}
-
-void VideoCarrousel::exit() {
-	ofRemoveListener(ofEvents().mousePressed, this, &VideoCarrousel::mousePressed);
-	ofRemoveListener(ofEvents().mouseReleased, this, &VideoCarrousel::mouseReleased);
-}
-
-void VideoCarrousel::mousePressed(ofMouseEventArgs& args) {
-	lastX = args.x;  // Initialize lastX when the mouse is first pressed.
-}
-
-
-void VideoCarrousel::mouseReleased(ofMouseEventArgs& args) {
-
-	if (!fullCarrousel.inside(args.x, args.y)) return; // should only drag on the bottom half of the screen
-
-	int deltaX = args.x - lastX; // Calculate the change in x position
-
-	// Threshold for dragging sensitivity
-	int threshold = 50;
-
-	if (deltaX < -threshold) { // Dragged right 2 left
-		next();
-	}
-	else if (deltaX > threshold) { // Dragged left 2 right
-		previous();
-	}
 }
 
 void VideoCarrousel::update() {
