@@ -6,6 +6,7 @@
 #include "VideoGrabber.h"
 #include "Metadata.h"
 #include "ScreenSaver.h"
+#include "screen_names.h"
 
 
 class ofApp : public ofBaseApp {
@@ -40,6 +41,7 @@ public:
 	int activePage;
 
 	// interface pages enum
+	/*
 	enum {
 		SCREEN_SAVER_PAGE = 0,
 		MAIN_PAGE = 1,
@@ -50,4 +52,6 @@ public:
 		VIDEO_PAGE = 6
 		// Must add other pages here
 	};
+	*/
+	
 };

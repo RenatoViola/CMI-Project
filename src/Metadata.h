@@ -15,7 +15,6 @@ private:
 	static void processFileMetadata(string fileName, vector<ofPixels>& frames, ofXml& XML);
 	static void calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance);
 	static void calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofXml& XML);
-	static vector<ofPixels> extractFrames(ofVideoPlayer& videoPlayer, int skip);
 	static int numberOfFaces(vector<ofPixels>& frames);
 	static void detectEdges(ofPixels& pixels, ofXml& XML);
 	static void calculateStats(const string& filterName, Mat& filteredMat, ofXml& XML, bool thresholdOn);

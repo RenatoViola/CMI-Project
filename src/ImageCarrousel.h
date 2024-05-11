@@ -6,13 +6,13 @@
 class ImageCarrousel : public Carrousel
 {
 public:
-	virtual void setup(const std::string& path);
+	void setup(const std::string& path);
 //	virtual void exit();
-	virtual void draw();
-	virtual void displayCurrent();
+	void draw();
+	void displayCurrent();
 
-	virtual void next();
-	virtual void previous();
+	void next();
+	void previous();
 
 	vector<ofImage> images;
 	FilterPanel panel;

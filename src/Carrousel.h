@@ -1,5 +1,6 @@
 #pragma once
 #include "ofMain.h"
+#include "screen_names.h"
 
 class Carrousel {
 public:
@@ -34,13 +35,13 @@ public:
 			int PAGE;
 			if (isImageCarrousel)
 			{
-				PAGE = 5;
+				PAGE = IMAGE_PAGE;
 			}
 			else {
-				PAGE = 6;
+				PAGE = VIDEO_PAGE;
 			}
-
 			ofNotifyEvent(onChangeScreen, PAGE, this);
+
 			return;
 		}
 

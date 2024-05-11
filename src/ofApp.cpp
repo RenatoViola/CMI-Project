@@ -18,7 +18,7 @@ void ofApp::setup() {
 	openedImage = false;
 	openedVideo = false;
 	detectionEnabled = false;
-
+	
 	activePage = SCREEN_SAVER_PAGE;
 
 	ofSetVerticalSync(true);
