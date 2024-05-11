@@ -1,6 +1,7 @@
 #include "ImageCarrousel.h"
 
 void ImageCarrousel::setup(const std::string& path) {
+
 	dir.allowExt("jpg");
 	dir.allowExt("png");
 	dir.listDir(path);
@@ -16,24 +17,54 @@ void ImageCarrousel::setup(const std::string& path) {
 		images[i].load(dir.getPath(i));
 		Metadata::load(dir.getName(i), xml, true);
 	}
-	
-	current = 0;
+
+	ofAddListener(ofEvents().mousePressed, this, &ImageCarrousel::mousePressed);
+	ofAddListener(ofEvents().mouseReleased, this, &ImageCarrousel::mouseReleased);
 }
 
-void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpacing) {
+void ImageCarrousel::exit() {
+	ofRemoveListener(ofEvents().mousePressed, this, &ImageCarrousel::mousePressed);
+	ofRemoveListener(ofEvents().mouseReleased, this, &ImageCarrousel::mouseReleased);
+}
+
+void ImageCarrousel::mousePressed(ofMouseEventArgs& args) {
+	lastX = args.x;  // Initialize lastX when the mouse is first pressed.
+}
+
+void ImageCarrousel::mouseReleased(ofMouseEventArgs& args) {
+
+	if (args.y > horizontalMiddle) return; // should only drag on the top half of the screen
+
+	int deltaX = args.x - lastX; // Calculate the change in x position
+
+	// Threshold for dragging sensitivity, adjust as needed
+	int threshold = 50;
+	
+	ofLogError() << "DELTAX: " << deltaX;
+	if (deltaX < -threshold) { // Dragged right2left
+		ofLogError() << "inside IF ONE   deltaX: " << deltaX;
+		next();
+	}
+	else if (deltaX > threshold) { // Dragged left2right
+		ofLogError() << "inside IF TWO   deltaX: " << deltaX;
+		previous();
+	}
+}
+
+
+void ImageCarrousel::draw() {
 	int space = width + gridSpacing;
 	// Calculate progressive step 
 	step = ofLerp(step, space, 0.05);
 
 	// Calculate the total width of the videos including spacing
+	int numFilesToShow = 5;
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
 
 	// Calculate the starting x position so the selected video is in the center
 	int startX = (ofGetWidth() - totalWidth) / 2;
 
-	int yPos = (ofGetHeight() - height) / 2; // Vertically center
-
-	yPos -= height; // ...
+	int yPos = horizontalMiddle - height; // Top half of the screen
 
 	ofSetColor(ofColor::black);
 	ofDrawBitmapString("IMAGES", startX + totalWidth / 2 - 18, yPos - 50);
@@ -44,12 +75,23 @@ void ImageCarrousel::draw(int numFilesToShow, int width, int height, int gridSpa
 		int displayIndex = (current - (numFilesToShow / 2) + i + images.size()) % images.size();
 
 		// Calculate x and y position for the current video
-		int xPos = startX + i * space + (space - step);
-
+		int xPos = startX + i * space;
+		if (loadFromTheRight)
+		{
+			xPos += (space - step);
+		}
+		else {
+			xPos -= (space - step);
+		}
+			
 		// Draw the video at the calculated position
 		if (displayIndex == current)
 		{
-			images[displayIndex].draw(xPos - 20, yPos - 15, width + 40, height + 30);
+			currentWidth = ofLerp(currentWidth, 40, 0.05);
+			currentHeight = ofLerp(currentHeight, 30, 0.05);
+
+		//	images[displayIndex].draw(xPos - 20, yPos - 15, width + 40, height + 30);
+			images[displayIndex].draw(xPos - currentWidth / 2, yPos - currentHeight / 2, width + currentWidth, height + currentHeight);
 		}
 		else {
 			images[displayIndex].draw(xPos, yPos, width, height); // Draw each video at (xPosition, 0)
@@ -82,14 +124,16 @@ void ImageCarrousel::displayCurrent() {
 void ImageCarrousel::next() {
 	if (dir.size() > 0) {
 		++current %= dir.size();
+		step = 0;
+		loadFromTheRight = true;
 	}
-	step = 0;
-
 }
 
 void ImageCarrousel::previous() {
 	if (dir.size() > 0) {
 		if (--current == -1)
 			current = dir.size() - 1;
+		step = 0;
+		loadFromTheRight = false;
 	}
 }

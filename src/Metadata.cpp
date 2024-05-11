@@ -62,15 +62,7 @@ void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, of
 	XML.appendChild("FILENAME").set(filename);
 	auto xmlTags = XML.appendChild("TAGS");
 
-	ofColor color;
-	float luminance;
-	calculateAverageColorAndLuminance(frames, color, &luminance);
-	XML.appendChild("LUMINANCE").set(luminance);
-
-	auto colorSection = XML.appendChild("COLOR");
-	colorSection.appendChild("RED").set(color.r);
-	colorSection.appendChild("GREEN").set(color.g);
-	colorSection.appendChild("BLUE").set(color.b);
+	calculateAverageColorAndLuminance(frames, XML);
 
 	int num_faces = numberOfFaces(frames);
 	XML.appendChild("NUM_FACES").set(num_faces);
@@ -83,7 +75,7 @@ void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, of
 }
 
 
-void Metadata::calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofColor& color, float* luminance) {
+void Metadata::calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofXml& XML) {
 
 	long long r = 0, g = 0, b = 0;
 	float totalLuminance = 0.0;
@@ -104,11 +96,15 @@ void Metadata::calculateAverageColorAndLuminance(vector<ofPixels>& frames, ofCol
 
 	int nFrames = frames.size();
 
-	color.r = r / nFrames;
-	color.g = g / nFrames;
-	color.b = b / nFrames;
+	float luminance = totalLuminance / nFrames;
+	XML.appendChild("LUMINANCE").set(luminance);
 
-	*luminance = totalLuminance / nFrames;
+	ofColor color = ofColor(r / nFrames, g / nFrames, b / nFrames);
+
+	auto colorSection = XML.appendChild("COLOR");
+	colorSection.appendChild("RED").set(color.r);
+	colorSection.appendChild("GREEN").set(color.g);
+	colorSection.appendChild("BLUE").set(color.b);
 }
 
 void Metadata::calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance) {
@@ -202,9 +198,9 @@ void Metadata::detectTextureCharacteristics(ofPixels& pixels, ofXml& XML) {
 
 	int kernel_id = 0;
 
-	for (size_t theta = 30; theta <= 180; theta += 30)
+	for (int theta = 30; theta <= 180; theta += 30)
 	{
-		for (size_t sigma = 10; sigma <= 40; sigma += 10) {
+		for (int sigma = 15; sigma <= 60; sigma += 15) {
 			kernel = getGaborKernel(ksize, sigma, theta, lambd, gamma);
 			cv::filter2D(src, dst, src.depth(), kernel);
 			string kernel_name = "GABOR_KERNEL_" + to_string(++kernel_id);
@@ -232,7 +228,7 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	meanStdDev(filteredMat, mean, deviation);
 
 	auto filterSection = XML.appendChild(filterName);
-	filterSection.appendChild("NUM_EDGES").set(numEdges);
+	filterSection.appendChild("EDGES").set(numEdges);
 	filterSection.appendChild("MEAN").set(mean[0]);
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
