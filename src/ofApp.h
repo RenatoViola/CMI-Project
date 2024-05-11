@@ -27,6 +27,8 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
+	void changeScreen(int& page);
+
 	ImageCarrousel imageCarrousel;
 	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;

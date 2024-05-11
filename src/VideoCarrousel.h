@@ -5,7 +5,7 @@
 class VideoCarrousel : public Carrousel
 {
 public:
-	virtual void setup(const std::string& path) override;
+	virtual void setup(const std::string& path);
 	virtual void draw();
 	virtual void displayCurrent();
 

@@ -3,16 +3,17 @@
 
 class Carrousel {
 public:
-	virtual ~Carrousel() {
+	~Carrousel() {
 		exit();
 	}
 
-	virtual void setup(const std::string& path) {
+	void setup(const std::string& path, bool isImageCarrousel) {
+		this->isImageCarrousel = isImageCarrousel;
 		ofAddListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
 		ofAddListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
 	}
 	
-	virtual void exit() {
+	void exit() {
 		ofRemoveListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
 		ofRemoveListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
 	}
@@ -20,13 +21,30 @@ public:
 	virtual void draw() = 0;
 	virtual void displayCurrent() = 0;
 
-	virtual void mousePressed(ofMouseEventArgs& args) {
+	void mousePressed(ofMouseEventArgs& args) {
 		lastX = args.x;
 	}
 
-	virtual void mouseReleased(ofMouseEventArgs& args) {
+	void mouseReleased(ofMouseEventArgs& args) {
+		
+		int x = args.x, y = args.y;
 
-		if (!fullCarrousel.inside(args.x, args.y)) return;
+		if (selectedFile.inside(x, y))
+		{
+			int PAGE;
+			if (isImageCarrousel)
+			{
+				PAGE = 5;
+			}
+			else {
+				PAGE = 6;
+			}
+
+			ofNotifyEvent(onChangeScreen, PAGE, this);
+			return;
+		}
+
+		if (!fullCarrousel.inside(x, y)) return;
 
 		int deltaX = args.x - lastX;
 
@@ -49,13 +67,14 @@ public:
 	int horizontalMiddle = (ofGetHeight() - vHeight) / 2;
 	int space = vWidth + gridSpacing;
 	int startX = (ofGetWidth() - totalWidth) / 2;
-	int startY;
+	int startY, lastX;
 	float step = 0;
-	int lastX;
-	bool loadFromTheRight = true;
+	bool loadFromTheRight = true, isImageCarrousel;
 
 	ofRectangle fullCarrousel, selectedFile;
 
 	ofDirectory dir;
 	ofXml xml;
+
+	ofEvent<int> onChangeScreen;
 };

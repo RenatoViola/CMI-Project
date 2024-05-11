@@ -5,7 +5,6 @@ void ofApp::setup() {
 	ofBackground(255, 255, 255);
 	ofSetVerticalSync(true);
 
-
 	// setup Screen Saver Page
 	screenSaverPage.setup();
 
@@ -16,17 +15,16 @@ void ofApp::setup() {
 	videoCarrousel.setup("videos/");
 	videoGrabber.setup(1280, 720);
 
-	// Ignore this, used for debugging
-	//filesMetadata.getFileTags();
-	//filesMetadata.createFile("other.xml", { "9s","2b" });
-
 	openedImage = false;
 	openedVideo = false;
 	detectionEnabled = false;
 
-	activePage = 0;
+	activePage = SCREEN_SAVER_PAGE;
 
 	ofSetVerticalSync(true);
+
+	ofAddListener(imageCarrousel.onChangeScreen, this, &ofApp::changeScreen);
+	ofAddListener(videoCarrousel.onChangeScreen, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -139,6 +137,60 @@ void ofApp::keyPressed(int key) {
 	case OF_KEY_RETURN:
 		if (activePage == SCREEN_SAVER_PAGE)
 			activePage = MAIN_PAGE;
+		break;
+	}
+}
+
+void ofApp::changeScreen(int& page) {
+	switch (activePage)
+	{
+		case SCREEN_SAVER_PAGE:
+		//	screenSaverPage.draw();
+			break;
+		case MAIN_PAGE:
+			imageCarrousel.exit();
+			videoCarrousel.exit();
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+		//	videoGrabber.drawCamera(detectionEnabled);
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+		//	imageCarrousel.displayCurrent();
+			break;
+		case VIDEO_PAGE:
+		//	videoCarrousel.displayCurrent();
+			break;
+		default:
+			break;
+	}
+
+	activePage = page;
+
+	switch (activePage)
+	{
+	case SCREEN_SAVER_PAGE:
+		screenSaverPage.setup();
+		break;
+	case MAIN_PAGE:
+		imageCarrousel.setup("images/");
+		videoCarrousel.setup("videos/");
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
+		videoGrabber.setup(1280, 720);
+		break;
+	case CONTROL_VERSION_PAGE:
+		break;
+	case IMAGE_PAGE:
+		break;
+	case VIDEO_PAGE:
+		break;
+	default:
 		break;
 	}
 }

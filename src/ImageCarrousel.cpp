@@ -2,7 +2,7 @@
 
 void ImageCarrousel::setup(const std::string& path) {
 
-	Carrousel::setup(path);
+	Carrousel::setup(path, true);
 	dir.allowExt("jpg");
 	dir.allowExt("png");
 	dir.listDir(path);

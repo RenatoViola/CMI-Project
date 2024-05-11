@@ -2,7 +2,7 @@
 
 void VideoCarrousel::setup(const std::string& path) {
 	
-	Carrousel::setup(path);
+	Carrousel::setup(path, false);
 	dir.allowExt("mp4"); // Filter for mp4 files
 	dir.listDir(path); // List files in the directory
 	dir.sort();
