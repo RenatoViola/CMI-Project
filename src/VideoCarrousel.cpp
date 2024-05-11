@@ -18,6 +18,12 @@ void VideoCarrousel::setup(const std::string& path) {
 	videos[current].setLoopState(OF_LOOP_NORMAL);
 	videos[current].play();
 
+	startY = horizontalMiddle + vHeight; // Bottom half of the screen
+
+	fullCarrousel.set(startX, startY, totalWidth, vHeight);
+
+	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, vWidth + currentWidth, vHeight + currentHeight);
+
 	ofAddListener(ofEvents().mousePressed, this, &VideoCarrousel::mousePressed);
 	ofAddListener(ofEvents().mouseReleased, this, &VideoCarrousel::mouseReleased);
 }
@@ -34,7 +40,7 @@ void VideoCarrousel::mousePressed(ofMouseEventArgs& args) {
 
 void VideoCarrousel::mouseReleased(ofMouseEventArgs& args) {
 
-	if (args.y < horizontalMiddle) return; // should only drag on the bottom half of the screen
+	if (!fullCarrousel.inside(args.x, args.y)) return; // should only drag on the bottom half of the screen
 
 	int deltaX = args.x - lastX; // Calculate the change in x position
 
@@ -56,22 +62,11 @@ void VideoCarrousel::update() {
 }
 
 void VideoCarrousel::draw() {
-	int space = width + gridSpacing;
-
 	// Calculate progressive step 
 	step = ofLerp(step, space,0.05);
 
-	// Calculate the total width of the videos including spacing
-	int numFilesToShow = 5;
-	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
-
-	// Calculate the starting x position so the selected video is in the center
-	int startX = (ofGetWidth() - totalWidth) / 2;
-
-	int yPos = horizontalMiddle + height; // bottom half of the screen
-
 	ofSetColor(ofColor::black);
-	ofDrawBitmapString("VIDEOS", startX + totalWidth / 2 - 18, yPos - 50);
+	ofDrawBitmapString("VIDEOS", startX + totalWidth / 2 - 18, startY - 50);
 
 	ofSetColor(ofColor::white);
 	for (int i = 0; i < numFilesToShow; i++) {
@@ -94,10 +89,10 @@ void VideoCarrousel::draw() {
 			currentWidth = ofLerp(currentWidth, 40, 0.05);
 			currentHeight = ofLerp(currentHeight, 30, 0.05);
 
-			videos[displayIndex].draw(xPos - currentWidth / 2, yPos - currentHeight / 2, width + currentWidth, height + currentHeight);
+			videos[displayIndex].draw(xPos - currentWidth / 2, startY - currentHeight / 2, vWidth + currentWidth, vHeight + currentHeight);
 		}
 		else {
-			videos[displayIndex].draw(xPos, yPos, width, height); // Draw each video at (xPosition, 0)
+			videos[displayIndex].draw(xPos, startY, vWidth, vHeight); // Draw each video at (xPosition, 0)
 		}
 	}
 }

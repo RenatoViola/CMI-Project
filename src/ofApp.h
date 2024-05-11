@@ -33,8 +33,6 @@ public:
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
 
-	ScreenSaver screenSaverPage;
-
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
 	int activePage;

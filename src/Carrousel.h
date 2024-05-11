@@ -16,14 +16,19 @@ public:
 	virtual void next() = 0;
 	virtual void previous() = 0;
 
-	int width = 320, height = 240, gridSpacing = 30;
+	int vWidth = 320, vHeight = 240, gridSpacing = 30, numFilesToShow = 5;
+	int totalWidth = numFilesToShow * vWidth + (numFilesToShow - 1) * gridSpacing;
 	int current = 0, currentWidth = 40, currentHeight = 30;
-	int horizontalMiddle = (ofGetHeight() - height) / 2; // Horizontal middle of the screen
+	int horizontalMiddle = (ofGetHeight() - vHeight) / 2;
+	int space = vWidth + gridSpacing;
+	int startX = (ofGetWidth() - totalWidth) / 2;
+	int xPos = startX + 2 * space;
+	int startY;
 	float step = 0;
 	int lastX;
 	bool loadFromTheRight = true;
 
-	
+	ofRectangle fullCarrousel, selectedFile;
 
 	ofDirectory dir;
 	ofXml xml;
