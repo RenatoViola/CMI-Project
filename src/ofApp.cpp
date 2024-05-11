@@ -11,11 +11,11 @@ void ofApp::setup() {
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
-	
+
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
 	videoGrabber.setup(1280, 720);
-	
+
 	// Ignore this, used for debugging
 	//filesMetadata.getFileTags();
 	//filesMetadata.createFile("other.xml", { "9s","2b" });
@@ -66,8 +66,8 @@ void ofApp::draw() {
 		screenSaverPage.draw();
 		break;
 	case MAIN_PAGE:
-		imageCarrousel.draw(5, 320, 240, 30);
-		videoCarrousel.draw(5, 320, 240, 30);
+		imageCarrousel.draw();
+		videoCarrousel.draw();
 		break;
 	case FILTERED_PAGE:
 		break;

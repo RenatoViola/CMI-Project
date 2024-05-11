@@ -31,11 +31,12 @@ public:
 	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
+	ScreenSaver screenSaverPage;
 
 	ScreenSaver screenSaverPage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
-	
+
 	int activePage;
 
 	// interface pages enum

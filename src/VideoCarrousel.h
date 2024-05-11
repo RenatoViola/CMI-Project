@@ -6,8 +6,12 @@ class VideoCarrousel : public Carrousel
 {
 public:
 	virtual void setup(const std::string& path);
-	virtual void draw(int numFilesToShow, int width, int height, int gridSpacing);
+	virtual void exit();
+	virtual void draw();
 	virtual void displayCurrent();
+
+	virtual void mousePressed(ofMouseEventArgs& args);
+	virtual void mouseReleased(ofMouseEventArgs& args);
 
 	virtual void next();
 	virtual void previous();
@@ -19,14 +23,8 @@ public:
 	void previousFrame();
 	void firstFrame();
 
-	bool frameByframe;
-
-
-	float currentWidth;
-	float currentHeight;
+	bool frameByframe = false;
 
 	vector<ofVideoPlayer> videos;
-	ofXml xml;
-
 };
 
