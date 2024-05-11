@@ -5,34 +5,54 @@ void ofApp::setup() {
 	ofBackground(255, 255, 255);
 	ofSetVerticalSync(true);
 
+
+	// setup Screen Saver Page
+	screenSaverPage.setup();
+
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
-	
+
 	imageCarrousel.setup("images/");
 	videoCarrousel.setup("videos/");
 	videoGrabber.setup(1280, 720);
-	
+
 	// Ignore this, used for debugging
 	//filesMetadata.getFileTags();
 	//filesMetadata.createFile("other.xml", { "9s","2b" });
 
 	openedImage = false;
 	openedVideo = false;
-	displayCamera = false;
 	detectionEnabled = false;
+
+	activePage = 0;
 
 	ofSetVerticalSync(true);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-	videoCarrousel.update();
 
-	if (displayCamera)
+	switch (activePage)
 	{
+	case SCREEN_SAVER_PAGE:
+		screenSaverPage.update();
+		break;
+	case MAIN_PAGE:
+		videoCarrousel.update();
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
 		videoGrabber.update(detectionEnabled);
+		break;
+	case CONTROL_VERSION_PAGE:
+		break;
+	default:
+		break;
 	}
-	else
+
+
+	if (activePage != CAMERA_PAGE)
 	{
 		detectionEnabled = false;
 	}
@@ -40,21 +60,30 @@ void ofApp::update() {
 
 void ofApp::draw() {
 
-	if (displayCamera) 
+	switch (activePage)
 	{
-		videoGrabber.drawCamera(detectionEnabled);
-	}
-	else if (openedImage)
-	{
-		imageCarrousel.displayCurrent();
-	}
-	else if (openedVideo) 
-	{
-		videoCarrousel.displayCurrent();
-	}
-	else {
+	case SCREEN_SAVER_PAGE:
+		screenSaverPage.draw();
+		break;
+	case MAIN_PAGE:
 		imageCarrousel.draw(5, 320, 240, 30);
 		videoCarrousel.draw(5, 320, 240, 30);
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
+		videoGrabber.drawCamera(detectionEnabled);
+		break;
+	case CONTROL_VERSION_PAGE:
+		break;
+	case IMAGE_PAGE:
+		imageCarrousel.displayCurrent();
+		break;
+	case VIDEO_PAGE:
+		videoCarrousel.displayCurrent();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -75,7 +104,12 @@ void ofApp::keyPressed(int key) {
 		videoCarrousel.next();
 		break;
 	case 'm':
-		if(!openedImage) openedVideo = !openedVideo;
+		if (activePage == MAIN_PAGE)
+			activePage = VIDEO_PAGE;
+		else if (activePage == VIDEO_PAGE)
+			activePage = MAIN_PAGE;
+
+		//if(!openedImage) openedVideo = !openedVideo;
 		break;
 	case OF_KEY_LEFT:
 		videoCarrousel.previousFrame();
@@ -93,10 +127,18 @@ void ofApp::keyPressed(int key) {
 		imageCarrousel.next();
 		break;
 	case 'k':
-		if(!openedVideo) openedImage = !openedImage;
+		if (activePage == MAIN_PAGE)
+			activePage = IMAGE_PAGE;
+		else if (activePage == IMAGE_PAGE)
+			activePage = MAIN_PAGE;
+		//if(!openedVideo) openedImage = !openedImage;
 		break;
 	case 'c':
-		displayCamera = !displayCamera;
+		activePage = CAMERA_PAGE;
+		break;
+	case OF_KEY_RETURN:
+		if (activePage == SCREEN_SAVER_PAGE)
+			activePage = MAIN_PAGE;
 		break;
 	}
 }
