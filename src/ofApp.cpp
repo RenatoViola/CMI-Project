@@ -66,8 +66,8 @@ void ofApp::draw() {
 		screenSaverPage.draw();
 		break;
 	case MAIN_PAGE:
-		imageCarrousel.draw(5, 320, 240, 30);
-		videoCarrousel.draw(5, 320, 240, 30);
+		imageCarrousel.draw();
+		videoCarrousel.draw();
 		break;
 	case FILTERED_PAGE:
 		break;
