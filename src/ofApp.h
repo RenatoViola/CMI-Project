@@ -1,8 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ImageCarrousel.h"
-#include "VideoCarrousel.h"
+//#include "ImageCarrousel.h"
+//#include "VideoCarrousel.h"
+#include "Carrousel.h"
 #include "VideoGrabber.h"
 #include "Metadata.h"
 #include "ScreenSaver.h"
@@ -30,8 +31,8 @@ public:
 
 	void changeScreen(int& page);
 
-	ImageCarrousel imageCarrousel;
-	VideoCarrousel videoCarrousel;
+//	ImageCarrousel imageCarrousel;
+//	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
@@ -40,18 +41,5 @@ public:
 
 	int activePage;
 
-	// interface pages enum
-	/*
-	enum {
-		SCREEN_SAVER_PAGE = 0,
-		MAIN_PAGE = 1,
-		FILTERED_PAGE = 2,
-		CAMERA_PAGE = 3,
-		CONTROL_VERSION_PAGE = 4,
-		IMAGE_PAGE = 5,
-		VIDEO_PAGE = 6
-		// Must add other pages here
-	};
-	*/
-	
+	Carrousel imageMediaCarrousel, videoMediaCarrousel;	
 };

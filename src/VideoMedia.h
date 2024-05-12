@@ -10,7 +10,8 @@ private:
 public:
     void load(const std::string& filePath) override {
         video.load(filePath);
-    //    video.play();  // Optionally start playing automatically
+        video.setLoopState(OF_LOOP_NORMAL);
+        video.play();  // Optionally start playing automatically
     }
 
     void draw(float x, float y, float w, float h) override {

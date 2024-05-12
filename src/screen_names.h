@@ -14,4 +14,3 @@ enum {
 };
 
 #endif // SCREEN_NAMES_H
-
