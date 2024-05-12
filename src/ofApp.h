@@ -1,11 +1,13 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ImageCarrousel.h"
-#include "VideoCarrousel.h"
+//#include "ImageCarrousel.h"
+//#include "VideoCarrousel.h"
+#include "Carrousel.h"
 #include "VideoGrabber.h"
 #include "Metadata.h"
 #include "ScreenSaver.h"
+#include "screen_names.h"
 
 
 class ofApp : public ofBaseApp {
@@ -27,27 +29,17 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	ImageCarrousel imageCarrousel;
-	VideoCarrousel videoCarrousel;
+	void changeScreen(int& page);
+
+//	ImageCarrousel imageCarrousel;
+//	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
-	ScreenSaver screenSaverPage;
-
 	ScreenSaver screenSaverPage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
 	int activePage;
 
-	// interface pages enum
-	enum {
-		SCREEN_SAVER_PAGE = 0,
-		MAIN_PAGE = 1,
-		FILTERED_PAGE = 2,
-		CAMERA_PAGE = 3,
-		CONTROL_VERSION_PAGE = 4,
-		IMAGE_PAGE = 5,
-		VIDEO_PAGE = 6
-		// Must add other pages here
-	};
+	Carrousel imageMediaCarrousel, videoMediaCarrousel;	
 };

@@ -1,5 +1,5 @@
 #include "Metadata.h"
-
+#include "VideoMedia.h"
 
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
@@ -21,7 +21,7 @@ void Metadata::load(string filename, ofXml& XML, bool isImage) {
 		{
 			ofVideoPlayer video;
 			video.load("videos/" + filename);
-			vector<ofPixels> frames = extractFrames(video, 10);
+			vector<ofPixels> frames = VideoMedia::extractFrames(video, 10);
 
 			processFileMetadata(filename, frames, XML.appendChild("VIDEO"));
 		}
@@ -233,6 +233,7 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
 
+/*
 vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
 	vector<ofPixels> frames;
 
@@ -262,3 +263,4 @@ vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
 
 	return frames;
 }
+*/
