@@ -12,6 +12,9 @@ void ofApp::setup() {
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 
 	///////////////////////////////////////////////////////////
+	int mediaHeight = 240;
+	int horizontalMiddle = (ofGetHeight() - mediaHeight) / 2;
+
 	vector<unique_ptr<Media>> imagesMedia;
 
 	ofDirectory imgDir;
@@ -27,7 +30,7 @@ void ofApp::setup() {
 		imagesMedia.push_back(move(image));
 	}
 
-	imageMediaCarrousel.setup(move(imagesMedia), true, "IMAGES");
+	imageMediaCarrousel.setup(move(imagesMedia), horizontalMiddle - mediaHeight, "IMAGES");
 
 
 	vector<unique_ptr<Media>> videosMedia;
@@ -44,7 +47,7 @@ void ofApp::setup() {
 		videosMedia.push_back(move(video));
 	}
 
-	videoMediaCarrousel.setup(move(videosMedia), false, "VIDEOS");
+	videoMediaCarrousel.setup(move(videosMedia), horizontalMiddle + mediaHeight, "VIDEOS");
 
 
 	///////////////////////////////////////////////////////////
@@ -69,8 +72,8 @@ void ofApp::setup() {
 	//ofAddListener(imageCarrousel.onChangeScreen, this, &ofApp::changeScreen);
 	//ofAddListener(videoCarrousel.onChangeScreen, this, &ofApp::changeScreen);
 
-	ofAddListener(imageMediaCarrousel.onChangeScreen, this, &ofApp::changeScreen);
-	ofAddListener(videoMediaCarrousel.onChangeScreen, this, &ofApp::changeScreen);
+	ofAddListener(imageMediaCarrousel.clickedOnSelected, this, &ofApp::openImage);
+	ofAddListener(videoMediaCarrousel.clickedOnSelected, this, &ofApp::openVideo);
 }
 
 //--------------------------------------------------------------
@@ -226,6 +229,17 @@ void ofApp::changeScreen(int& page) {
 	}
 }
 
+
+void ofApp::openImage() {
+	int page = IMAGE_PAGE;
+	activePage = page;
+}
+
+void ofApp::openVideo() {
+	int page = VIDEO_PAGE;
+	activePage = page;
+}
+
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {
 
@@ -238,17 +252,19 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-
+	
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-
+	imageMediaCarrousel.mousePressed(x, y, button);
+	videoMediaCarrousel.mousePressed(x, y, button);
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button) {
-
+	imageMediaCarrousel.mouseReleased(x, y, button);
+	videoMediaCarrousel.mouseReleased(x, y, button);
 }
 
 //--------------------------------------------------------------

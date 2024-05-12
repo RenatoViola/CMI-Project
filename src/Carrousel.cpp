@@ -1,32 +1,19 @@
 #include "Carrousel.h"
 
 
-void Carrousel::setup(vector<unique_ptr<Media>>&& items, bool isImageCarrousel, string label) {
+void Carrousel::setup(vector<unique_ptr<Media>>&& items, int verticalPos, string label) {
 
 	this->items = move(items);
-	this->isImageCarrousel = isImageCarrousel;
 	this->label = label;
 
-	if (isImageCarrousel)
-	{
-		startY = horizontalMiddle - height; // Top half of the screen
-	}
-	else {
-		startY = horizontalMiddle + height; // Bottom half of the screen
-	}
+	startY = verticalPos;
 
 	fullCarrousel.set(startX, startY, totalWidth, height);
 	int xPos = startX + 2 * space;
 	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, width + currentWidth, height + currentHeight);
-
-	ofAddListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
-	ofAddListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
 }
 
 void Carrousel::exit() {
-	ofRemoveListener(ofEvents().mousePressed, this, &Carrousel::mousePressed);
-	ofRemoveListener(ofEvents().mouseReleased, this, &Carrousel::mouseReleased);
-
 //	items.clear();
 }
 
@@ -72,32 +59,21 @@ void Carrousel::update() {
 	}
 }
 
-void Carrousel::mousePressed(ofMouseEventArgs& args) {
-	lastX = args.x;
+void Carrousel::mousePressed(int x, int y, int button) {
+	lastX = x;
 }
 
-void Carrousel::mouseReleased(ofMouseEventArgs& args) {
-
-	int x = args.x, y = args.y;
+void Carrousel::mouseReleased(int x, int y, int button) {
 
 	if (selectedFile.inside(x, y))
 	{
-		int PAGE;
-		if (isImageCarrousel)
-		{
-			PAGE = IMAGE_PAGE;
-		}
-		else {
-			PAGE = VIDEO_PAGE;
-		}
-		ofNotifyEvent(onChangeScreen, PAGE, this);
-
+		ofNotifyEvent(clickedOnSelected, this);
 		return;
 	}
 
 	if (!fullCarrousel.inside(x, y)) return;
 
-	int deltaX = args.x - lastX;
+	int deltaX = x - lastX;
 
 	int threshold = 50;
 

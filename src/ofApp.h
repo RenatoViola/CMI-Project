@@ -8,6 +8,7 @@
 #include "Metadata.h"
 #include "ScreenSaver.h"
 #include "screen_names.h"
+#include <HomePage.h>
 
 
 class ofApp : public ofBaseApp {
@@ -30,12 +31,13 @@ public:
 	void gotMessage(ofMessage msg);
 
 	void changeScreen(int& page);
+	void openImage();
+	void openVideo();
 
-//	ImageCarrousel imageCarrousel;
-//	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
+	HomePage homePage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
