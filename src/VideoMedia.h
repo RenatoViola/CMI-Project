@@ -22,6 +22,10 @@ public:
         video.update();
     }
 
+    void exit() override {
+        video.close();
+    }
+
     void drawInFullscreen() override {
         float vWidth = video.getWidth(), vHeight = video.getHeight();
 

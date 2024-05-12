@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-//#include "ImageCarrousel.h"
-//#include "VideoCarrousel.h"
 #include "Carrousel.h"
 #include "VideoGrabber.h"
 #include "Metadata.h"
@@ -31,8 +29,6 @@ public:
 	void gotMessage(ofMessage msg);
 
 	void changeScreen(int& page);
-	void openImage();
-	void openVideo();
 
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
@@ -42,6 +38,4 @@ public:
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
 	int activePage;
-
-	Carrousel imageMediaCarrousel, videoMediaCarrousel;	
 };

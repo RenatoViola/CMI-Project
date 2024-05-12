@@ -19,6 +19,10 @@ public:
         // No-op since ofImage doesn't require updating.
     }
 
+    void exit() override {
+        image.clear();
+    }
+
     void drawInFullscreen() override {
         float iWidth = image.getWidth(), iHeight = image.getHeight();
 
