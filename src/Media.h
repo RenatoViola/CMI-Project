@@ -11,8 +11,6 @@ public:
     virtual void exit() = 0;
     virtual void draw(float x, float y, float w, float h) = 0;
     virtual void update() = 0;
-    //virtual void drawInFullscreen() = 0;
-    virtual void drawInFullscreen(float sWidth, float sHeight) = 0;
 
     // filters to be applied to image
     virtual void drawInAscii(float sWidth, float sHeight) = 0;

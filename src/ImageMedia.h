@@ -21,21 +21,6 @@ public:
         // No-op since ofImage doesn't require updating.
     }
 
-    void drawInFullscreen(float sWidth, float sHeight) override {
-        float iWidth = image.getWidth(), iHeight = image.getHeight();
-
-        float scale = 1.0f;
-
-        if (iWidth > sWidth || iHeight > sHeight)
-            scale = std::min(sWidth / iWidth, sHeight / iHeight);
-
-        float displayWidth = iWidth * scale, displayHeight = iHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        image.draw(xPos, yPos, displayWidth, displayHeight);
-
     float getWidth() {
         return image.getWidth();
     }
@@ -56,4 +41,3 @@ public:
         return image;
     }
 };
-

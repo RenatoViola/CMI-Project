@@ -24,23 +24,6 @@ public:
         video.update();
     }
 
-    void drawInFullscreen(float sWidth, float sHeight) override {
-        float vWidth = video.getWidth(), vHeight = video.getHeight();
-
-        float scale = 1.0f;
-
-        if (vWidth > sWidth || vHeight > sHeight)
-            scale = std::min(sWidth / vWidth, sHeight / vHeight);
-
-        float displayWidth = vWidth * scale, displayHeight = vHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        video.draw(xPos, yPos, displayWidth, displayHeight);
-		
-	}
-	
     void exit() override {
         video.close();
     }
