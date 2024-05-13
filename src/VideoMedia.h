@@ -10,8 +10,6 @@ private:
 public:
     void load(const std::string& filePath) override {
         video.load(filePath);
-        video.setLoopState(OF_LOOP_NORMAL);
-        video.play();  // Optionally start playing automatically
     }
 
     void draw(float x, float y, float w, float h) override {
@@ -26,28 +24,16 @@ public:
         video.close();
     }
 
-    void drawInFullscreen() override {
-        float vWidth = video.getWidth(), vHeight = video.getHeight();
+    float getWidth() {
+        return video.getWidth();
+    }
 
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-
-        ofSetColor(ofColor::black);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
-
-        float scale = 1.0f;
-
-        if (vWidth > sWidth || vHeight > sHeight)
-            scale = std::min(sWidth / vWidth, sHeight / vHeight);
-
-        float displayWidth = vWidth * scale, displayHeight = vHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        video.draw(xPos, yPos, displayWidth, displayHeight);
+    float getHeight() {
+        return video.getHeight();
     }
 
     void play() {
+        video.setLoopState(OF_LOOP_NORMAL);
         video.play();
     }
 

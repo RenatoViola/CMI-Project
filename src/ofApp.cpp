@@ -13,9 +13,6 @@ void ofApp::setup() {
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 
 	videoGrabber.setup(1280, 720);
-
-	openedImage = false;
-	openedVideo = false;
 	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
@@ -42,6 +39,12 @@ void ofApp::update() {
 			videoGrabber.update(detectionEnabled);
 			break;
 		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			imagePage.update();
+			break;
+		case VIDEO_PAGE:
+			videoPage.update();
 			break;
 		default:
 			break;
@@ -72,8 +75,10 @@ void ofApp::draw() {
 	case CONTROL_VERSION_PAGE:
 		break;
 	case IMAGE_PAGE:
+		imagePage.draw();
 		break;
 	case VIDEO_PAGE:
+		videoPage.draw();
 		break;
 	default:
 		break;
@@ -84,25 +89,8 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	switch (key) {
-	case 'p':
-		break;
 	case 'f':
 		detectionEnabled = !detectionEnabled;
-		break;
-	case 'm':
-		if (activePage == MAIN_PAGE)
-			activePage = VIDEO_PAGE;
-		else if (activePage == VIDEO_PAGE)
-			activePage = MAIN_PAGE;
-
-		//if(!openedImage) openedVideo = !openedVideo;
-		break;
-	case 'k':
-		if (activePage == MAIN_PAGE)
-			activePage = IMAGE_PAGE;
-		else if (activePage == IMAGE_PAGE)
-			activePage = MAIN_PAGE;
-		//if(!openedVideo) openedImage = !openedImage;
 		break;
 	case 'c':
 		activePage = CAMERA_PAGE;
@@ -130,8 +118,10 @@ void ofApp::changeScreen(int& page) {
 		case CONTROL_VERSION_PAGE:
 			break;
 		case IMAGE_PAGE:
+			imagePage.exit();
 			break;
 		case VIDEO_PAGE:
+			videoPage.exit();
 			break;
 		default:
 			break;
@@ -156,8 +146,10 @@ void ofApp::changeScreen(int& page) {
 	case CONTROL_VERSION_PAGE:
 		break;
 	case IMAGE_PAGE:
+		imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
 		break;
 	case VIDEO_PAGE:
+		videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
 		break;
 	default:
 		break;

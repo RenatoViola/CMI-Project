@@ -13,10 +13,12 @@ public:
     void mouseReleased(int x, int y, int button);
     void clickOnImage();
     void clickOnVideo();
+    Media* getSelectedMedia();
 
     ofEvent<int> clickedOnMedia;
+    
 
 private:
     Carrousel imageCarrousel, videoCarrousel;
-
+    Media* selectedMedia;
 };

@@ -74,11 +74,19 @@ void HomePage::mouseReleased(int x, int y, int button) {
 }
 
 void HomePage::clickOnImage() {
+    selectedMedia = imageCarrousel.getCurrentMedia();
+
     int PAGE = IMAGE_PAGE;
     ofNotifyEvent(clickedOnMedia, PAGE, this);
 }
 
 void HomePage::clickOnVideo() {
+    selectedMedia = videoCarrousel.getCurrentMedia();
+
     int PAGE = VIDEO_PAGE;
     ofNotifyEvent(clickedOnMedia, PAGE, this);
+}
+
+Media* HomePage::getSelectedMedia() {
+    return selectedMedia;
 }

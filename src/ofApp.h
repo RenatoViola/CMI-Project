@@ -7,6 +7,8 @@
 #include "ScreenSaver.h"
 #include "screen_names.h"
 #include <HomePage.h>
+#include "../ImageEditor.h"
+#include "../VideoEditor.h"
 
 
 class ofApp : public ofBaseApp {
@@ -34,6 +36,8 @@ public:
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
 	HomePage homePage;
+	ImageEditor imagePage;
+	VideoEditor videoPage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 

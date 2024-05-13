@@ -19,29 +19,16 @@ public:
         // No-op since ofImage doesn't require updating.
     }
 
-    void exit() override {
-        image.clear();
+    float getWidth() {
+        return image.getWidth();
     }
 
-    void drawInFullscreen() override {
-        float iWidth = image.getWidth(), iHeight = image.getHeight();
+    float getHeight() {
+        return image.getHeight();
+    }
 
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-
-        ofSetColor(ofColor::black);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
-
-        float scale = 1.0f;
-
-        if (iWidth > sWidth || iHeight > sHeight)
-            scale = std::min(sWidth / iWidth, sHeight / iHeight);
-
-        float displayWidth = iWidth * scale, displayHeight = iHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        image.draw(xPos, yPos, displayWidth, displayHeight);
+    void exit() override {
+        image.clear();
     }
 
     ofImage getContent() {
