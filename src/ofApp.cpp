@@ -127,11 +127,11 @@ void ofApp::draw() {
 		break;
 	case IMAGE_PAGE:
 	//	imageCarrousel.displayCurrent();
-		imageMediaCarrousel.getCurrentMedia()->drawInFullscreen();
+		mEditor.draw();
 		break;
 	case VIDEO_PAGE:
 	//	Media* selectedMedia = videoMediaCarrousel.getCurrentMedia();
-		videoMediaCarrousel.getCurrentMedia()->drawInFullscreen();
+		mEditor.draw();
 		
 		//video->play();
 	//	videoCarrousel.displayCurrent();
@@ -152,16 +152,20 @@ void ofApp::keyPressed(int key) {
 		detectionEnabled = !detectionEnabled;
 		break;
 	case 'm':
-		if (activePage == MAIN_PAGE)
+		if (activePage == MAIN_PAGE) {
 			activePage = VIDEO_PAGE;
+			mEditor.media = videoMediaCarrousel.getCurrentMedia();
+		}
 		else if (activePage == VIDEO_PAGE)
 			activePage = MAIN_PAGE;
 
 		//if(!openedImage) openedVideo = !openedVideo;
 		break;
 	case 'k':
-		if (activePage == MAIN_PAGE)
+		if (activePage == MAIN_PAGE) {
 			activePage = IMAGE_PAGE;
+			mEditor.media = imageMediaCarrousel.getCurrentMedia();
+		}
 		else if (activePage == IMAGE_PAGE)
 			activePage = MAIN_PAGE;
 		//if(!openedVideo) openedImage = !openedImage;

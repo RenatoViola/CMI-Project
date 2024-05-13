@@ -12,6 +12,8 @@ public:
         video.load(filePath);
         video.setLoopState(OF_LOOP_NORMAL);
         video.play();  // Optionally start playing automatically
+        font.load("Courier New Bold.ttf", 9);
+        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
     }
 
     void draw(float x, float y, float w, float h) override {
@@ -22,13 +24,8 @@ public:
         video.update();
     }
 
-    void drawInFullscreen() override {
+    void drawInFullscreen(float sWidth, float sHeight) override {
         float vWidth = video.getWidth(), vHeight = video.getHeight();
-
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-
-        ofSetColor(ofColor::black);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
 
         float scale = 1.0f;
 
@@ -42,6 +39,7 @@ public:
         ofSetColor(ofColor::white);
         video.draw(xPos, yPos, displayWidth, displayHeight);
     }
+
 
     void play() {
         video.play();
@@ -81,6 +79,12 @@ public:
 
         return frames;
     }
+
+    void drawInAscii(float sWidht, float sHeight) override
+    {
+
+    }
+
 
     ofVideoPlayer getContent() {
         return video;

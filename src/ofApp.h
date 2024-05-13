@@ -8,6 +8,7 @@
 #include "Metadata.h"
 #include "ScreenSaver.h"
 #include "screen_names.h"
+#include "MediaEditor.h"
 #include <HomePage.h>
 
 
@@ -38,6 +39,8 @@ public:
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
 	HomePage homePage;
+	MediaEditor mEditor;
+
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
