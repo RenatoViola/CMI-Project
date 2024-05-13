@@ -35,6 +35,17 @@ public:
 
         ofSetColor(ofColor::white);
         image.draw(xPos, yPos, displayWidth, displayHeight);
+
+    float getWidth() {
+        return image.getWidth();
+    }
+
+    float getHeight() {
+        return image.getHeight();
+    }
+
+    void exit() override {
+        image.clear();
     }
 
     void drawInAscii(float sWidth, float sHeight)

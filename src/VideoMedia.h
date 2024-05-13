@@ -38,10 +38,24 @@ public:
 
         ofSetColor(ofColor::white);
         video.draw(xPos, yPos, displayWidth, displayHeight);
+		
+	}
+	
+    void exit() override {
+        video.close();
+    }
+
+    float getWidth() {
+        return video.getWidth();
+    }
+
+    float getHeight() {
+        return video.getHeight();
     }
 
 
     void play() {
+        video.setLoopState(OF_LOOP_NORMAL);
         video.play();
     }
 
