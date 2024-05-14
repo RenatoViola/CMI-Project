@@ -6,9 +6,9 @@
 #include "Metadata.h"
 #include "ScreenSaver.h"
 #include "screen_names.h"
-#include <HomePage.h>
-#include "ImageEditor.h"
+#include "HomePage.h"
 #include "VideoEditor.h"
+#include "ImageEditor.h"
 
 
 class ofApp : public ofBaseApp {
@@ -36,6 +36,7 @@ public:
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
 	HomePage homePage;
+
 	ImageEditor imagePage;
 	VideoEditor videoPage;
 

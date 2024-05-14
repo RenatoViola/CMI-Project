@@ -9,6 +9,8 @@ private:
 public:
     void load(const std::string& filePath) {
         image.load(filePath);
+        font.load("Courier New Bold.ttf", 9);
+        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
     }
 
     void draw(float x, float y, float w, float h) {
@@ -29,6 +31,10 @@ public:
 
     void exit() {
     //    image.clear();
+    }
+
+    void drawInAscii(float sWidth, float sHeight)
+    {
     }
 
     ofImage getContent() {

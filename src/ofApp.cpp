@@ -52,7 +52,6 @@ void ofApp::update() {
 			break;
 	}
 
-
 	if (activePage != CAMERA_PAGE)
 	{
 		detectionEnabled = false;
@@ -115,6 +114,7 @@ void ofApp::changeScreen(int& page) {
 	{
 		// Close previous page
 		case SCREEN_SAVER_PAGE:
+			screenSaverPage.exit();
 			break;
 		case MAIN_PAGE:
 		//	homePage.exit();

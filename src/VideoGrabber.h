@@ -10,7 +10,6 @@ class VideoGrabber {
 		void update(bool detectionEnabled);
 		void drawCamera(bool detectionEnabled);
 
-
 		ofVideoGrabber vidGrabber;
 
 		ofxCvHaarFinder finder;
