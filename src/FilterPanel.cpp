@@ -26,7 +26,6 @@ void FilterPanel::draw()
 	if (panelVisibility) {
 		gui.draw();
 	}
-
 }
 
 

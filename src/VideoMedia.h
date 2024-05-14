@@ -8,42 +8,38 @@ private:
     ofVideoPlayer video;
 
 public:
-    void load(const std::string& filePath) override {
+    void load(const std::string& filePath) {
         video.load(filePath);
-        video.setLoopState(OF_LOOP_NORMAL);
-        video.play();  // Optionally start playing automatically
+    //    video.setLoopState(OF_LOOP_NORMAL);
+    //    video.play();  // Optionally start playing automatically
+    //    font.load("Courier New Bold.ttf", 9);
+        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
     }
 
-    void draw(float x, float y, float w, float h) override {
+    void draw(float x, float y, float w, float h) {
         video.draw(x, y, w, h);
     }
 
-    void update() override {
+    void update() {
         video.update();
     }
 
-    void drawInFullscreen() override {
-        float vWidth = video.getWidth(), vHeight = video.getHeight();
-
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-
-        ofSetColor(ofColor::black);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
-
-        float scale = 1.0f;
-
-        if (vWidth > sWidth || vHeight > sHeight)
-            scale = std::min(sWidth / vWidth, sHeight / vHeight);
-
-        float displayWidth = vWidth * scale, displayHeight = vHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        video.draw(xPos, yPos, displayWidth, displayHeight);
+    void exit() {
+    //    video.close();
+        video.stop();
     }
 
+    float getWidth() {
+        return video.getWidth();
+    }
+
+    float getHeight() {
+        return video.getHeight();
+    }
+
+
     void play() {
+        video.setLoopState(OF_LOOP_NORMAL);
         video.play();
     }
 
@@ -82,7 +78,17 @@ public:
         return frames;
     }
 
+    void drawInAscii(float sWidht, float sHeight) override
+    {
+
+    }
+
+
     ofVideoPlayer getContent() {
         return video;
+    }
+
+    ofPixels& getPixels() {
+        return video.getPixels();
     }
 };

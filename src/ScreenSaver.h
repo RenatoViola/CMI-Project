@@ -1,15 +1,15 @@
 #pragma once
 #include "ofMain.h"
+#include <ofxOpenCv.h>
 
 class ScreenSaver
 {
 public:
-	virtual void setup();
-	virtual void draw();
-
+	void setup();
+	void draw();
 	void update();
+	void exit();
 
-	ofImage backgroundImage;
 	const string PATH = "./screenSaver.png";
-
+	ofImage img;
 };

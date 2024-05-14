@@ -11,12 +11,12 @@ public:
 		exit();
 	}
 
-	void setup(vector<unique_ptr<Media>>&& items, bool isImageCarrousel, string label);
+	void setup(vector<unique_ptr<Media>>&& items, int verticalPos, string label);
 	void exit();
 	void draw();
 	void update();
-	void mousePressed(ofMouseEventArgs& args);
-	void mouseReleased(ofMouseEventArgs& args);
+	void mousePressed(int x, int y, int button);
+	void mouseReleased(int x, int y, int button);
 	void next();
 	void previous();
 	Media* getCurrentMedia();
@@ -29,14 +29,11 @@ public:
 	int startX = (ofGetWidth() - totalWidth) / 2;
 	int startY, lastX;
 	float step = 0;
-	bool loadFromTheRight = true, isImageCarrousel;
+	bool loadFromTheRight = true;
 	string label;
 
 	ofRectangle fullCarrousel, selectedFile;
 
-//	ofDirectory dir;
-//	ofXml xml;
-
-	ofEvent<int> onChangeScreen;
+	ofEvent<void> clickedOnSelected;
 	vector<unique_ptr<Media>> items;
 };

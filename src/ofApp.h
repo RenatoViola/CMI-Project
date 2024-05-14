@@ -1,13 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
-//#include "ImageCarrousel.h"
-//#include "VideoCarrousel.h"
 #include "Carrousel.h"
 #include "VideoGrabber.h"
 #include "Metadata.h"
 #include "ScreenSaver.h"
 #include "screen_names.h"
+#include "HomePage.h"
+#include "VideoEditor.h"
+#include "ImageEditor.h"
 
 
 class ofApp : public ofBaseApp {
@@ -31,15 +32,15 @@ public:
 
 	void changeScreen(int& page);
 
-//	ImageCarrousel imageCarrousel;
-//	VideoCarrousel videoCarrousel;
 	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
 	ScreenSaver screenSaverPage;
+	HomePage homePage;
+
+	ImageEditor imagePage;
+	VideoEditor videoPage;
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
 	int activePage;
-
-	Carrousel imageMediaCarrousel, videoMediaCarrousel;	
 };

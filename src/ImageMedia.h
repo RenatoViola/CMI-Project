@@ -7,41 +7,41 @@ private:
     ofImage image;
 
 public:
-    void load(const std::string& filePath) override {
+    void load(const std::string& filePath) {
         image.load(filePath);
+        font.load("Courier New Bold.ttf", 9);
+        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
     }
 
-    void draw(float x, float y, float w, float h) override {
+    void draw(float x, float y, float w, float h) {
         image.draw(x, y, w, h);
     }
 
-    void update() override {
+    void update() {
         // No-op since ofImage doesn't require updating.
     }
 
-    void drawInFullscreen() override {
-        float iWidth = image.getWidth(), iHeight = image.getHeight();
+    float getWidth() {
+        return image.getWidth();
+    }
 
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
+    float getHeight() {
+        return image.getHeight();
+    }
 
-        ofSetColor(ofColor::black);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
+    void exit() {
+    //    image.clear();
+    }
 
-        float scale = 1.0f;
-
-        if (iWidth > sWidth || iHeight > sHeight)
-            scale = std::min(sWidth / iWidth, sHeight / iHeight);
-
-        float displayWidth = iWidth * scale, displayHeight = iHeight * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-
-        ofSetColor(ofColor::white);
-        image.draw(xPos, yPos, displayWidth, displayHeight);
+    void drawInAscii(float sWidth, float sHeight)
+    {
     }
 
     ofImage getContent() {
         return image;
     }
-};
 
+    ofPixels& getPixels() {
+        return image.getPixels();
+    }
+};

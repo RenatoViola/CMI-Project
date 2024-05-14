@@ -7,70 +7,21 @@ void ofApp::setup() {
 
 	// setup Screen Saver Page
 	screenSaverPage.setup();
+	homePage.setup();
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 
-	///////////////////////////////////////////////////////////
-	vector<unique_ptr<Media>> imagesMedia;
-
-	ofDirectory imgDir;
-	imgDir.allowExt("jpg");
-	imgDir.allowExt("png");
-	imgDir.listDir("images/");
-
-	imagesMedia.reserve(imgDir.size());
-
-	for (int i = 0; i < (int)imgDir.size(); i++) {
-		auto image = make_unique<ImageMedia>();
-		image->load(imgDir.getPath(i));
-		imagesMedia.push_back(move(image));
-	}
-
-	imageMediaCarrousel.setup(move(imagesMedia), true, "IMAGES");
-
-
-	vector<unique_ptr<Media>> videosMedia;
-
-	ofDirectory vidDir;
-	vidDir.allowExt("mp4");
-	vidDir.listDir("videos/");
-
-	videosMedia.reserve(vidDir.size());
-
-	for (int i = 0; i < (int)vidDir.size(); i++) {
-		auto video = make_unique<VideoMedia>();
-		video->load(vidDir.getPath(i));
-		videosMedia.push_back(move(video));
-	}
-
-	videoMediaCarrousel.setup(move(videosMedia), false, "VIDEOS");
-
-
-	///////////////////////////////////////////////////////////
-
-	
-	//imageCarrousel.setup("images/");
-	//videoCarrousel.setup("videos/");
-	
-	
 	videoGrabber.setup(1280, 720);
-
-	
-
-	openedImage = false;
-	openedVideo = false;
 	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
 
 	ofSetVerticalSync(true);
 
-	//ofAddListener(imageCarrousel.onChangeScreen, this, &ofApp::changeScreen);
-	//ofAddListener(videoCarrousel.onChangeScreen, this, &ofApp::changeScreen);
-
-	ofAddListener(imageMediaCarrousel.onChangeScreen, this, &ofApp::changeScreen);
-	ofAddListener(videoMediaCarrousel.onChangeScreen, this, &ofApp::changeScreen);
+	ofAddListener(homePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(imagePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -78,25 +29,28 @@ void ofApp::update() {
 
 	switch (activePage)
 	{
-	case SCREEN_SAVER_PAGE:
-		screenSaverPage.update();
-		break;
-	case MAIN_PAGE:
-	//	videoCarrousel.update();
-		imageMediaCarrousel.update();
-		videoMediaCarrousel.update();
-		break;
-	case FILTERED_PAGE:
-		break;
-	case CAMERA_PAGE:
-		videoGrabber.update(detectionEnabled);
-		break;
-	case CONTROL_VERSION_PAGE:
-		break;
-	default:
-		break;
+		case SCREEN_SAVER_PAGE:
+			screenSaverPage.update();
+			break;
+		case MAIN_PAGE:
+			homePage.update();
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+			videoGrabber.update(detectionEnabled);
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			imagePage.update();
+			break;
+		case VIDEO_PAGE:
+			videoPage.update();
+			break;
+		default:
+			break;
 	}
-
 
 	if (activePage != CAMERA_PAGE)
 	{
@@ -112,8 +66,7 @@ void ofApp::draw() {
 		screenSaverPage.draw();
 		break;
 	case MAIN_PAGE:
-		imageMediaCarrousel.draw();
-		videoMediaCarrousel.draw();
+		homePage.draw();
 		break;
 	case FILTERED_PAGE:
 		break;
@@ -123,15 +76,10 @@ void ofApp::draw() {
 	case CONTROL_VERSION_PAGE:
 		break;
 	case IMAGE_PAGE:
-	//	imageCarrousel.displayCurrent();
-		imageMediaCarrousel.getCurrentMedia()->drawInFullscreen();
+		imagePage.draw();
 		break;
 	case VIDEO_PAGE:
-	//	Media* selectedMedia = videoMediaCarrousel.getCurrentMedia();
-		videoMediaCarrousel.getCurrentMedia()->drawInFullscreen();
-		
-		//video->play();
-	//	videoCarrousel.displayCurrent();
+		videoPage.draw();
 		break;
 	default:
 		break;
@@ -142,29 +90,17 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	switch (key) {
-	case 'p':
-	//	(dynamic_cast<VideoMedia*>(videoMediaCarrousel.getCurrentMedia()))->pause();
-		break;
 	case 'f':
 		detectionEnabled = !detectionEnabled;
 		break;
-	case 'm':
-		if (activePage == MAIN_PAGE)
-			activePage = VIDEO_PAGE;
-		else if (activePage == VIDEO_PAGE)
-			activePage = MAIN_PAGE;
-
-		//if(!openedImage) openedVideo = !openedVideo;
-		break;
-	case 'k':
-		if (activePage == MAIN_PAGE)
-			activePage = IMAGE_PAGE;
-		else if (activePage == IMAGE_PAGE)
-			activePage = MAIN_PAGE;
-		//if(!openedVideo) openedImage = !openedImage;
-		break;
 	case 'c':
-		activePage = CAMERA_PAGE;
+		if (activePage == CAMERA_PAGE)
+		{
+			activePage = MAIN_PAGE;
+		}
+		else {
+			activePage = CAMERA_PAGE;
+		}
 		break;
 	case OF_KEY_RETURN:
 		if (activePage == SCREEN_SAVER_PAGE)
@@ -176,25 +112,24 @@ void ofApp::keyPressed(int key) {
 void ofApp::changeScreen(int& page) {
 	switch (activePage)
 	{
+		// Close previous page
 		case SCREEN_SAVER_PAGE:
-		//	screenSaverPage.draw();
+			screenSaverPage.exit();
 			break;
 		case MAIN_PAGE:
-			imageMediaCarrousel.exit();
-			videoMediaCarrousel.exit();
+		//	homePage.exit();
 			break;
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
-		//	videoGrabber.drawCamera(detectionEnabled);
 			break;
 		case CONTROL_VERSION_PAGE:
 			break;
 		case IMAGE_PAGE:
-		//	imageCarrousel.displayCurrent();
+			imagePage.exit();
 			break;
 		case VIDEO_PAGE:
-		//	videoCarrousel.displayCurrent();
+			videoPage.exit();
 			break;
 		default:
 			break;
@@ -202,12 +137,14 @@ void ofApp::changeScreen(int& page) {
 
 	activePage = page;
 
+	// Setup the new one
 	switch (activePage)
 	{
 	case SCREEN_SAVER_PAGE:
 		screenSaverPage.setup();
 		break;
 	case MAIN_PAGE:
+	//	homePage.setup();
 		break;
 	case FILTERED_PAGE:
 		break;
@@ -217,9 +154,10 @@ void ofApp::changeScreen(int& page) {
 	case CONTROL_VERSION_PAGE:
 		break;
 	case IMAGE_PAGE:
+		imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
 		break;
 	case VIDEO_PAGE:
-	//	(dynamic_cast<VideoMedia*>(videoMediaCarrousel.getCurrentMedia()))->play();
+		videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
 		break;
 	default:
 		break;
@@ -238,17 +176,60 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-
+	
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
 
+	switch (activePage)
+	{
+		case SCREEN_SAVER_PAGE:
+			break;
+		case MAIN_PAGE:
+			homePage.mousePressed(x, y, button);
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			break;
+		case VIDEO_PAGE:
+			break;
+		default:
+			break;
+	}
+	
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button) {
 
+	switch (activePage)
+	{
+	case SCREEN_SAVER_PAGE:
+		break;
+	case MAIN_PAGE:
+		homePage.mouseReleased(x, y, button);
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
+		break;
+	case CONTROL_VERSION_PAGE:
+		break;
+	case IMAGE_PAGE:
+		imagePage.mouseReleased(x, y, button);
+		break;
+	case VIDEO_PAGE:
+		videoPage.mouseReleased(x, y, button);
+		break;
+	default:
+		break;
+	}
 }
 
 //--------------------------------------------------------------
