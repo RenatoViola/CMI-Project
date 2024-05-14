@@ -77,14 +77,14 @@ void HomePage::clickOnImage() {
     selectedMedia = imageCarrousel.getCurrentMedia();
 
     int PAGE = IMAGE_PAGE;
-    ofNotifyEvent(clickedOnMedia, PAGE, this);
+    ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 void HomePage::clickOnVideo() {
     selectedMedia = videoCarrousel.getCurrentMedia();
 
     int PAGE = VIDEO_PAGE;
-    ofNotifyEvent(clickedOnMedia, PAGE, this);
+    ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 Media* HomePage::getSelectedMedia() {

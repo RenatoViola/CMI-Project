@@ -7,15 +7,15 @@ private:
     ofImage image;
 
 public:
-    void load(const std::string& filePath) override {
+    void load(const std::string& filePath) {
         image.load(filePath);
     }
 
-    void draw(float x, float y, float w, float h) override {
+    void draw(float x, float y, float w, float h) {
         image.draw(x, y, w, h);
     }
 
-    void update() override {
+    void update() {
         // No-op since ofImage doesn't require updating.
     }
 
@@ -27,12 +27,15 @@ public:
         return image.getHeight();
     }
 
-    void exit() override {
-        image.clear();
+    void exit() {
+    //    image.clear();
     }
 
     ofImage getContent() {
         return image;
     }
-};
 
+    ofPixels& getPixels() {
+        return image.getPixels();
+    }
+};

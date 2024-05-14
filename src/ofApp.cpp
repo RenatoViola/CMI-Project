@@ -19,7 +19,9 @@ void ofApp::setup() {
 
 	ofSetVerticalSync(true);
 
-	ofAddListener(homePage.clickedOnMedia, this, &ofApp::changeScreen);
+	ofAddListener(homePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(imagePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -93,7 +95,13 @@ void ofApp::keyPressed(int key) {
 		detectionEnabled = !detectionEnabled;
 		break;
 	case 'c':
-		activePage = CAMERA_PAGE;
+		if (activePage == CAMERA_PAGE)
+		{
+			activePage = MAIN_PAGE;
+		}
+		else {
+			activePage = CAMERA_PAGE;
+		}
 		break;
 	case OF_KEY_RETURN:
 		if (activePage == SCREEN_SAVER_PAGE)
@@ -109,7 +117,7 @@ void ofApp::changeScreen(int& page) {
 		case SCREEN_SAVER_PAGE:
 			break;
 		case MAIN_PAGE:
-			homePage.exit();
+		//	homePage.exit();
 			break;
 		case FILTERED_PAGE:
 			break;
@@ -136,7 +144,7 @@ void ofApp::changeScreen(int& page) {
 		screenSaverPage.setup();
 		break;
 	case MAIN_PAGE:
-		homePage.setup();
+	//	homePage.setup();
 		break;
 	case FILTERED_PAGE:
 		break;
@@ -214,8 +222,10 @@ void ofApp::mouseReleased(int x, int y, int button) {
 	case CONTROL_VERSION_PAGE:
 		break;
 	case IMAGE_PAGE:
+		imagePage.mouseReleased(x, y, button);
 		break;
 	case VIDEO_PAGE:
+		videoPage.mouseReleased(x, y, button);
 		break;
 	default:
 		break;

@@ -7,8 +7,8 @@
 #include "ScreenSaver.h"
 #include "screen_names.h"
 #include <HomePage.h>
-#include "../ImageEditor.h"
-#include "../VideoEditor.h"
+#include "ImageEditor.h"
+#include "VideoEditor.h"
 
 
 class ofApp : public ofBaseApp {

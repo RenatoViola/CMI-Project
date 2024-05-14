@@ -1,13 +1,14 @@
 #include "ScreenSaver.h"
+#include <Media.h>
 
 void ScreenSaver::setup()
 {
-	backgroundImage.load(PATH);
+	img.load(PATH);
 }
 
 void ScreenSaver::draw() 
 {
-	backgroundImage.drawInFullscreen(ofColor::white);
+	Media::drawInFullscreen(img.getPixels(), ofColor::white);
 }
 
 void ScreenSaver::update()
@@ -16,5 +17,5 @@ void ScreenSaver::update()
 }
 
 void ScreenSaver::exit() {
-	backgroundImage.exit();
+//	backgroundImage.clear();
 }

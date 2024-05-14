@@ -37,6 +37,8 @@ void VideoGrabber::update(bool detectionEnabled) {
 
 	if (vidGrabber.isFrameNew()) {
 		colorImg.setFromPixels(vidGrabber.getPixels());
+	//	colorImg.invert();
+
 		if (detectionEnabled)
 		{
 			grayImg = colorImg;

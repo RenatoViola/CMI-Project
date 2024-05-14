@@ -8,20 +8,21 @@ private:
     ofVideoPlayer video;
 
 public:
-    void load(const std::string& filePath) override {
+    void load(const std::string& filePath) {
         video.load(filePath);
     }
 
-    void draw(float x, float y, float w, float h) override {
+    void draw(float x, float y, float w, float h) {
         video.draw(x, y, w, h);
     }
 
-    void update() override {
+    void update() {
         video.update();
     }
 
-    void exit() override {
-        video.close();
+    void exit() {
+    //    video.close();
+        video.stop();
     }
 
     float getWidth() {
@@ -74,5 +75,9 @@ public:
 
     ofVideoPlayer getContent() {
         return video;
+    }
+
+    ofPixels& getPixels() {
+        return video.getPixels();
     }
 };

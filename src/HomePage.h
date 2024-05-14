@@ -15,9 +15,8 @@ public:
     void clickOnVideo();
     Media* getSelectedMedia();
 
-    ofEvent<int> clickedOnMedia;
-    
-
+    ofEvent<int> redirectEvent;
+   
 private:
     Carrousel imageCarrousel, videoCarrousel;
     Media* selectedMedia;
