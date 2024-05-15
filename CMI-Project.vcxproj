@@ -104,11 +104,16 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Button.cpp" />
+    <ClCompile Include="src\Carrousel.cpp" />
+    <ClCompile Include="src\FilterPanel.cpp" />
+    <ClCompile Include="src\HomePage.cpp" />
+    <ClCompile Include="src\ImageEditor.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
-    <ClCompile Include="src\ImageCarrousel.cpp" />
     <ClCompile Include="src\Metadata.cpp" />
-    <ClCompile Include="src\VideoCarrousel.cpp" />
+    <ClCompile Include="src\ScreenSaver.cpp" />
+    <ClCompile Include="src\VideoEditor.cpp" />
     <ClCompile Include="src\VideoGrabber.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxBaseGui.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxButton.cpp" />
@@ -133,11 +138,19 @@
     <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Button.h" />
+    <ClInclude Include="src\FilterPanel.h" />
+    <ClInclude Include="src\HomePage.h" />
+    <ClInclude Include="src\ImageEditor.h" />
+    <ClInclude Include="src\ImageMedia.h" />
+    <ClInclude Include="src\Media.h" />
+    <ClInclude Include="src\MediaEditor.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\Carrousel.h" />
-    <ClInclude Include="src\ImageCarrousel.h" />
     <ClInclude Include="src\Metadata.h" />
-    <ClInclude Include="src\VideoCarrousel.h" />
+    <ClInclude Include="src\ScreenSaver.h" />
+    <ClInclude Include="src\screen_names.h" />
+    <ClInclude Include="src\VideoEditor.h" />
     <ClInclude Include="src\VideoGrabber.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxButton.h" />
@@ -738,6 +751,7 @@
     <ClInclude Include="..\..\..\addons\ofxOpenCv\libs\opencv\include\opencv4\opencv2\video.hpp" />
     <ClInclude Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.h" />
     <ClInclude Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h" />
+    <ClInclude Include="src\VideoMedia.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">

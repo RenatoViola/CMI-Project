@@ -7,12 +7,12 @@ void ofApp::setup() {
 
 	// setup Screen Saver Page
 	screenSaverPage.setup();
-	homePage.setup();
+	//homePage.setup();
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 
-	videoGrabber.setup(1280, 720);
+	
 	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
@@ -20,13 +20,14 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 
 	ofAddListener(homePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(screenSaverPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(imagePage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-
+	cout << activePage << endl;
 	switch (activePage)
 	{
 		case SCREEN_SAVER_PAGE:
@@ -122,6 +123,7 @@ void ofApp::changeScreen(int& page) {
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
+			videoGrabber.setup(1280, 720);
 			break;
 		case CONTROL_VERSION_PAGE:
 			break;
@@ -144,7 +146,7 @@ void ofApp::changeScreen(int& page) {
 		screenSaverPage.setup();
 		break;
 	case MAIN_PAGE:
-	//	homePage.setup();
+		homePage.setup();
 		break;
 	case FILTERED_PAGE:
 		break;
