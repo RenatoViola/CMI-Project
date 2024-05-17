@@ -2,13 +2,17 @@
 
 void ImageEditor::setup(ImageMedia* img) {
     // Assign the provided ImageMedia object to the class member
-    image = img;
+    originalImage = img;
+    currentImage = img;
 
     gui.setup();
 
     backBtn.setup("backIcon.png", 100, 45, 52);
 
     ofAddListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+
+    // add listeners to the gui
+    gui.asciiFilter.addListener(this, &ImageEditor::convertToAscii);
 }
 
 void ImageEditor::update() {
@@ -20,7 +24,14 @@ void ImageEditor::update() {
 
 void ImageEditor::draw() {
 
-    image->drawInFullscreen(ofColor::black);
+    if (gui.asciiFilter)
+    {
+        currentImage->drawInAscii(ofColor::black);
+    }
+    else {
+        currentImage->drawInFullscreen(ofColor::black);
+    }
+
 //    Media::drawInFullscreen(image->getPixels(), ofColor::black);
     backBtn.draw();
     gui.draw();
@@ -38,4 +49,17 @@ void ImageEditor::gotoPreviousPage() {
 void ImageEditor::exit() {
 //    image->exit();
     ofRemoveListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+}
+
+void ImageEditor::convertToAscii(bool & toggleValue) {
+    ofImage img = originalImage->getContent();
+    float aspectRatio = (float)img.getWidth() / img.getHeight();
+
+    // Resize the image for processing
+    ofImage resizedImg;
+    resizedImg.allocate(ofGetHeight() * aspectRatio, ofGetHeight(), OF_IMAGE_GRAYSCALE);
+    resizedImg.setFromPixels(originalImage->getPixels());
+    resizedImg.resize(ofGetHeight() * aspectRatio, ofGetHeight());
+
+    currentImage->load(resizedImg);
 }

@@ -12,7 +12,6 @@ void FilterPanel::setup()
 	gui.add(invertColorFilter.setup("Inverted Colors", false));
 	gui.add(asciiFilter.setup("ASCII", false));
 	gui.add(color.setup("color", ofColor(100, 100, 140), ofColor(0, 0), ofColor(255, 255)));
-	
 }
 
 void FilterPanel::update()

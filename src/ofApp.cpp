@@ -27,7 +27,6 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::update() {
-	cout << activePage << endl;
 	switch (activePage)
 	{
 		case SCREEN_SAVER_PAGE:

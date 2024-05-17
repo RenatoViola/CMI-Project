@@ -14,11 +14,13 @@ public:
     void exit();
     void mouseReleased(int x, int y, int button);
     void gotoPreviousPage();
+    void convertToAscii(bool& toggleValue);
 
     ofEvent<int> redirectEvent;
 
 private:
-    ImageMedia* image;
+    ImageMedia* originalImage;
+    ImageMedia* currentImage;
     FilterPanel gui;
     Button backBtn;
 };

@@ -14,7 +14,7 @@ public:
     virtual void update() = 0;
 
     // filters to be applied to image
-    virtual void drawInAscii(float sWidth, float sHeight) = 0;
+    virtual void drawInAscii(ofColor backgroundColor) = 0;
     //virtual void drawWithInvertedColors(float sWidth, float sHeight) = 0;
 
     // characters used in the ascii filter

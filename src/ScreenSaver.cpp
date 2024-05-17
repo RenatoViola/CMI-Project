@@ -78,7 +78,7 @@ void ScreenSaver::exit() {
 
 void ScreenSaver::checkForMovement()
 {
-	int movementThreshold = CAMERA_HEIGHT * CAMERA_WIDHT / 4; // Adjust this threshold as needed
+	int movementThreshold = 10000; // Adjust this threshold as needed
 	int whitePixelCount = 0;
 
 	ofPixels pixels = diff.getPixels();
@@ -94,7 +94,6 @@ void ScreenSaver::checkForMovement()
 	}
 
 	// Verify if movement exceeds the threshold
-	cout << whitePixelCount << endl;
 	if (whitePixelCount > movementThreshold) {
 		int PAGE = MAIN_PAGE;
 		changeScreen = true;

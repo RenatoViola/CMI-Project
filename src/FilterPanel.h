@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include <filter_names.h>
 #include "Carrousel.h"
 
 class FilterPanel
@@ -13,6 +14,7 @@ public:
 	
 	void colapseButton();
 
+	void changeToAscii();
 
 	bool panelVisibility;
 
@@ -20,10 +22,6 @@ public:
 
 	ofxToggle invertColorFilter;
 	ofxToggle asciiFilter;
-	
-	ofxButton twoCircles;
-	ofxButton ringButton;
-	ofxLabel screenSize;
 
 	ofxPanel gui;
 };
