@@ -5,12 +5,57 @@ class ImageMedia : public Media
 {
 private:
     ofImage image;
+    vector<string> asciiArt;
+    ofFbo asciiFbo;
+
+    void generateAsciiArt() {
+        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
+        float width = image.getWidth(), height = image.getHeight();
+
+        float scale = 1.0f;
+
+        if (width > sWidth || height > sHeight)
+            scale = min(sWidth / width, sHeight / height);
+
+        float displayWidth = width * scale, displayHeight = height * scale;
+
+        ofImage resizedImg;
+        resizedImg.allocate(displayWidth, displayHeight, OF_IMAGE_GRAYSCALE);
+        resizedImg.setFromPixels(image.getPixels());
+        resizedImg.resize(displayWidth, displayHeight);
+
+        asciiArt.clear();
+
+        for (int j = 0; j < displayHeight; j += 9) {
+            string line;
+            for (int i = 0; i < displayWidth; i += 7) {
+                float lightness = resizedImg.getPixels().getColor(i, j).getLightness();
+                int characterIndex = powf(ofMap(lightness, 0, 255, 0, 1), 2.5) * (asciiCharacters.size() - 1);
+                characterIndex = ofClamp(characterIndex, 0, asciiCharacters.size() - 1);
+                line += asciiCharacters[characterIndex];
+            }
+            asciiArt.push_back(line);
+        }
+
+        asciiFbo.allocate(sWidth, sHeight, GL_RGBA);
+        asciiFbo.begin();
+        ofClear(0, 0, 0, 0);
+        ofSetColor(ofColor::white);
+
+        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
+
+        for (int i = 0; i < asciiArt.size(); ++i) {
+            font.drawString(asciiArt[i], xPos, yPos + i * 9);
+        }
+        asciiFbo.end();
+    }
 
 public:
     void load(const std::string& filePath) {
         image.load(filePath);
         font.load("Courier New Bold.ttf", 9);
         asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
+        generateAsciiArt();
     }
 
     void load(ofImage img)
@@ -18,6 +63,7 @@ public:
         image.setFromPixels(img.getPixels());
         font.load("Courier New Bold.ttf", 9);
         asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
+        generateAsciiArt();
     }
 
     void draw(float x, float y, float w, float h) {
@@ -40,41 +86,16 @@ public:
     //    image.clear();
     }
 
+    
     void drawInAscii(ofColor backgroundColor)
     {
-        float width = image.getWidth(), height = image.getHeight();
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-
         ofSetColor(backgroundColor);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
+        ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
-        float scale = 1.0f;
-
-        if (width > sWidth || height > sHeight)
-            scale = min(sWidth / width, sHeight / height);
-
-        float displayWidth = width * scale, displayHeight = height * scale;
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
-        
-        ofPixelsRef pixelsRef = image.getPixelsRef();
         ofSetColor(ofColor::white);
-
-        for (int i = 0; i < displayWidth; i += 7) {
-            for (int j = 0; j < displayHeight; j += 9) {
-                
-                float lightness = pixelsRef.getColor(i, j).getLightness();
-
-                // calculate the index of the character from our asciiCharacters array
-                int character = powf(ofMap(lightness, 0, 255, 0, 1), 2.5) * asciiCharacters.size();
-
-
-                // draw the character at the correct location
-                font.drawString(ofToString(asciiCharacters[character]), i + xPos,  j + yPos);
-            }
-        }
+        asciiFbo.draw(0, 0);
     }
-
+    
     ofImage getContent() {
         return image;
     }

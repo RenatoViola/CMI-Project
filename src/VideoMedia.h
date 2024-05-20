@@ -78,7 +78,7 @@ public:
         return frames;
     }
 
-    void drawInAscii(ofColor backgroundColor) override
+    void drawInAscii(ofColor backgroundColor)
     {
 
     }

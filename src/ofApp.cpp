@@ -7,7 +7,7 @@ void ofApp::setup() {
 
 	// setup Screen Saver Page
 	screenSaverPage.setup();
-	//homePage.setup();
+	homePage.setup();
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
@@ -145,7 +145,7 @@ void ofApp::changeScreen(int& page) {
 		screenSaverPage.setup();
 		break;
 	case MAIN_PAGE:
-		homePage.setup();
+	//	homePage.setup();
 		break;
 	case FILTERED_PAGE:
 		break;
