@@ -14,8 +14,6 @@ public:
 	
 	void colapseButton();
 
-	void changeToAscii();
-
 	bool panelVisibility;
 
 	ofxColorSlider color;

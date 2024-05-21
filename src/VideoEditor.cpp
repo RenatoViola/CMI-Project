@@ -7,7 +7,7 @@ void VideoEditor::setup(VideoMedia* vid) {
 
     gui.setup();
 
-    backBtn.setup("backIcon.png", 100, 45, 52);
+    backBtn.setup("backIcon.png", 100, 50, 50);
 
     ofAddListener(backBtn.clickedInside, this, &VideoEditor::gotoPreviousPage);
 }

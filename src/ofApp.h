@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "Carrousel.h"
-#include "VideoGrabber.h"
+#include "CameraPage.h"
 #include "Metadata.h"
 #include "ScreenSaver.h"
 #include "screen_names.h"
@@ -32,8 +32,8 @@ public:
 
 	void changeScreen(int& page);
 
-	VideoGrabber videoGrabber;
 	Metadata filesMetadata;
+	CameraPage cameraPage;
 	ScreenSaver screenSaverPage;
 	HomePage homePage;
 

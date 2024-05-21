@@ -8,7 +8,6 @@ void ScreenSaver::setup()
 	changeScreen = false;
 	counterToLearn = 0;
 
-
 	videoGrabber.setDeviceID(0);
 	videoGrabber.setDesiredFrameRate(30);
 	videoGrabber.setVerbose(true);
@@ -18,6 +17,8 @@ void ScreenSaver::setup()
 	bgImage.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
 
 	img.load(PATH);
+	colorImg.allocate(img.getWidth(), img.getHeight());
+	colorImg.setFromPixels(img.getPixels());
 }
 
 void ScreenSaver::draw() 
@@ -32,7 +33,7 @@ void ScreenSaver::draw()
 
 	#else
 
-		Media::drawInFullscreen(img.getPixels(), ofColor::white);	
+		Media::drawInFullscreen(colorImg, ofColor::white);	
 	
 	#endif // CAMERA_DEBUG
 
@@ -73,7 +74,11 @@ void ScreenSaver::update()
 }
 
 void ScreenSaver::exit() {
-	//backgroundImage.clear();
+	videoGrabber.close();
+	currentFrame.clear();
+	img.clear();
+	bgImage.clear();
+	colorImg.clear();
 }
 
 void ScreenSaver::checkForMovement()

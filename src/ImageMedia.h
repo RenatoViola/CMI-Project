@@ -8,16 +8,11 @@ private:
     vector<string> asciiArt;
     ofFbo asciiFbo;
 
-    void generateAsciiArt() {
+    void generateAsciiArt() 
+    {
         float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-        float width = image.getWidth(), height = image.getHeight();
-
-        float scale = 1.0f;
-
-        if (width > sWidth || height > sHeight)
-            scale = min(sWidth / width, sHeight / height);
-
-        float displayWidth = width * scale, displayHeight = height * scale;
+        float displayWidth, displayHeight, xPos, yPos;
+        setFullScreenSizeAndPos(&displayWidth, &displayHeight, &xPos, &yPos);
 
         ofImage resizedImg;
         resizedImg.allocate(displayWidth, displayHeight, OF_IMAGE_GRAYSCALE);
@@ -36,13 +31,12 @@ private:
             }
             asciiArt.push_back(line);
         }
+        resizedImg.clear();
 
         asciiFbo.allocate(sWidth, sHeight, GL_RGBA);
         asciiFbo.begin();
         ofClear(0, 0, 0, 0);
         ofSetColor(ofColor::white);
-
-        float xPos = (sWidth - displayWidth) / 2.0f, yPos = (sHeight - displayHeight) / 2.0f;
 
         for (int i = 0; i < asciiArt.size(); ++i) {
             font.drawString(asciiArt[i], xPos, yPos + i * 9);
@@ -51,7 +45,8 @@ private:
     }
 
 public:
-    void load(const std::string& filePath) {
+    void load(const std::string& filePath) 
+    {
         image.load(filePath);
         font.load("Courier New Bold.ttf", 9);
         asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
@@ -66,27 +61,31 @@ public:
         generateAsciiArt();
     }
 
-    void draw(float x, float y, float w, float h) {
-        image.draw(x, y, w, h);
-    }
-
-    void update() {
+    void update() 
+    {
         // No-op since ofImage doesn't require updating.
     }
 
-    float getWidth() {
+    float getWidth() 
+    {
         return image.getWidth();
     }
 
-    float getHeight() {
+    float getHeight()
+    {
         return image.getHeight();
     }
 
-    void exit() {
+    void exit() 
+    {
     //    image.clear();
     }
 
-    
+    void draw(float x, float y, float w, float h)
+    {
+        image.draw(x, y, w, h);
+    }
+
     void drawInAscii(ofColor backgroundColor)
     {
         ofSetColor(backgroundColor);
@@ -96,11 +95,13 @@ public:
         asciiFbo.draw(0, 0);
     }
     
-    ofImage getContent() {
+    ofImage getContent() 
+    {
         return image;
     }
 
-    ofPixels& getPixels() {
+    ofPixels& getPixels() 
+    {
         return image.getPixels();
     }
 };

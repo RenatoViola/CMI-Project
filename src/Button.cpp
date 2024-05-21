@@ -21,5 +21,5 @@ void Button::mouseReleased(int x, int y, int button) {
 
 bool Button::inside(int x, int y)
 {
-	return (glm::distance(glm::vec2(this->x, this->y), glm::vec2(x, y)) < radius);
+	return (glm::distance(glm::vec2(this->x + radius, this->y + radius), glm::vec2(x, y)) < radius);
 }

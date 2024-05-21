@@ -11,7 +11,7 @@ public:
 	void mouseReleased(int x, int y, int button);
 
 	bool inside(int x, int y);
-	int radius, x, y, page;
+	int radius, x, y;
 	ofImage icon;
 	ofEvent<void> clickedInside;
 };

@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "Carrousel.h"
+#include <Button.h>
 
 class HomePage {
 public:
@@ -11,8 +12,11 @@ public:
     void draw();
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
-    void clickOnImage();
-    void clickOnVideo();
+
+    void gotoImagePage();
+    void gotoVideoPage();
+    void gotoCameraPage();
+    void gotoSavescreenPage();
     Media* getSelectedMedia();
 
     ofEvent<int> redirectEvent;
@@ -20,4 +24,5 @@ public:
 private:
     Carrousel imageCarrousel, videoCarrousel;
     Media* selectedMedia;
+    Button cameraBtn, lockBtn;
 };

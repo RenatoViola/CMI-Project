@@ -1,7 +1,8 @@
-#include "VideoGrabber.h"
+#include "CameraPage.h"
+#include <screen_names.h>
 
 //--------------------------------------------------------------
-void VideoGrabber::setup(int width, int height) {
+void CameraPage::setup(int width, int height) {
 	camWidth = width;  // try to grab at this size.
 	camHeight = height;
 
@@ -19,8 +20,8 @@ void VideoGrabber::setup(int width, int height) {
 		}
 	}
 
-	//vidGrabber.setDeviceID(0);
-	//vidGrabber.setDesiredFrameRate(30);
+	vidGrabber.setDeviceID(0);
+	vidGrabber.setDesiredFrameRate(30);
 
 	vidGrabber.setVerbose(true);
 	vidGrabber.setup(width, height);
@@ -30,14 +31,16 @@ void VideoGrabber::setup(int width, int height) {
 
 	finder.setup("haarcascade_frontalface_default.xml");
 	// finder.setScaleHaar(1.5);
+
+	backBtn.setup("backIcon.png", 100, 50, 50);
+	ofAddListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
 }
 
-void VideoGrabber::update(bool detectionEnabled) {
+void CameraPage::update(bool detectionEnabled) {
 	vidGrabber.update();
 
 	if (vidGrabber.isFrameNew()) {
 		colorImg.setFromPixels(vidGrabber.getPixels());
-	//	colorImg.invert();
 
 		if (detectionEnabled)
 		{
@@ -45,16 +48,15 @@ void VideoGrabber::update(bool detectionEnabled) {
 			finder.findHaarObjects(grayImg);
 		}
 	}
-
 }
 
 //--------------------------------------------------------------
-void VideoGrabber::drawCamera(bool detectionEnabled) {
-	ofSetColor(ofColor::black);
+void CameraPage::drawCamera(bool detectionEnabled) {
+	ofSetColor(ofColor::white);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
-	ofSetColor(ofColor::white);
 	colorImg.draw(ofGetWidth() / 2 - camWidth / 2, ofGetHeight() / 2 - camHeight / 2);
+	backBtn.draw();
 
 	if (detectionEnabled)
 	{
@@ -65,5 +67,21 @@ void VideoGrabber::drawCamera(bool detectionEnabled) {
 		}
 		ofFill();
 	}
+}
 
+void CameraPage::mouseReleased(int x, int y, int button) {
+	backBtn.mouseReleased(x, y, button);
+}
+
+void CameraPage::gotoPreviousPage() {
+	int PAGE = MAIN_PAGE;
+	ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+void CameraPage::exit() {
+	vidGrabber.close();
+	colorImg.clear();
+	grayImg.clear();
+	faceRects.clear();
+	ofRemoveListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
 }

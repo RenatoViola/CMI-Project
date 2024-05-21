@@ -2,43 +2,45 @@
 
 void ImageEditor::setup(ImageMedia* img) {
     // Assign the provided ImageMedia object to the class member
-    originalImage = img;
-    currentImage = img;
+    this->img = img;
+
+    colorImg.allocate(img->getWidth(), img->getHeight());
+    colorImg.setFromPixels(img->getPixels());
 
     gui.setup();
 
-    backBtn.setup("backIcon.png", 100, 45, 52);
+    backBtn.setup("backIcon.png", 100, 50, 50);
 
     ofAddListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
 }
 
 void ImageEditor::update() {
-    // Here you would typically handle real-time adjustments to the image
-    // For example, applying brightness or contrast settings
- //   image->update();
+ //   img->update();
     gui.update();
+ //   ofLogNotice() << "FPS: " << ofGetFrameRate();
 }
 
 void ImageEditor::draw() {
 
     if (gui.asciiFilter)
     {
-        currentImage->drawInAscii(ofColor::black);
+        img->drawInAscii(ofColor::black);
     } 
     else if (gui.invertColorFilter)
     {
-        ofxCvColorImage i;
-        i.setFromPixels(currentImage->getPixels());
-        i.invert();
-        Media::drawInFullscreen(i.getPixels(), ofColor::black);
+        Media::drawInFullscreen(colorImg, ofColor::black);
     }
     else {
-        currentImage->drawInFullscreen(ofColor::black);
+        img->drawInFullscreen(ofColor::black);
     }
 
-//    Media::drawInFullscreen(image->getPixels(), ofColor::black);
     backBtn.draw();
     gui.draw();
+}
+
+void ImageEditor::invertImage(bool& toggleValue) {
+    colorImg.invert();
 }
 
 void ImageEditor::mouseReleased(int x, int y, int button) {
@@ -51,6 +53,7 @@ void ImageEditor::gotoPreviousPage() {
 }
 
 void ImageEditor::exit() {
-//    image->exit();
+    //    image->exit();
     ofRemoveListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    gui.invertColorFilter.removeListener(this, &ImageEditor::invertImage);
 }
