@@ -10,7 +10,6 @@ void HomePage::setup() {
 
     // Set up the image carousel
     imageDir.allowExt("jpg");
-    imageDir.allowExt("png");
     imageDir.listDir("images/");
 
     images.reserve(imageDir.size());
@@ -22,11 +21,10 @@ void HomePage::setup() {
     }
 
     // Top half of the screen
-    imageCarrousel.setup(move(images), horizontalMiddle - mediaHeight, "IMAGES");
+    imageCarrousel.setup(move(images), horizontalMiddle - mediaHeight / 2, "IMAGES");
 
     // Set up the video carousel
     videoDir.allowExt("mp4");
-    videoDir.allowExt("avi");
     videoDir.listDir("videos/");
 
     videos.reserve(videoDir.size());
@@ -41,16 +39,25 @@ void HomePage::setup() {
     videoCarrousel.setup(move(videos), horizontalMiddle + mediaHeight, "VIDEOS");
 
     // Mouse event listeners
-    ofAddListener(imageCarrousel.clickedOnSelected, this, &HomePage::clickOnImage);
-    ofAddListener(videoCarrousel.clickedOnSelected, this, &HomePage::clickOnVideo);
+    ofAddListener(imageCarrousel.clickedOnSelected, this, &HomePage::gotoImagePage);
+    ofAddListener(videoCarrousel.clickedOnSelected, this, &HomePage::gotoVideoPage);
+    
+    // Buttons and their listeners
+    cameraBtn.setup("cameraIcon.png", 100, 80, 50);
+    lockBtn.setup("lockIcon.png", 100, ofGetWidth() - 180, 50);
+
+    ofAddListener(cameraBtn.clickedInside, this, &HomePage::gotoCameraPage);
+    ofAddListener(lockBtn.clickedInside, this, &HomePage::gotoSavescreenPage);
 }
 
 void HomePage::exit() {
     imageCarrousel.exit();
     videoCarrousel.exit();
 
-    ofRemoveListener(imageCarrousel.clickedOnSelected, this, &HomePage::clickOnImage);
-    ofRemoveListener(videoCarrousel.clickedOnSelected, this, &HomePage::clickOnVideo);
+    ofRemoveListener(imageCarrousel.clickedOnSelected, this, &HomePage::gotoImagePage);
+    ofRemoveListener(videoCarrousel.clickedOnSelected, this, &HomePage::gotoVideoPage);
+    ofRemoveListener(cameraBtn.clickedInside, this, &HomePage::gotoCameraPage);
+    ofRemoveListener(lockBtn.clickedInside, this, &HomePage::gotoSavescreenPage);
 }
 
 void HomePage::update() {
@@ -61,6 +68,12 @@ void HomePage::update() {
 void HomePage::draw() {
     imageCarrousel.draw();
     videoCarrousel.draw();
+    cameraBtn.draw();
+    lockBtn.draw();
+}
+
+Media* HomePage::getSelectedMedia() {
+    return selectedMedia;
 }
 
 void HomePage::mousePressed(int x, int y, int button) {
@@ -71,22 +84,34 @@ void HomePage::mousePressed(int x, int y, int button) {
 void HomePage::mouseReleased(int x, int y, int button) {
     imageCarrousel.mouseReleased(x, y, button);
     videoCarrousel.mouseReleased(x, y, button);
+    cameraBtn.mouseReleased(x, y, button);
+    lockBtn.mouseReleased(x, y, button);
 }
 
-void HomePage::clickOnImage() {
+void HomePage::gotoImagePage() {
     selectedMedia = imageCarrousel.getCurrentMedia();
 
     int PAGE = IMAGE_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
-void HomePage::clickOnVideo() {
+void HomePage::gotoVideoPage() {
     selectedMedia = videoCarrousel.getCurrentMedia();
 
     int PAGE = VIDEO_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
-Media* HomePage::getSelectedMedia() {
-    return selectedMedia;
+void HomePage::gotoCameraPage() {
+    selectedMedia = imageCarrousel.getCurrentMedia();
+
+    int PAGE = CAMERA_PAGE;
+    ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+void HomePage::gotoSavescreenPage() {
+    selectedMedia = videoCarrousel.getCurrentMedia();
+
+    int PAGE = SCREEN_SAVER_PAGE;
+    ofNotifyEvent(redirectEvent, PAGE, this);
 }

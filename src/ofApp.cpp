@@ -12,7 +12,7 @@ void ofApp::setup() {
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 
-	videoGrabber.setup(1280, 720);
+	
 	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
@@ -20,13 +20,14 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 
 	ofAddListener(homePage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(screenSaverPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(imagePage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-
 	switch (activePage)
 	{
 		case SCREEN_SAVER_PAGE:
@@ -38,7 +39,7 @@ void ofApp::update() {
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
-			videoGrabber.update(detectionEnabled);
+			cameraPage.update(detectionEnabled);
 			break;
 		case CONTROL_VERSION_PAGE:
 			break;
@@ -71,7 +72,7 @@ void ofApp::draw() {
 	case FILTERED_PAGE:
 		break;
 	case CAMERA_PAGE:
-		videoGrabber.drawCamera(detectionEnabled);
+		cameraPage.drawCamera(detectionEnabled);
 		break;
 	case CONTROL_VERSION_PAGE:
 		break;
@@ -89,23 +90,13 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	switch (key) {
-	case 'f':
-		detectionEnabled = !detectionEnabled;
-		break;
-	case 'c':
-		if (activePage == CAMERA_PAGE)
-		{
-			activePage = MAIN_PAGE;
-		}
-		else {
-			activePage = CAMERA_PAGE;
-		}
-		break;
-	case OF_KEY_RETURN:
-		if (activePage == SCREEN_SAVER_PAGE)
-			activePage = MAIN_PAGE;
-		break;
+	switch (key) 
+	{
+		case 'f':
+			detectionEnabled = !detectionEnabled;
+			break;
+		default:
+			break;
 	}
 }
 
@@ -122,6 +113,7 @@ void ofApp::changeScreen(int& page) {
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
+			cameraPage.exit();
 			break;
 		case CONTROL_VERSION_PAGE:
 			break;
@@ -137,7 +129,6 @@ void ofApp::changeScreen(int& page) {
 
 	activePage = page;
 
-	// Setup the new one
 	switch (activePage)
 	{
 	case SCREEN_SAVER_PAGE:
@@ -149,7 +140,7 @@ void ofApp::changeScreen(int& page) {
 	case FILTERED_PAGE:
 		break;
 	case CAMERA_PAGE:
-		videoGrabber.setup(1280, 720);
+		cameraPage.setup(1280, 720);
 		break;
 	case CONTROL_VERSION_PAGE:
 		break;
@@ -218,6 +209,7 @@ void ofApp::mouseReleased(int x, int y, int button) {
 	case FILTERED_PAGE:
 		break;
 	case CAMERA_PAGE:
+		cameraPage.mouseReleased(x, y, button);
 		break;
 	case CONTROL_VERSION_PAGE:
 		break;

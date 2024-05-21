@@ -14,11 +14,13 @@ public:
     void exit();
     void mouseReleased(int x, int y, int button);
     void gotoPreviousPage();
+    void invertImage(bool& toggleValue);
 
     ofEvent<int> redirectEvent;
 
 private:
-    ImageMedia* image;
+    ImageMedia* img;
+    ofxCvColorImage colorImg;
     FilterPanel gui;
     Button backBtn;
 };
