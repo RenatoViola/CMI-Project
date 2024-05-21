@@ -27,5 +27,5 @@ class CameraPage {
 		int camWidth;
 		int camHeight;
 
-		Button backBtn;
+		Button homeBtn;
 };

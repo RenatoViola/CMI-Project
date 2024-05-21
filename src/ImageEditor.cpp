@@ -9,9 +9,12 @@ void ImageEditor::setup(ImageMedia* img) {
 
     gui.setup();
 
-    backBtn.setup("backIcon.png", 100, 50, 50);
+    homeBtn.setup("homeIcon.png", 100, 50, 50);
+    versionBtn.setup("versionIcon.png", 100, 50, 200);
 
-    ofAddListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    ofAddListener(homeBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    ofAddListener(versionBtn.clickedInside, this, &ImageEditor::gotoVersionPage);
+
     gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
 }
 
@@ -35,7 +38,9 @@ void ImageEditor::draw() {
         img->drawInFullscreen(ofColor::black);
     }
 
-    backBtn.draw();
+    homeBtn.draw();
+    versionBtn.draw();
+
     gui.draw();
 }
 
@@ -44,7 +49,8 @@ void ImageEditor::invertImage(bool& toggleValue) {
 }
 
 void ImageEditor::mouseReleased(int x, int y, int button) {
-    backBtn.mouseReleased(x, y, button);
+    homeBtn.mouseReleased(x, y, button);
+    versionBtn.mouseReleased(x, y, button);
 }
 
 void ImageEditor::gotoPreviousPage() {
@@ -52,8 +58,14 @@ void ImageEditor::gotoPreviousPage() {
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+void ImageEditor::gotoVersionPage() {
+    int PAGE = CONTROL_VERSION_PAGE;
+    ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
 void ImageEditor::exit() {
     //    image->exit();
-    ofRemoveListener(backBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    ofRemoveListener(homeBtn.clickedInside, this, &ImageEditor::gotoPreviousPage);
+    ofRemoveListener(versionBtn.clickedInside, this, &ImageEditor::gotoVersionPage);
     gui.invertColorFilter.removeListener(this, &ImageEditor::invertImage);
 }

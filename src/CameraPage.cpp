@@ -32,8 +32,8 @@ void CameraPage::setup(int width, int height) {
 	finder.setup("haarcascade_frontalface_default.xml");
 	// finder.setScaleHaar(1.5);
 
-	backBtn.setup("backIcon.png", 100, 50, 50);
-	ofAddListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
+	homeBtn.setup("homeIcon.png", 100, 50, 50);
+	ofAddListener(homeBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
 }
 
 void CameraPage::update(bool detectionEnabled) {
@@ -56,7 +56,7 @@ void CameraPage::drawCamera(bool detectionEnabled) {
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 	colorImg.draw(ofGetWidth() / 2 - camWidth / 2, ofGetHeight() / 2 - camHeight / 2);
-	backBtn.draw();
+	homeBtn.draw();
 
 	if (detectionEnabled)
 	{
@@ -70,7 +70,7 @@ void CameraPage::drawCamera(bool detectionEnabled) {
 }
 
 void CameraPage::mouseReleased(int x, int y, int button) {
-	backBtn.mouseReleased(x, y, button);
+	homeBtn.mouseReleased(x, y, button);
 }
 
 void CameraPage::gotoPreviousPage() {
@@ -83,5 +83,5 @@ void CameraPage::exit() {
 	colorImg.clear();
 	grayImg.clear();
 	faceRects.clear();
-	ofRemoveListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
+	ofRemoveListener(homeBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
 }
