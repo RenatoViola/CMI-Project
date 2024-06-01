@@ -59,18 +59,27 @@ void ScreenSaver::update()
 		diff.absDiff(bgImage,currentFrame);
 		diff.threshold(THRESHOLD); 
 
+
+		// Convert ofxCvGrayscaleImage to cv::Mat
+		cv::Mat frame = cv::cvarrToMat(currentFrame.getCvImage());
+		cv::Mat bgMat = cv::cvarrToMat(bgImage.getCvImage());
+
+		// Convert to float type for accumulateWeighted
+		frame.convertTo(frame, CV_32F);
+		bgMat.convertTo(bgMat, CV_32F);
+
+		try {
+			// Background updated over time
+			cv::accumulateWeighted(frame, bgMat, ALPHA);
+			bgMat.convertTo(bgMat, CV_8U);
+			bgImage.setFromPixels(bgMat.data, bgMat.cols, bgMat.rows);
+		}
+		catch (const cv::Exception& e) {
+			std::cerr << "cv::Exception: " << e.what() << std::endl;
+
+		}
 		checkForMovement();
 	}
-	
-
-	// Relearn background after 1000 frames
-	counterToLearn++;
-
-	if (counterToLearn > 1000) {
-		counterToLearn = 0;
-		bLearnBackground = true;
-	}
-
 }
 
 void ScreenSaver::exit() {
