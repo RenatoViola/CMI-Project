@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
-#include "Carrousel.h"
-#include <Button.h>
+#include "UIElements/Carrousel.h"
+#include <UIElements/Button.h>
 
 class HomePage {
 public:

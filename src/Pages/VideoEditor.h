@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
-#include "VideoMedia.h"
-#include "FilterPanel.h"
-#include <Button.h>
+#include "DataTypes/VideoMedia.h"
+#include "UIElements/FilterPanel.h"
+#include <UIElements/Button.h>
 #include <ofxOpenCv.h>
 
 class VideoEditor {

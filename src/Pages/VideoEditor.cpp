@@ -1,4 +1,4 @@
-#include "VideoEditor.h"
+#include "Pages/VideoEditor.h"
 
 void VideoEditor::setup(VideoMedia* vid) {
     // Assign the provided ImageMedia object to the class member

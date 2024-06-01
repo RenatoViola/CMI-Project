@@ -1,9 +1,9 @@
 #pragma once
 #include "ofMain.h"
 #include "screen_names.h"
-#include <Media.h>
-#include <ImageMedia.h>
-#include <VideoMedia.h>
+#include <DataTypes/Media.h>
+#include <DataTypes/ImageMedia.h>
+#include <DataTypes/VideoMedia.h>
 
 class Carrousel {
 public:

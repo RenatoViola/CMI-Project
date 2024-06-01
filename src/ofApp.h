@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
-#include "Carrousel.h"
-#include "CameraPage.h"
-#include "Metadata.h"
-#include "ScreenSaver.h"
 #include "screen_names.h"
-#include "HomePage.h"
-#include "VideoEditor.h"
-#include "ImageEditor.h"
+#include "DataTypes/Metadata.h"
+#include "UIElements/Carrousel.h"
+#include "Pages/CameraPage.h"
+#include "Pages/ScreenSaver.h"
+#include "Pages/HomePage.h"
+#include "Pages/VideoEditor.h"
+#include "Pages/ImageEditor.h"
 
 
 class ofApp : public ofBaseApp {

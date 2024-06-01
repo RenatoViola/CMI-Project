@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ImageMedia.h"
-#include "FilterPanel.h"
 #include <ofxOpenCv.h>
-#include <Button.h>
+#include "DataTypes/ImageMedia.h"
+#include "UIElements/FilterPanel.h"
+#include <UIElements/Button.h>
 
 class ImageEditor {
 public:

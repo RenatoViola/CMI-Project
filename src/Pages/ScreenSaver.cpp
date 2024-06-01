@@ -1,5 +1,5 @@
 #include "ScreenSaver.h"
-#include <Media.h>
+#include <DataTypes/Media.h>
 #include <screen_names.h>
 
 void ScreenSaver::setup()
