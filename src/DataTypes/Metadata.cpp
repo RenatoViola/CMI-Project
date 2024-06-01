@@ -134,7 +134,7 @@ void Metadata::calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColo
 
 int Metadata::numberOfFaces(vector<ofPixels>& frames) {
 	ofxCvHaarFinder finder;
-	finder.setup("haarcascade_frontalface_default.xml");
+	finder.setup("haarcascade_frontalface_alt_tree.xml");
 
 	int nFaces = 0;
 	ofxCvColorImage colorImg;

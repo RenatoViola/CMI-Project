@@ -12,7 +12,7 @@ class CameraPage {
 		void drawCamera(bool detectionEnabled);
 		void exit();
 		void mouseReleased(int x, int y, int button);
-		void gotoPreviousPage();
+		void gotoHomePage();
 
 		ofEvent<int> redirectEvent;
 
@@ -27,5 +27,5 @@ class CameraPage {
 		int camWidth;
 		int camHeight;
 
-		Button backBtn;
+		Button homeBtn;
 };

@@ -7,9 +7,11 @@ void VideoEditor::setup(VideoMedia* vid) {
 
     gui.setup();
 
-    backBtn.setup("backIcon.png", 100, 50, 50);
+    homeBtn.setup("homeIcon.png", 100, 50, 50);
+    versionBtn.setup("versionIcon.png", 100, 50, 200);
 
-    ofAddListener(backBtn.clickedInside, this, &VideoEditor::gotoPreviousPage);
+    ofAddListener(homeBtn.clickedInside, this, &VideoEditor::gotoHomePage);
+    ofAddListener(versionBtn.clickedInside, this, &VideoEditor::gotoVersionPage);
 }
 
 void VideoEditor::update() {
@@ -31,21 +33,29 @@ void VideoEditor::draw() {
 
     video->drawInFullscreen(ofColor::black);
 //    Media::drawInFullscreen(frame, ofColor::black);
-    backBtn.draw();
+    homeBtn.draw();
+    versionBtn.draw();
     gui.draw(); // Draw the GUI on top of the image
 }
 
 void VideoEditor::mouseReleased(int x, int y, int button) {
-    backBtn.mouseReleased(x, y, button);
+    homeBtn.mouseReleased(x, y, button);
+    versionBtn.mouseReleased(x, y, button);
 }
 
-void VideoEditor::gotoPreviousPage() {
+void VideoEditor::gotoHomePage() {
     int PAGE = MAIN_PAGE;
+    ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+void VideoEditor::gotoVersionPage() {
+    int PAGE = CONTROL_VERSION_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 
 void VideoEditor::exit() {
     video->exit();
-    ofRemoveListener(backBtn.clickedInside, this, &VideoEditor::gotoPreviousPage);
+    ofRemoveListener(homeBtn.clickedInside, this, &VideoEditor::gotoHomePage);
+    ofRemoveListener(versionBtn.clickedInside, this, &VideoEditor::gotoVersionPage);
 }

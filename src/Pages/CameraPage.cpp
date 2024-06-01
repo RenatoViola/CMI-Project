@@ -29,11 +29,14 @@ void CameraPage::setup(int width, int height) {
 	colorImg.allocate(width, height);
 	grayImg.allocate(width, height);
 
-	finder.setup("haarcascade_frontalface_default.xml");
+//	finder.setup("haarcascade_frontalface_default.xml");
+//	finder.setup("haarcascade_frontalface_alt.xml");
+//	finder.setup("haarcascade_frontalface_alt2.xml");
+	finder.setup("haarcascade_frontalface_alt_tree.xml");
 	// finder.setScaleHaar(1.5);
 
-	backBtn.setup("backIcon.png", 100, 50, 50);
-	ofAddListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
+	homeBtn.setup("homeIcon.png", 100, 50, 50);
+	ofAddListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
 }
 
 void CameraPage::update(bool detectionEnabled) {
@@ -52,28 +55,36 @@ void CameraPage::update(bool detectionEnabled) {
 
 //--------------------------------------------------------------
 void CameraPage::drawCamera(bool detectionEnabled) {
-	ofSetColor(ofColor::white);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(ofColor::white);
+    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
-	colorImg.draw(ofGetWidth() / 2 - camWidth / 2, ofGetHeight() / 2 - camHeight / 2);
-	backBtn.draw();
+    // Calculate the position where the image will be drawn
+    float drawPosX = ofGetWidth() / 2 - camWidth / 2;
+    float drawPosY = ofGetHeight() / 2 - camHeight / 2;
 
-	if (detectionEnabled)
-	{
-		ofNoFill();
-		ofSetColor(ofColor::blueSteel);
-		for (int i = 0; i < finder.blobs.size(); i++) {
-			ofDrawRectangle(finder.blobs[i].boundingRect);
-		}
-		ofFill();
-	}
+    // Draw the video image
+    colorImg.draw(drawPosX, drawPosY);
+    homeBtn.draw();
+
+    if (detectionEnabled) {
+        ofNoFill();
+        ofSetColor(ofColor::steelBlue);
+        for (int i = 0; i < finder.blobs.size(); i++) {
+            ofRectangle cur = finder.blobs[i].boundingRect;
+
+            // Adjust the rectangle position by the draw position offset
+            ofDrawRectangle(cur.x + drawPosX, cur.y + drawPosY, cur.width, cur.height);
+        }
+        ofFill();
+    }
 }
+
 
 void CameraPage::mouseReleased(int x, int y, int button) {
-	backBtn.mouseReleased(x, y, button);
+	homeBtn.mouseReleased(x, y, button);
 }
 
-void CameraPage::gotoPreviousPage() {
+void CameraPage::gotoHomePage() {
 	int PAGE = MAIN_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
@@ -83,5 +94,5 @@ void CameraPage::exit() {
 	colorImg.clear();
 	grayImg.clear();
 	faceRects.clear();
-	ofRemoveListener(backBtn.clickedInside, this, &CameraPage::gotoPreviousPage);
+	ofRemoveListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
 }

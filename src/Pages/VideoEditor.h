@@ -13,12 +13,13 @@ public:
     void draw();
     void exit();
     void mouseReleased(int x, int y, int button);
-    void gotoPreviousPage();
+    void gotoHomePage();
+    void gotoVersionPage();
 
     ofEvent<int> redirectEvent;
 private:
     VideoMedia* video;
     ofPixels frame;
     FilterPanel gui;
-    Button backBtn;
+    Button homeBtn, versionBtn;
 };

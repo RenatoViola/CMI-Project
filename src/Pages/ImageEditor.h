@@ -13,7 +13,8 @@ public:
     void draw();
     void exit();
     void mouseReleased(int x, int y, int button);
-    void gotoPreviousPage();
+    void gotoHomePage();
+    void gotoVersionPage();
     void invertImage(bool& toggleValue);
 
     ofEvent<int> redirectEvent;
@@ -22,5 +23,5 @@ private:
     ImageMedia* img;
     ofxCvColorImage colorImg;
     FilterPanel gui;
-    Button backBtn;
+    Button homeBtn, versionBtn;
 };

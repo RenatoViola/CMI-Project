@@ -63,27 +63,27 @@ void ofApp::draw() {
 
 	switch (activePage)
 	{
-	case SCREEN_SAVER_PAGE:
-		screenSaverPage.draw();
-		break;
-	case MAIN_PAGE:
-		homePage.draw();
-		break;
-	case FILTERED_PAGE:
-		break;
-	case CAMERA_PAGE:
-		cameraPage.drawCamera(detectionEnabled);
-		break;
-	case CONTROL_VERSION_PAGE:
-		break;
-	case IMAGE_PAGE:
-		imagePage.draw();
-		break;
-	case VIDEO_PAGE:
-		videoPage.draw();
-		break;
-	default:
-		break;
+		case SCREEN_SAVER_PAGE:
+			screenSaverPage.draw();
+			break;
+		case MAIN_PAGE:
+			homePage.draw();
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+			cameraPage.drawCamera(detectionEnabled);
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			imagePage.draw();
+			break;
+		case VIDEO_PAGE:
+			videoPage.draw();
+			break;
+		default:
+			break;
 	}
 }
 
@@ -131,27 +131,27 @@ void ofApp::changeScreen(int& page) {
 
 	switch (activePage)
 	{
-	case SCREEN_SAVER_PAGE:
-		screenSaverPage.setup();
-		break;
-	case MAIN_PAGE:
-	//	homePage.setup();
-		break;
-	case FILTERED_PAGE:
-		break;
-	case CAMERA_PAGE:
-		cameraPage.setup(1280, 720);
-		break;
-	case CONTROL_VERSION_PAGE:
-		break;
-	case IMAGE_PAGE:
-		imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
-		break;
-	case VIDEO_PAGE:
-		videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
-		break;
-	default:
-		break;
+		case SCREEN_SAVER_PAGE:
+			screenSaverPage.setup();
+			break;
+		case MAIN_PAGE:
+		//	homePage.setup();
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+			cameraPage.setup(1280, 720);
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
+			break;
+		case VIDEO_PAGE:
+			videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
+			break;
+		default:
+			break;
 	}
 }
 
@@ -201,26 +201,26 @@ void ofApp::mouseReleased(int x, int y, int button) {
 
 	switch (activePage)
 	{
-	case SCREEN_SAVER_PAGE:
-		break;
-	case MAIN_PAGE:
-		homePage.mouseReleased(x, y, button);
-		break;
-	case FILTERED_PAGE:
-		break;
-	case CAMERA_PAGE:
-		cameraPage.mouseReleased(x, y, button);
-		break;
-	case CONTROL_VERSION_PAGE:
-		break;
-	case IMAGE_PAGE:
-		imagePage.mouseReleased(x, y, button);
-		break;
-	case VIDEO_PAGE:
-		videoPage.mouseReleased(x, y, button);
-		break;
-	default:
-		break;
+		case SCREEN_SAVER_PAGE:
+			break;
+		case MAIN_PAGE:
+			homePage.mouseReleased(x, y, button);
+			break;
+		case FILTERED_PAGE:
+			break;
+		case CAMERA_PAGE:
+			cameraPage.mouseReleased(x, y, button);
+			break;
+		case CONTROL_VERSION_PAGE:
+			break;
+		case IMAGE_PAGE:
+			imagePage.mouseReleased(x, y, button);
+			break;
+		case VIDEO_PAGE:
+			videoPage.mouseReleased(x, y, button);
+			break;
+		default:
+			break;
 	}
 }
 
