@@ -86,12 +86,8 @@ public:
         image.draw(x, y, w, h);
     }
 
-    void drawInAscii(ofColor backgroundColor)
+    void drawInAscii()
     {
-        ofSetColor(backgroundColor);
-        ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-
-        ofSetColor(ofColor::white);
         asciiFbo.draw(0, 0);
     }
     

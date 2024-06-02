@@ -44,7 +44,6 @@ void ofApp::update() {
 		case CONTROL_VERSION_PAGE:
 			break;
 		case IMAGE_PAGE:
-			imagePage.update();
 			break;
 		case VIDEO_PAGE:
 			videoPage.update();

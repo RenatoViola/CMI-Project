@@ -9,7 +9,6 @@ class FilterPanel
 {
 public:
 	void setup();
-	void update();
 	void draw();
 	
 	void colapseButton();
@@ -20,6 +19,7 @@ public:
 
 	ofxToggle invertColorFilter;
 	ofxToggle asciiFilter;
+	ofxToggle edgeFilter;
 
 	ofxPanel gui;
 };

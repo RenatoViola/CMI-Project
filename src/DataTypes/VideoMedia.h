@@ -11,9 +11,6 @@ public:
     void load(const std::string& filePath) {
         video.load(filePath);
     //    video.setLoopState(OF_LOOP_NORMAL);
-    //    video.play();  // Optionally start playing automatically
-    //    font.load("Courier New Bold.ttf", 9);
-        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
     }
 
     void draw(float x, float y, float w, float h) {
@@ -25,7 +22,6 @@ public:
     }
 
     void exit() {
-    //    video.close();
         video.stop();
     }
 
@@ -36,7 +32,6 @@ public:
     float getHeight() {
         return video.getHeight();
     }
-
 
     void play() {
         video.setLoopState(OF_LOOP_NORMAL);
@@ -77,12 +72,6 @@ public:
 
         return frames;
     }
-
-    void drawInAscii(ofColor backgroundColor)
-    {
-
-    }
-
 
     ofVideoPlayer getContent() {
         return video;

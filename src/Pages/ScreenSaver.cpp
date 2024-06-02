@@ -11,10 +11,10 @@ void ScreenSaver::setup()
 	videoGrabber.setDeviceID(0);
 	videoGrabber.setDesiredFrameRate(30);
 	videoGrabber.setVerbose(true);
-	videoGrabber.setup(CAMERA_WIDHT, CAMERA_HEIGHT);
+	videoGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	currentFrame.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
-	bgImage.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
+	currentFrame.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	bgImage.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	img.load(PATH);
 	colorImg.allocate(img.getWidth(), img.getHeight());
@@ -32,8 +32,9 @@ void ScreenSaver::draw()
 		diff.draw(CAMERA_WIDHT, CAMERA_HEIGHT);
 
 	#else
-
-		Media::drawInFullscreen(colorImg, ofColor::white);	
+		float displayWidth, displayHeight, xPos, yPos;
+		Media::setFullScreenSizeAndPos(colorImg, &displayWidth, &displayHeight, &xPos, &yPos);
+		colorImg.draw(xPos, yPos, displayWidth, displayHeight);
 	
 	#endif // CAMERA_DEBUG
 
@@ -98,7 +99,7 @@ void ScreenSaver::checkForMovement()
 	ofPixels pixels = diff.getPixels();
 	// Iterate through the image pixels
 	for (int y = 0; y < CAMERA_HEIGHT; y++) {
-		for (int x = 0; x < CAMERA_WIDHT; x++) {
+		for (int x = 0; x < CAMERA_WIDTH; x++) {
 			ofColor pixelColor = pixels.getColor(x + y);
 			// Check if the pixel is white (movement detected)
 			if (pixelColor.getBrightness() > 0) {

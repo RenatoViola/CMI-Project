@@ -15,7 +15,7 @@ public:
 
 	const string PATH = "./screenSaver.jpg";
 	const int CAMERA_HEIGHT = 240;
-	const int CAMERA_WIDHT = 320;
+	const int CAMERA_WIDTH = 320;
 
 	const int THRESHOLD = 70;
 	const double ALPHA = 0.05;

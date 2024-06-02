@@ -5,17 +5,13 @@
 class Media
 {
 public:
-    virtual ~Media() {};
+    ~Media() {};
 
     // Pure virtual methods
-    virtual void load(const std::string& filePath) = 0;
+    virtual void load(const string& filePath) = 0;
     virtual void exit() = 0;
     virtual void draw(float x, float y, float w, float h) = 0;
     virtual void update() = 0;
-
-    // filters to be applied to image
- //   virtual void drawInAscii(ofColor backgroundColor) = 0;
-    //virtual void drawWithInvertedColors(float sWidth, float sHeight) = 0;
 
     // characters used in the ascii filter
     string asciiCharacters;
@@ -58,30 +54,5 @@ public:
         *xPos = (sWidth - *displayWidth) / 2.0f;
         *yPos = (sHeight - *displayHeight) / 2.0f;
     }
-
-    void drawInFullscreen(ofColor backgroundColor)
-    {
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-        float displayWidth, displayHeight, xPos, yPos;
-        this->setFullScreenSizeAndPos(&displayWidth, &displayHeight, &xPos, &yPos);
-
-        ofSetColor(backgroundColor);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
-        ofSetColor(ofColor::white);
-        this->draw(xPos, yPos, displayWidth, displayHeight);
-    }
-
-    static void drawInFullscreen(ofxCvColorImage img, ofColor backgroundColor)
-    {
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-        float displayWidth, displayHeight, xPos, yPos;
-        setFullScreenSizeAndPos(img, &displayWidth, &displayHeight, &xPos, &yPos);
-
-        ofSetColor(backgroundColor);
-        ofDrawRectangle(0, 0, sWidth, sHeight);
-        ofSetColor(ofColor::white);
-        img.draw(xPos, yPos, displayWidth, displayHeight);
-    }
-
 };
 

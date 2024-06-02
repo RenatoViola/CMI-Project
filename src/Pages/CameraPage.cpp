@@ -58,11 +58,9 @@ void CameraPage::drawCamera(bool detectionEnabled) {
     ofSetColor(ofColor::white);
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
-    // Calculate the position where the image will be drawn
     float drawPosX = ofGetWidth() / 2 - camWidth / 2;
     float drawPosY = ofGetHeight() / 2 - camHeight / 2;
 
-    // Draw the video image
     colorImg.draw(drawPosX, drawPosY);
     homeBtn.draw();
 
@@ -71,8 +69,6 @@ void CameraPage::drawCamera(bool detectionEnabled) {
         ofSetColor(ofColor::steelBlue);
         for (int i = 0; i < finder.blobs.size(); i++) {
             ofRectangle cur = finder.blobs[i].boundingRect;
-
-            // Adjust the rectangle position by the draw position offset
             ofDrawRectangle(cur.x + drawPosX, cur.y + drawPosY, cur.width, cur.height);
         }
         ofFill();
