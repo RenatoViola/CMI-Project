@@ -1,9 +1,9 @@
 #pragma once
 #include "ofMain.h"
-#include "FilterPanel.h"
-#include "Media.h"
-#include "Metadata.h"
 #include "ofApp.h"
+#include "UIElements/FilterPanel.h"
+#include "DataTypes/Media.h"
+#include "DataTypes/Metadata.h"
 
 class MediaEditor
 {

@@ -29,7 +29,7 @@ void ScreenSaver::draw()
 		ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 		ofSetHexColor(0xffffff);
-		diff.draw(CAMERA_WIDHT, CAMERA_HEIGHT);
+		diff.draw(CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	#else
 		float displayWidth, displayHeight, xPos, yPos;

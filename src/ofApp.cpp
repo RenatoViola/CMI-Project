@@ -24,6 +24,7 @@ void ofApp::setup() {
 	ofAddListener(imagePage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -42,6 +43,7 @@ void ofApp::update() {
 			cameraPage.update(detectionEnabled);
 			break;
 		case CONTROL_VERSION_PAGE:
+			verCtrPage.update();
 			break;
 		case IMAGE_PAGE:
 			break;
@@ -74,6 +76,7 @@ void ofApp::draw() {
 			cameraPage.drawCamera(detectionEnabled);
 			break;
 		case CONTROL_VERSION_PAGE:
+			verCtrPage.draw();
 			break;
 		case IMAGE_PAGE:
 			imagePage.draw();
@@ -86,6 +89,64 @@ void ofApp::draw() {
 	}
 }
 
+void ofApp::changeScreen(int& page) {
+	switch (activePage)
+	{
+		// Close previous page
+	case SCREEN_SAVER_PAGE:
+		screenSaverPage.exit();
+		break;
+	case MAIN_PAGE:
+		//	homePage.exit();
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
+		cameraPage.exit();
+		break;
+	case CONTROL_VERSION_PAGE:
+		verCtrPage.exit();
+		break;
+	case IMAGE_PAGE:
+		imagePage.exit();
+		break;
+	case VIDEO_PAGE:
+		videoPage.exit();
+		break;
+	default:
+		break;
+	}
+
+	activePage = page;
+
+	switch (activePage)
+	{
+	case SCREEN_SAVER_PAGE:
+		screenSaverPage.setup();
+		break;
+	case MAIN_PAGE:
+		//	homePage.setup();
+		break;
+	case FILTERED_PAGE:
+		break;
+	case CAMERA_PAGE:
+		cameraPage.setup(1280, 720);
+		break;
+	case CONTROL_VERSION_PAGE:
+		verCtrPage.setup();
+		break;
+	case IMAGE_PAGE:
+		imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
+		break;
+	case VIDEO_PAGE:
+		videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
+		break;
+	default:
+		break;
+	}
+}
+
+#pragma region Event listeners
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
@@ -93,61 +154,6 @@ void ofApp::keyPressed(int key) {
 	{
 		case 'f':
 			detectionEnabled = !detectionEnabled;
-			break;
-		default:
-			break;
-	}
-}
-
-void ofApp::changeScreen(int& page) {
-	switch (activePage)
-	{
-		// Close previous page
-		case SCREEN_SAVER_PAGE:
-			screenSaverPage.exit();
-			break;
-		case MAIN_PAGE:
-		//	homePage.exit();
-			break;
-		case FILTERED_PAGE:
-			break;
-		case CAMERA_PAGE:
-			cameraPage.exit();
-			break;
-		case CONTROL_VERSION_PAGE:
-			break;
-		case IMAGE_PAGE:
-			imagePage.exit();
-			break;
-		case VIDEO_PAGE:
-			videoPage.exit();
-			break;
-		default:
-			break;
-	}
-
-	activePage = page;
-
-	switch (activePage)
-	{
-		case SCREEN_SAVER_PAGE:
-			screenSaverPage.setup();
-			break;
-		case MAIN_PAGE:
-		//	homePage.setup();
-			break;
-		case FILTERED_PAGE:
-			break;
-		case CAMERA_PAGE:
-			cameraPage.setup(1280, 720);
-			break;
-		case CONTROL_VERSION_PAGE:
-			break;
-		case IMAGE_PAGE:
-			imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
-			break;
-		case VIDEO_PAGE:
-			videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
 			break;
 		default:
 			break;
@@ -247,3 +253,5 @@ void ofApp::gotMessage(ofMessage msg) {
 void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }
+
+#pragma endregion

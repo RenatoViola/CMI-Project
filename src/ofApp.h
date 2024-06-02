@@ -9,6 +9,7 @@
 #include "Pages/HomePage.h"
 #include "Pages/VideoEditor.h"
 #include "Pages/ImageEditor.h"
+#include "Pages/VersionControlPage.h"
 
 
 class ofApp : public ofBaseApp {
@@ -17,6 +18,8 @@ public:
 	void setup();
 	void update();
 	void draw();
+
+	#pragma region Event listeners
 
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -29,16 +32,22 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
+	
+	#pragma endregion
 
 	void changeScreen(int& page);
+
+	#pragma region Pages
 
 	Metadata filesMetadata;
 	CameraPage cameraPage;
 	ScreenSaver screenSaverPage;
 	HomePage homePage;
-
+	VersionControlPage verCtrPage;
 	ImageEditor imagePage;
 	VideoEditor videoPage;
+
+	#pragma endregion
 
 	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
