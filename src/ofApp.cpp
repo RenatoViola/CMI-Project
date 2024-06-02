@@ -217,6 +217,7 @@ void ofApp::mouseReleased(int x, int y, int button) {
 			cameraPage.mouseReleased(x, y, button);
 			break;
 		case CONTROL_VERSION_PAGE:
+			verCtrPage.mouseReleased(x, y, button);
 			break;
 		case IMAGE_PAGE:
 			imagePage.mouseReleased(x, y, button);

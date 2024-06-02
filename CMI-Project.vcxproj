@@ -104,6 +104,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\UIElements\MediaCircle.cpp" />
     <ClCompile Include="src\DataTypes\Metadata.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\UIElements\MediaCircle.h" />
     <ClInclude Include="src\DataTypes\ImageMedia.h" />
     <ClInclude Include="src\DataTypes\Media.h" />
     <ClInclude Include="src\DataTypes\Metadata.h" />

@@ -3,8 +3,11 @@
 #include "ofMain.h"
 #include "DataTypes/Media.h"
 #include "UIElements/Button.h"
+#include "UIElements/MediaCircle.h"
+#include <DataTypes/VideoMedia.h>
+#include <screen_names.h>
 
-#define CAMERA_DEBUG
+//#define CAMERA_DEBUG
 
 class VersionControlPage
 {
@@ -15,8 +18,9 @@ public:
 	void exit();
 
 	void gotoHomePage();
+	void mouseReleased(int x, int y, int button);
 
-	vector<Media> media;
+	MediaCircle mediaCir;
 
 	ofEvent<int> redirectEvent;
 	Button homeBtn;

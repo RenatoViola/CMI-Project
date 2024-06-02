@@ -1,12 +1,8 @@
 #include "VersionControlPage.h"
 
-#include <DataTypes/Media.h>
-#include <screen_names.h>
-
-
 void VersionControlPage::setup()
 {
-
+	homeBtn.setup("homeIcon.png", 100, 50, 50);
 	ofAddListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
 
 	/* Camera Vision Properties */
@@ -20,7 +16,20 @@ void VersionControlPage::setup()
 	currentFrame.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
 	bgImage.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
 
-	// TODO - initialize media circle
+	// TODO - initialize media circle / find and load media files
+	/* Initialize media circle */
+	ofDirectory videoDir;
+	vector<unique_ptr<Media>> videos;
+	videoDir.listDir("videos/");
+
+	videos.reserve(3);
+
+	for (int i = 0; i < 3; i++) {
+		auto video = make_unique<VideoMedia>();
+		video->load(videoDir.getPath(i));
+		videos.push_back(move(video));
+	}
+	mediaCir.setup(move(videos));
 }
 
 void VersionControlPage::draw()
@@ -38,6 +47,7 @@ void VersionControlPage::draw()
 #else
 
 	// TODO - draw media circle
+	mediaCir.draw();
 
 #endif // CAMERA_DEBUG
 
@@ -92,9 +102,13 @@ void VersionControlPage::update()
 		
 		checkForMovement();
 	}
+
+	mediaCir.update();
+	
 }
 
 void VersionControlPage::exit() {
+	mediaCir.exit();
 	videoGrabber.close();
 	currentFrame.clear();
 	diff.clear();
@@ -118,4 +132,8 @@ void VersionControlPage::gotoHomePage()
 {
 	int PAGE = MAIN_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+void VersionControlPage::mouseReleased(int x, int y, int button) {
+	homeBtn.mouseReleased(x, y, button);
 }
