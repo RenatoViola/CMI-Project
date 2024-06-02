@@ -7,7 +7,7 @@
 #include <DataTypes/VideoMedia.h>
 #include <screen_names.h>
 
-//#define CAMERA_DEBUG
+#define CAMERA_DEBUG
 
 class VersionControlPage
 {
@@ -28,7 +28,7 @@ public:
 	#pragma region Camera Vision properties
 
 	const int CAMERA_HEIGHT = 240;
-	const int CAMERA_WIDHT = 320;
+	const int CAMERA_WIDTH = 320;
 	const int THRESHOLD = 70;
 	const double ALPHA = 0.02;
 

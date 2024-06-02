@@ -21,27 +21,9 @@ public:
     virtual float getHeight() = 0;
     virtual ofPixels& getPixels() = 0;
 
-    static void setFullScreenSizeAndPos(ofxCvColorImage img, float* displayWidth, float* displayHeight, float* xPos, float* yPos)
+    static void setFullScreenSizeAndPos(float width, float height, float* displayWidth, float* displayHeight, float* xPos, float* yPos)
     {
         float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-        float width = img.getWidth(), height = img.getHeight();
-
-        float scale = 1.0f;
-
-        if (width > sWidth || height > sHeight)
-            scale = min(sWidth / width, sHeight / height);
-
-        *displayWidth = width * scale;
-        *displayHeight = height * scale;
-
-        *xPos = (sWidth - *displayWidth) / 2.0f;
-        *yPos = (sHeight - *displayHeight) / 2.0f;
-    }
-
-    void setFullScreenSizeAndPos(float* displayWidth, float* displayHeight, float* xPos, float* yPos)
-    {
-        float sWidth = ofGetWidth(), sHeight = ofGetHeight();
-        float width = this->getWidth(), height = this->getHeight();
 
         float scale = 1.0f;
 

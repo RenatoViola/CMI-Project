@@ -33,7 +33,7 @@ void ScreenSaver::draw()
 
 	#else
 		float displayWidth, displayHeight, xPos, yPos;
-		Media::setFullScreenSizeAndPos(colorImg, &displayWidth, &displayHeight, &xPos, &yPos);
+		Media::setFullScreenSizeAndPos(colorImg.getWidth(), colorImg.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
 		colorImg.draw(xPos, yPos, displayWidth, displayHeight);
 	
 	#endif // CAMERA_DEBUG

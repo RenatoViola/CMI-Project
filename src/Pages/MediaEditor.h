@@ -12,7 +12,7 @@ public:
 	virtual void setup(Media* media) {
 		this->media = media;
 
-		media->setFullScreenSizeAndPos(&displayWidth, &displayHeight, &xPos, &yPos);
+		media->setFullScreenSizeAndPos(media->getWidth(), media->getHeight(), & displayWidth, &displayHeight, &xPos, &yPos);
 		
 		colorImg.allocate(media->getWidth(), media->getHeight());
 		colorImg.setFromPixels(media->getPixels());

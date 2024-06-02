@@ -14,10 +14,10 @@ public:
 
 	Media* getSelectedMedia();
 
-	const int MEDIA_WIDTH = 320;
-	const int MEDIA_HEIGHT = 240;
+	const int MEDIA_WIDTH = 240;
+	const int MEDIA_HEIGHT = 180;
 
-	const int CIRCLE_RADIUS = 450;
+	const int CIRCLE_RADIUS = 400;
 
 	double angleInRadians;
 

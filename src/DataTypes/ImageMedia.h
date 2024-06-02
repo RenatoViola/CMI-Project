@@ -12,7 +12,7 @@ private:
     {
         float sWidth = ofGetWidth(), sHeight = ofGetHeight();
         float displayWidth, displayHeight, xPos, yPos;
-        setFullScreenSizeAndPos(&displayWidth, &displayHeight, &xPos, &yPos);
+        setFullScreenSizeAndPos(image.getWidth(), image.getHeight(), & displayWidth, &displayHeight, &xPos, &yPos);
 
         ofImage resizedImg;
         resizedImg.allocate(displayWidth, displayHeight, OF_IMAGE_GRAYSCALE);

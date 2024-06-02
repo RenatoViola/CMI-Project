@@ -11,10 +11,10 @@ void VersionControlPage::setup()
 	videoGrabber.setDeviceID(0);
 	videoGrabber.setDesiredFrameRate(30);
 	videoGrabber.setVerbose(true);
-	videoGrabber.setup(CAMERA_WIDHT, CAMERA_HEIGHT);
+	videoGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	currentFrame.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
-	bgImage.allocate(CAMERA_WIDHT, CAMERA_HEIGHT);
+	currentFrame.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	bgImage.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	// TODO - initialize media circle / find and load media files
 	/* Initialize media circle */
@@ -22,9 +22,9 @@ void VersionControlPage::setup()
 	vector<unique_ptr<Media>> videos;
 	videoDir.listDir("videos/");
 
-	videos.reserve(3);
+	videos.reserve(8);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 8; i++) {
 		auto video = make_unique<VideoMedia>();
 		video->load(videoDir.getPath(i));
 		videos.push_back(move(video));
@@ -36,14 +36,14 @@ void VersionControlPage::draw()
 {
 #ifdef CAMERA_DEBUG
 
-	ofSetColor(ofColor::black);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	float displayWidth, displayHeight, xPos, yPos;
+	Media::setFullScreenSizeAndPos(CAMERA_WIDTH, CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
 
 	ofSetHexColor(0xffffff);
-	diff.draw(CAMERA_WIDHT, CAMERA_HEIGHT);
+	diff.draw(xPos, yPos, displayWidth, displayHeight);
+	contourFinder.draw(xPos, yPos, displayWidth, displayHeight);
 
-	contourFinder.draw(CAMERA_WIDHT, CAMERA_HEIGHT);
-
+	mediaCir.draw();
 #else
 
 	// TODO - draw media circle
@@ -120,7 +120,7 @@ void VersionControlPage::checkForMovement()
 
 	#pragma region Find countours blobs
 
-	int maxArea = (CAMERA_HEIGHT * CAMERA_WIDHT) / 3;
+	int maxArea = (CAMERA_HEIGHT * CAMERA_WIDTH) / 3;
 
 	contourFinder.findContours(diff, 20, maxArea, 10, false);
 
