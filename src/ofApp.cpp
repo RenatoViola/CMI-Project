@@ -27,7 +27,7 @@ void ofApp::setup() {
 	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
 
 	// Test recognition
-	ofImage img;
+	/*ofImage img;
 	img.load("./o0.jpg");
 
 	ofDirectory imgDir;
@@ -50,7 +50,7 @@ void ofApp::setup() {
 		vid_paths.push_back(vidDir.getPath(i));
 	}
 
-	vector<string> matching_paths = Metadata::filesWithObject(img.getPixels(), img_paths, vid_paths);
+	vector<string> matching_paths = Metadata::filesWithObject(img.getPixels(), img_paths, vid_paths);*/
 }
 
 //--------------------------------------------------------------

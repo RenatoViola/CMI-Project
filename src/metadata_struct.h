@@ -6,7 +6,7 @@
 
 struct FileMetadata {
 	string path;
-	vector<string> tags;
+	set<string> tags;
 	double luminance;
 	int red, green, blue;
 	int numFaces;
