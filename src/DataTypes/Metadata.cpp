@@ -3,6 +3,7 @@
 #include <opencv2/features2d.hpp>
 #include <constants_c.h>
 
+
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
 
@@ -11,22 +12,24 @@ void Metadata::load(string filename, ofXml& XML, bool isImage) {
 	if (!XML.load(PATH)) {
 		ofLogError() << "Couldn't load file: " << filename << "; " << "Will create one.";
 		XML.clear();
+		ofXml file = XML.appendChild("FILE");
+		vector<ofPixels> frames;
+
 		if (isImage)
 		{
 			ofImage img;
 			img.load("images/" + filename);
-			vector<ofPixels> frames{ img.getPixels() };
-
-			processFileMetadata(filename, frames, XML.appendChild("IMAGE"));
+			frames = { img.getPixels() };
+			file.appendChild("TYPE").set("IMAGE");
 		}
 		else
 		{
 			ofVideoPlayer video;
 			video.load("videos/" + filename);
-			vector<ofPixels> frames = VideoMedia::extractFrames(video, 10);
-
-			processFileMetadata(filename, frames, XML.appendChild("VIDEO"));
+			frames = VideoMedia::extractFrames(video, 10);
+			file.appendChild("TYPE").set("VIDEO");
 		}
+		processFileMetadata(filename, frames, file);
 		save(filename, XML, isImage);
 	}
 }
@@ -297,8 +300,8 @@ vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image
 int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPoint>& kpts1) {
 
 	// Might need to tweak these values further
-	const double kDistanceCoef = 2.0;
-	const int kMaxMatchingSize = 100;
+	const double kDistanceCoef = 4.0;
+	const int kMaxMatchingSize = 50;
 
 	Mat img2(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
 	if (img2.channels() != 1) {
@@ -343,7 +346,7 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 		pts1.push_back(kpts1[matches[i].queryIdx].pt);
 		pts2.push_back(kpts2[matches[i].trainIdx].pt);
 	}
-
+	
 	findHomography(pts1, pts2, cv::RANSAC, 4, match_mask);
 
 	return countNonZero(match_mask);
@@ -351,4 +354,57 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 
 bool Metadata::comparePairs(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
 	return a.second > b.second;
+}
+
+FileMetadata Metadata::parseMetadata(const string& filename) {
+	FileMetadata metadata;
+	ofXml xml;
+
+	if (!xml.load(filename)) {
+		cerr << "Error loading file: " << filename << endl;
+		return metadata;
+	}
+
+	// Parse file type
+	metadata.path = xml.getAttribute("TYPE").getValue();
+
+	// Parse filename
+	metadata.path = xml.getAttribute("FILENAME").getValue();
+
+	// Parse tags
+	metadata.tags = getTags(xml);
+
+	// Parse luminance
+	metadata.luminance = xml.getAttribute("LUMINANCE").getDoubleValue();
+
+	// Parse color
+	auto color = xml.findFirst("COLOR");
+	metadata.red = color.getChild("RED").getIntValue();
+	metadata.green = color.getChild("GREEN").getIntValue();
+	metadata.blue = color.getChild("BLUE").getIntValue();
+
+	// Parse number of faces
+	metadata.numFaces = xml.getAttribute("NUM_FACES").getIntValue();
+
+	// Parse edge distribution
+	vector<string> edgeTags = { "VERTICAL", "HORIZONTAL", "DEGREES_45", "DEGREES_135", "NON_DIRECTIONAL" };
+	for (size_t i = 0; i < edgeTags.size(); i++) {
+		auto filter = xml.findFirst("EDGE_DISTRIBUTION/" + edgeTags[i]);
+		int edges = filter.getChild("EDGES").getIntValue();
+		double mean = filter.getChild("MEAN").getDoubleValue();
+		double stdDev = filter.getChild("STANDARD_DEVIATION").getDoubleValue();
+		metadata.edgeDistribution[i] = make_tuple(edges, mean, stdDev);
+	}
+
+	// Parse texture characteristics
+	for (int i = 0; i < 24; i++) {
+		string tag = "GABOR_KERNEL_" + to_string(i + 1);
+		auto gabor = xml.findFirst("TEXTURE_CHARACTERISTICS/" + tag);
+		int edges = gabor.getChild("EDGES").getIntValue();
+		double mean = gabor.getChild("MEAN").getDoubleValue();
+		double stdDev = gabor.getChild("STANDARD_DEVIATION").getDoubleValue();
+		metadata.textureCharacteristics[i] = make_tuple(edges, mean, stdDev);
+	}
+
+	return metadata;
 }

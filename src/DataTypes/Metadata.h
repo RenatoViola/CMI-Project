@@ -2,11 +2,13 @@
 
 #include "ofMain.h"
 #include "ofxCvHaarFinder.h"
+#include "../metadata_struct.h"
 using namespace cv;
 
 class Metadata
 {
 public:
+
 	static void load(string filename, ofXml& XML, bool isImage);
 	static void save(string filename, ofXml& XML, bool isImage);
 	static vector<string> getTags(ofXml& XML);
@@ -22,5 +24,9 @@ public:
 	
 	static int countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPoint>& kpts1);
 	static bool comparePairs(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b);
+
+	static FileMetadata parseMetadata(const string& filename);
+	static double calculateSimilarity(const FileMetadata& file1, const FileMetadata& file2);
+	
 };
 
