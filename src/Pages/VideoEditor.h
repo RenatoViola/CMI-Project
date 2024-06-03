@@ -11,10 +11,8 @@ class VideoEditor : public MediaEditor {
 public:
 
     void setup(VideoMedia* media) {
-        MediaEditor::setup(media);
         video = media;
-
-        gui.setup();
+        MediaEditor::setup(video);
     }
 
     void update() {
@@ -63,5 +61,4 @@ public:
 
 private:
     VideoMedia* video;
-    FilterPanel gui; // GUI just for videos
 };

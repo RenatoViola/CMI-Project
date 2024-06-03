@@ -11,10 +11,9 @@ class ImageEditor : public MediaEditor {
 public:
 
     void setup(ImageMedia* media) {
-        MediaEditor::setup(media);
         img = media;
-
-        gui.setup();
+        MediaEditor::setup(img);
+        
         gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
         gui.edgeFilter.addListener(this, &ImageEditor::edgeImage);
     }
@@ -47,9 +46,9 @@ public:
     }
 
     void exit() {
-        MediaEditor::exit();
         gui.invertColorFilter.removeListener(this, &ImageEditor::invertImage);
         gui.edgeFilter.removeListener(this, &ImageEditor::edgeImage);
+        MediaEditor::exit();
     }
 
     void invertImage(bool& toggleValue) {
@@ -76,5 +75,4 @@ public:
 
 private:
     ImageMedia* img;
-    FilterPanel gui; // GUI just for images
 };

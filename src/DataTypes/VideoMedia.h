@@ -9,6 +9,7 @@ private:
 
 public:
     void load(const std::string& filePath) {
+        this->filePath = filePath;
         video.load(filePath);
     //    video.setLoopState(OF_LOOP_NORMAL);
     }
