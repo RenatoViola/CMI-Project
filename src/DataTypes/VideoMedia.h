@@ -73,6 +73,30 @@ public:
         return frames;
     }
 
+    static ofPixels extractFirstFrame(ofVideoPlayer& video) {
+        ofPixels firstFrame;
+
+        video.update();
+        video.play();
+
+        // Give some time for the video to start and load the first frame
+        ofSleepMillis(500);
+
+        video.setPaused(true);
+        video.update();
+
+        while (!video.isFrameNew()) {
+            video.update();
+        }
+
+        firstFrame = video.getPixels();
+
+        video.stop();
+
+        return firstFrame;
+    }
+
+
     ofVideoPlayer getContent() {
         return video;
     }

@@ -25,6 +25,32 @@ void ofApp::setup() {
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
+
+	// Test recognition
+	ofImage img;
+	img.load("./o0.jpg");
+
+	ofDirectory imgDir;
+	imgDir.allowExt("jpg");
+	imgDir.listDir("images/");
+
+	ofDirectory vidDir;
+	vidDir.allowExt("mp4");
+	vidDir.listDir("videos/");
+
+	vector<string> img_paths, vid_paths;
+	img_paths.reserve(imgDir.size());
+	vid_paths.reserve(vidDir.size());
+
+	for (int i = 0; i < imgDir.size(); i++) {
+		img_paths.push_back(imgDir.getPath(i));
+	}
+
+	for (int i = 0; i < vidDir.size(); i++) {
+		vid_paths.push_back(vidDir.getPath(i));
+	}
+
+	vector<string> matching_paths = Metadata::filesWithObject(img.getPixels(), img_paths, vid_paths);
 }
 
 //--------------------------------------------------------------

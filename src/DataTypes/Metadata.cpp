@@ -1,5 +1,7 @@
 #include "Metadata.h"
 #include "VideoMedia.h"
+#include <opencv2/features2d.hpp>
+#include <constants_c.h>
 
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
@@ -233,34 +235,120 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
 
-/*
-vector<ofPixels> Metadata::extractFrames(ofVideoPlayer& videoPlayer, int skip) {
-	vector<ofPixels> frames;
 
-	videoPlayer.update();
-	videoPlayer.play();
+vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image_paths, vector<string> video_paths) {
 
-	ofSleepMillis(500);
+	std::vector<std::pair<std::string, int>> vec;
 
-	videoPlayer.setPaused(true);
-	videoPlayer.update();
-
-	int currentFrame = 0;
-	int totalFrames = videoPlayer.getTotalNumFrames();
-
-	while (currentFrame < totalFrames) {
-		if (currentFrame % (skip + 1) == 0) {
-			while (!videoPlayer.isFrameNew())
-			{
-				videoPlayer.update();
-			}
-			frames.push_back(videoPlayer.getPixels());
-		}
-		videoPlayer.nextFrame();
-		currentFrame++;
+	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+	if (img1.channels() != 1) {
+		cvtColor(img1, img1, COLOR_RGB2GRAY);
 	}
-	videoPlayer.stop();
+	
+	Mat desc1;
+	vector<KeyPoint> kpts1;
 
-	return frames;
+	Ptr<Feature2D> detector = SIFT::create();
+	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
+	
+	for (string path : image_paths)
+	{
+		ofImage image2;
+		image2.load(path);
+		int occurrences = countOccurrencesInFrame(image2.getPixels(), desc1, kpts1);
+		if (occurrences > 0)
+		{
+			vec.emplace_back(path, occurrences);
+		}
+	}
+
+	for (string path : video_paths)
+	{
+		ofVideoPlayer video;
+		video.load(path);
+		ofPixels frame = VideoMedia::extractFirstFrame(video);
+		int occurrences = countOccurrencesInFrame(frame, desc1, kpts1);
+		if (occurrences > 0)
+		{
+			vec.emplace_back(path, occurrences);
+		}
+	}
+
+	std::sort(vec.begin(), vec.end(), comparePairs);
+	if (vec.size() > 8) {
+		vec.resize(8);
+	}
+
+	vector<std::string> filenames;
+	filenames.reserve(vec.size());
+
+	for (const auto& pair : vec) {
+		filenames.push_back(pair.first);
+	}
+
+	for (const auto& pair : vec) {
+		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	}
+
+	return filenames;
 }
-*/
+
+
+int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPoint>& kpts1) {
+
+	// Might need to tweak these values further
+	const double kDistanceCoef = 2.0;
+	const int kMaxMatchingSize = 100;
+
+	Mat img2(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+	if (img2.channels() != 1) {
+		cvtColor(img2, img2, COLOR_RGB2GRAY);
+	}
+
+	Mat desc2;
+	vector<KeyPoint> kpts2;
+
+	Ptr<Feature2D> detector = SIFT::create();
+	detector->detectAndCompute(img2, Mat(), kpts2, desc2);
+
+	BFMatcher desc_matcher(cv::NORM_L2, true);
+	vector<DMatch> matches;
+//	desc_matcher.match(desc1, desc2, matches, Mat());  // DEFAULT
+
+	//______________________________________________________________KNN
+	vector< vector<DMatch> > vmatches;
+	desc_matcher.knnMatch(desc1, desc2, vmatches, 1);
+	for (int i = 0; i < static_cast<int>(vmatches.size()); ++i) {
+		if (!vmatches[i].size()) {
+			continue;
+		}
+		matches.push_back(vmatches[i][0]);
+	}
+	//______________________________________________________________
+	std::sort(matches.begin(), matches.end());
+	while (!matches.empty() && matches.front().distance * kDistanceCoef < matches.back().distance) {
+		matches.pop_back();
+	}
+	while (matches.size() > kMaxMatchingSize) {
+		matches.pop_back();
+	}
+
+	vector<char> match_mask(matches.size(), 1);
+	if (static_cast<int>(match_mask.size()) < 3) {
+		return 0;
+	}
+
+	vector<Point2f> pts1, pts2;
+	for (int i = 0; i < static_cast<int>(matches.size()); ++i) {
+		pts1.push_back(kpts1[matches[i].queryIdx].pt);
+		pts2.push_back(kpts2[matches[i].trainIdx].pt);
+	}
+
+	findHomography(pts1, pts2, cv::RANSAC, 4, match_mask);
+
+	return countNonZero(match_mask);
+}
+
+bool Metadata::comparePairs(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+	return a.second > b.second;
+}

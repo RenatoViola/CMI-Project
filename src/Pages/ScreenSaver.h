@@ -18,7 +18,7 @@ public:
 	const int CAMERA_WIDTH = 320;
 
 	const int THRESHOLD = 70;
-	const double ALPHA = 0.05;
+	const double ALPHA = 0.01;
 	ofImage img;
 	ofxCvColorImage colorImg;
 

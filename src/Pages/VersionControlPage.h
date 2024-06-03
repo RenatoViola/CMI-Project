@@ -30,7 +30,7 @@ public:
 	const int CAMERA_HEIGHT = 240;
 	const int CAMERA_WIDTH = 320;
 	const int THRESHOLD = 70;
-	const double ALPHA = 0.02;
+	const double ALPHA = 0.001;
 
 	ofxCvGrayscaleImage currentFrame;
 	ofxCvGrayscaleImage bgImage;

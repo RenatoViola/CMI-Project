@@ -22,9 +22,10 @@ void VersionControlPage::setup()
 	vector<unique_ptr<Media>> videos;
 	videoDir.listDir("videos/");
 
-	videos.reserve(8);
+	int NUM_VIDEOS = 8;
+	videos.reserve(NUM_VIDEOS);
 
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < NUM_VIDEOS; i++) {
 		auto video = make_unique<VideoMedia>();
 		video->load(videoDir.getPath(i));
 		videos.push_back(move(video));
