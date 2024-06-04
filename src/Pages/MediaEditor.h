@@ -9,23 +9,18 @@ class MediaEditor
 {
 public:
 
-	virtual void setup(Media* media) {
-		this->media = media;
-
-		media->setFullScreenSizeAndPos(media->getWidth(), media->getHeight(), & displayWidth, &displayHeight, &xPos, &yPos);
-		
-		colorImg.allocate(media->getWidth(), media->getHeight());
-		colorImg.setFromPixels(media->getPixels());
+	void setup(string filePath) {
 
 		homeBtn.setup("homeIcon.png", 100, 50, 50);
 		versionBtn.setup("versionIcon.png", 100, 50, 200);
+		gui.setup(filePath);
 
 		ofAddListener(homeBtn.clickedInside, this, &MediaEditor::gotoHomePage);
 		ofAddListener(versionBtn.clickedInside, this, &MediaEditor::gotoVersionPage);
 	}
 
 	void exit() {
-		media->exit();
+		gui.exit();
 		ofRemoveListener(homeBtn.clickedInside, this, &MediaEditor::gotoHomePage);
 		ofRemoveListener(versionBtn.clickedInside, this, &MediaEditor::gotoVersionPage);
 	}
@@ -46,7 +41,6 @@ public:
 		int PAGE = CONTROL_VERSION_PAGE;
 		ofNotifyEvent(redirectEvent, PAGE, this);
 	}
-
 
 	void drawEdges() {
 		for (int i = 0; i < contourFinder.nBlobs; i++) {
@@ -77,9 +71,7 @@ public:
 		contourFinder.findContours(binaryImg, 20, (displayWidth * displayHeight) / 2, 10, false);
 	}
 
-	Media* media;
-	FilterPanel* gui;
-
+	FilterPanel gui;
 	ofEvent<int> redirectEvent;
 	ofxCvColorImage colorImg;
 	Button homeBtn, versionBtn;

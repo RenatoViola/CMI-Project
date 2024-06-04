@@ -12,10 +12,12 @@ public:
     virtual void exit() = 0;
     virtual void draw(float x, float y, float w, float h) = 0;
     virtual void update() = 0;
+    
+    string getFilePath() {
+        return filePath;
+    }
 
-    // characters used in the ascii filter
-    string asciiCharacters;
-    ofTrueTypeFont font; // font to be used
+    string filePath;
 
     virtual float getWidth() = 0;
     virtual float getHeight() = 0;
@@ -35,6 +37,15 @@ public:
 
         *xPos = (sWidth - *displayWidth) / 2.0f;
         *yPos = (sHeight - *displayHeight) / 2.0f;
+    }
+
+    static bool isImage(const string& filePath) {
+        if (filePath.size() >= 4) {
+            if (filePath.substr(filePath.size() - 4) == ".jpg") {
+                return true;
+            }
+            else return false;
+        }
     }
 };
 

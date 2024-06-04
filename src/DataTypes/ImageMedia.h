@@ -4,6 +4,9 @@
 class ImageMedia : public Media
 {
 private:
+    // characters used in the ascii filter
+    string asciiCharacters;
+    ofTrueTypeFont font; // font to be used
     ofImage image;
     vector<string> asciiArt;
     ofFbo asciiFbo;
@@ -47,15 +50,8 @@ private:
 public:
     void load(const std::string& filePath) 
     {
+        this->filePath = filePath;
         image.load(filePath);
-        font.load("Courier New Bold.ttf", 9);
-        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
-        generateAsciiArt();
-    }
-
-    void load(ofImage img)
-    {
-        image.setFromPixels(img.getPixels());
         font.load("Courier New Bold.ttf", 9);
         asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
         generateAsciiArt();

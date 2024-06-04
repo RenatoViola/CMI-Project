@@ -8,19 +8,23 @@
 class FilterPanel
 {
 public:
-	void setup();
+	void setup(const string& filePath);
 	void draw();
+	void exit();
 	
-	void colapseButton();
+	void collapseButton();
 
-	bool panelVisibility;
+	void saveButtonPressed();
+	void loadVersionInfo(int versionID);
 
-	ofxColorSlider color;
+	bool panelVisibility, isImageFile;
 
-	ofxToggle invertColorFilter;
-	ofxToggle asciiFilter;
-	ofxToggle edgeFilter;
+	ofxToggle invertColorFilter, asciiFilter, edgeFilter;
+	ofxLabel filtersLabel, changesLabel, spaceLabel;
 
 	ofxPanel gui;
-};
 
+	ofxButton saveBtn;
+
+	string filePath;
+};

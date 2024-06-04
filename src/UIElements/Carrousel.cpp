@@ -1,20 +1,36 @@
 #include "Carrousel.h"
 
 
-void Carrousel::setup(vector<unique_ptr<Media>>&& items, int verticalPos, string label) {
+void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) {
 
-	this->items = move(items);
-	this->label = label;
+	this->isImageCarrousel = isImageCarrousel;
+
+	ofDirectory dir;
+	dir.allowExt(isImageCarrousel ? "jpg" : "mp4");
+	dir.listDir(directory);
+
+	items.reserve(dir.size());
+
+	for (int i = 0; i < dir.size(); i++) {
+		unique_ptr<Media> item;
+		if (isImageCarrousel)
+			item = make_unique<ImageMedia>();
+		else 
+			item = make_unique<VideoMedia>();
+		item->load(dir.getPath(i));
+		items.push_back(move(item));
+	}
 
 	startY = verticalPos;
+	int xPos = startX + 2 * space;
 
 	fullCarrousel.set(startX, startY, totalWidth, height);
-	int xPos = startX + 2 * space;
+	
 	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, width + currentWidth, height + currentHeight);
 }
 
 void Carrousel::exit() {
-//	items.clear();
+	items.clear();
 }
 
 void Carrousel::draw() {
@@ -22,7 +38,7 @@ void Carrousel::draw() {
 	step = ofLerp(step, space, 0.05);
 
 	ofSetColor(ofColor::black);
-	ofDrawBitmapString(label, startX + totalWidth / 2 - 18, startY - 50);
+	ofDrawBitmapString(isImageCarrousel ? "IMAGES" : "VIDEOS", startX + totalWidth / 2 - 18, startY - 50);
 
 	ofSetColor(ofColor::white);
 	for (int i = 0; i < numFilesToShow; i++) {
@@ -102,6 +118,6 @@ void Carrousel::previous() {
 	}
 }
 
-Media* Carrousel::getCurrentMedia() {
-	return items[current].get();
+string Carrousel::getCurrentFilePath() {
+	return items[current].get()->getFilePath();
 }

@@ -2,41 +2,14 @@
 
 void HomePage::setup() {
 
-    vector<unique_ptr<Media>> images, videos;
-    ofDirectory imageDir, videoDir;
-
     int mediaHeight = 240;
     int horizontalMiddle = (ofGetHeight() - mediaHeight) / 2;
 
-    // Set up the image carousel
-    imageDir.allowExt("jpg");
-    imageDir.listDir("images/");
-
-    images.reserve(imageDir.size());
-
-    for (int i = 0; i < imageDir.size(); i++) {
-        auto image = make_unique<ImageMedia>();
-        image->load(imageDir.getPath(i));
-        images.push_back(move(image));
-    }
-
     // Top half of the screen
-    imageCarrousel.setup(move(images), horizontalMiddle - mediaHeight / 2, "IMAGES");
-
-    // Set up the video carousel
-    videoDir.allowExt("mp4");
-    videoDir.listDir("videos/");
-
-    videos.reserve(videoDir.size());
-
-    for (int i = 0; i < videoDir.size(); i++) {
-        auto video = make_unique<VideoMedia>();
-        video->load(videoDir.getPath(i));
-        videos.push_back(move(video));
-    }
+    imageCarrousel.setup("images/", horizontalMiddle - mediaHeight / 2, true);
 
     // Bottom half of the screen
-    videoCarrousel.setup(move(videos), horizontalMiddle + mediaHeight, "VIDEOS");
+    videoCarrousel.setup("videos/", horizontalMiddle + mediaHeight, false);
 
     // Mouse event listeners
     ofAddListener(imageCarrousel.clickedOnSelected, this, &HomePage::gotoImagePage);
@@ -72,8 +45,8 @@ void HomePage::draw() {
     lockBtn.draw();
 }
 
-Media* HomePage::getSelectedMedia() {
-    return selectedMedia;
+string HomePage::getCurrentFilePath() {
+    return selectedFilePath;
 }
 
 void HomePage::mousePressed(int x, int y, int button) {
@@ -89,29 +62,25 @@ void HomePage::mouseReleased(int x, int y, int button) {
 }
 
 void HomePage::gotoImagePage() {
-    selectedMedia = imageCarrousel.getCurrentMedia();
+    selectedFilePath = imageCarrousel.getCurrentFilePath();
 
     int PAGE = IMAGE_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 void HomePage::gotoVideoPage() {
-    selectedMedia = videoCarrousel.getCurrentMedia();
+    selectedFilePath = videoCarrousel.getCurrentFilePath();
 
     int PAGE = VIDEO_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 void HomePage::gotoCameraPage() {
-    selectedMedia = imageCarrousel.getCurrentMedia();
-
     int PAGE = CAMERA_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 void HomePage::gotoSavescreenPage() {
-    selectedMedia = videoCarrousel.getCurrentMedia();
-
     int PAGE = SCREEN_SAVER_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }

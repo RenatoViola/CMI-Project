@@ -3,6 +3,7 @@
 #include <opencv2/features2d.hpp>
 #include <constants_c.h>
 
+
 //--------------------------------------------------------------
 void Metadata::load(string filename, ofXml& XML, bool isImage) {
 
@@ -11,22 +12,24 @@ void Metadata::load(string filename, ofXml& XML, bool isImage) {
 	if (!XML.load(PATH)) {
 		ofLogError() << "Couldn't load file: " << filename << "; " << "Will create one.";
 		XML.clear();
+		ofXml file = XML.appendChild("FILE");
+		vector<ofPixels> frames;
+
 		if (isImage)
 		{
 			ofImage img;
 			img.load("images/" + filename);
-			vector<ofPixels> frames{ img.getPixels() };
-
-			processFileMetadata(filename, frames, XML.appendChild("IMAGE"));
+			frames = { img.getPixels() };
+			file.appendChild("TYPE").set("IMAGE");
 		}
 		else
 		{
 			ofVideoPlayer video;
 			video.load("videos/" + filename);
-			vector<ofPixels> frames = VideoMedia::extractFrames(video, 10);
-
-			processFileMetadata(filename, frames, XML.appendChild("VIDEO"));
+			frames = VideoMedia::extractFrames(video, 10);
+			file.appendChild("TYPE").set("VIDEO");
 		}
+		processFileMetadata(filename, frames, file);
 		save(filename, XML, isImage);
 	}
 }
@@ -41,18 +44,18 @@ void Metadata::save(string filename, ofXml& XML, bool isImage) {
 }
 
 //--------------------------------------------------------------
-vector<string> Metadata::getTags(ofXml& XML) {
-	vector<string> tags;
+set<string> Metadata::getTags(ofXml& XML) {
+	set<string> tags;
 
 	auto xmlTags = XML.find("//TAGS/TAG");
 
 	if (xmlTags.empty())
 	{
-		throw new exception("There are no tags for this file.");
+		throw std::runtime_error("There are no tags for this file.");
 	}
 
 	for (auto& tag : xmlTags) {
-		tags.push_back(tag.getValue());
+		tags.insert(tag.getValue());
 	}
 
 	return tags;
@@ -238,7 +241,7 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 
 vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image_paths, vector<string> video_paths) {
 
-	std::vector<std::pair<std::string, int>> vec;
+	vector<pair<string, int>> vec;
 
 	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
 	if (img1.channels() != 1) {
@@ -274,9 +277,12 @@ vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image
 		}
 	}
 
-	std::sort(vec.begin(), vec.end(), comparePairs);
-	if (vec.size() > 8) {
-		vec.resize(8);
+	sort(vec.begin(), vec.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
+		return a.second > b.second;
+	});
+
+	if (vec.size() > 4) {
+		vec.resize(4);
 	}
 
 	vector<std::string> filenames;
@@ -298,7 +304,7 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 
 	// Might need to tweak these values further
 	const double kDistanceCoef = 2.0;
-	const int kMaxMatchingSize = 100;
+	const int kMaxMatchingSize = 50;
 
 	Mat img2(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
 	if (img2.channels() != 1) {
@@ -343,12 +349,165 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 		pts1.push_back(kpts1[matches[i].queryIdx].pt);
 		pts2.push_back(kpts2[matches[i].trainIdx].pt);
 	}
-
+	
 	findHomography(pts1, pts2, cv::RANSAC, 4, match_mask);
 
 	return countNonZero(match_mask);
 }
 
-bool Metadata::comparePairs(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
-	return a.second > b.second;
+FileMetadata Metadata::parseMetadata(const string& filename) {
+	FileMetadata metadata;
+	ofXml xml;
+
+	if (!xml.load(filename)) {
+		cerr << "Error loading file: " << filename << endl;
+		return metadata;
+	}
+
+	// Parse file type
+	metadata.path = xml.getAttribute("TYPE").getValue();
+
+	// Parse filename
+	metadata.path = xml.getAttribute("FILENAME").getValue();
+
+	// Parse tags
+	metadata.tags = getTags(xml);
+
+	// Parse luminance
+	metadata.luminance = xml.getAttribute("LUMINANCE").getDoubleValue();
+
+	// Parse color
+	auto color = xml.findFirst("COLOR");
+	metadata.red = color.getChild("RED").getIntValue();
+	metadata.green = color.getChild("GREEN").getIntValue();
+	metadata.blue = color.getChild("BLUE").getIntValue();
+
+	// Parse number of faces
+	metadata.numFaces = xml.getAttribute("NUM_FACES").getIntValue();
+
+	// Parse edge distribution
+	vector<string> edgeTags = { "VERTICAL", "HORIZONTAL", "DEGREES_45", "DEGREES_135", "NON_DIRECTIONAL" };
+	for (size_t i = 0; i < edgeTags.size(); i++) {
+		auto filter = xml.findFirst("EDGE_DISTRIBUTION/" + edgeTags[i]);
+		int edges = filter.getChild("EDGES").getIntValue();
+		double mean = filter.getChild("MEAN").getDoubleValue();
+		double stdDev = filter.getChild("STANDARD_DEVIATION").getDoubleValue();
+		metadata.edgeDistribution[i] = make_tuple(edges, mean, stdDev);
+	}
+
+	// Parse texture characteristics
+	for (int i = 0; i < 24; i++) {
+		string tag = "GABOR_KERNEL_" + to_string(i + 1);
+		auto gabor = xml.findFirst("TEXTURE_CHARACTERISTICS/" + tag);
+		int edges = gabor.getChild("EDGES").getIntValue();
+		double mean = gabor.getChild("MEAN").getDoubleValue();
+		double stdDev = gabor.getChild("STANDARD_DEVIATION").getDoubleValue();
+		metadata.textureCharacteristics[i] = make_tuple(edges, mean, stdDev);
+	}
+	
+	return metadata;
+}
+
+
+double Metadata::calculateSimilarity(const FileMetadata& file1, const FileMetadata& file2) {
+	
+	double similarity = 0.0;
+
+	set<string> tags1 = file1.tags, tags2 = file2.tags;
+
+	// Create an empty set to store the intersection of set1 and set2
+	set<string> intersection;
+
+	// Find the intersection of the two sets
+	std::set_intersection(tags1.begin(), tags1.end(),
+		tags2.begin(), tags2.end(),
+		std::inserter(intersection, intersection.begin()));
+
+	// We use a high weight for the tag similarity score
+	double tagSimilarity = intersection.size();
+
+	// Compare luminance (normalize the difference)
+	similarity += 1.0 - abs(file1.luminance - file2.luminance) / 255.0;
+
+	// Compare color (Euclidean distance normalized)
+	double colorDist = sqrt(pow(file1.red - file2.red, 2) +
+		pow(file1.green - file2.green, 2) +
+		pow(file1.blue - file2.blue, 2));
+	similarity += 1.0 - colorDist / sqrt(3 * pow(255, 2));
+
+	// Compare number of faces (normalized difference)
+	similarity += 1.0 - abs(file1.numFaces - file2.numFaces) / max(file1.numFaces, file2.numFaces + 1);
+
+	// Compare edge distribution (Euclidean distance normalized)
+	double edgeDist = 0.0;
+	for (size_t i = 0; i < file1.edgeDistribution.size(); i++) {
+		edgeDist += pow(get<0>(file1.edgeDistribution[i]) - get<0>(file2.edgeDistribution[i]), 2);
+		edgeDist += pow(get<1>(file1.edgeDistribution[i]) - get<1>(file2.edgeDistribution[i]), 2);
+		edgeDist += pow(get<2>(file1.edgeDistribution[i]) - get<2>(file2.edgeDistribution[i]), 2);
+	}
+	edgeDist = sqrt(edgeDist);
+	similarity += 1.0 - edgeDist / sqrt(file1.edgeDistribution.size() * 3 * pow(100, 2)); // Assuming normalization factor 100
+
+	// Compare texture characteristics (Euclidean distance normalized)
+	double textureDist = 0.0;
+	for (size_t i = 0; i < file1.textureCharacteristics.size(); i++) {
+		textureDist += pow(get<0>(file1.textureCharacteristics[i]) - get<0>(file2.textureCharacteristics[i]), 2);
+		textureDist += pow(get<1>(file1.textureCharacteristics[i]) - get<1>(file2.textureCharacteristics[i]), 2);
+		textureDist += pow(get<2>(file1.textureCharacteristics[i]) - get<2>(file2.textureCharacteristics[i]), 2);
+	}
+	textureDist = sqrt(textureDist);
+	similarity += 1.0 - textureDist / sqrt(file1.textureCharacteristics.size() * 3 * pow(100, 2)); // Assuming normalization factor 100
+
+	// Normalize similarity score to range [0, 1]
+	similarity /= 5.0;
+
+	// Combine tag similarity and attribute similarity
+	double combinedSimilarity = tagSimilarity * 1000 + similarity; // Using a large weight for tags to prioritize them
+
+	return combinedSimilarity;
+}
+
+
+vector<string> Metadata::findRelatedFiles(string filepath, vector<string>& image_paths, vector<string> video_paths) {
+	
+	vector<pair<string, double>> vec;
+
+	FileMetadata f1 = parseMetadata(filepath);
+	FileMetadata f2;
+	double similarity;
+
+	for (string path : image_paths)
+	{
+		f2 = parseMetadata(path);
+		similarity = calculateSimilarity(f1, f2);
+		vec.emplace_back(path, similarity);
+	}
+
+	for (string path : video_paths)
+	{
+		f2 = parseMetadata(path);
+		similarity = calculateSimilarity(f1, f2);
+		vec.emplace_back(path, similarity);
+	}
+
+	sort(vec.begin(), vec.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
+		return a.second > b.second;
+	});
+
+	if (vec.size() > 8) {
+		vec.resize(8);
+	}
+
+	vector<std::string> filenames;
+	filenames.reserve(vec.size());
+
+	for (const auto& pair : vec) {
+		filenames.push_back(pair.first);
+	}
+
+	for (const auto& pair : vec) {
+		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	}
+
+	return filenames;
 }

@@ -10,11 +10,16 @@
 class ImageEditor : public MediaEditor {
 public:
 
-    void setup(ImageMedia* media) {
-        MediaEditor::setup(media);
-        img = media;
+    void setup(string filePath) {
 
-        gui.setup();
+        MediaEditor::setup(filePath);
+
+        img.load(filePath);
+
+        Media::setFullScreenSizeAndPos(img.getWidth(), img.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
+        colorImg.allocate(img.getWidth(), img.getHeight());
+        colorImg.setFromPixels(img.getPixels());
+        
         gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
         gui.edgeFilter.addListener(this, &ImageEditor::edgeImage);
     }
@@ -27,7 +32,7 @@ public:
 
         if (gui.asciiFilter)
         {
-            img->drawInAscii();
+            img.drawInAscii();
         }
         else if (gui.invertColorFilter)
         {
@@ -38,7 +43,7 @@ public:
             MediaEditor::drawEdges();
         }
         else {
-            img->draw(xPos, yPos, displayWidth, displayHeight);
+            img.draw(xPos, yPos, displayWidth, displayHeight);
         }
 
         homeBtn.draw();
@@ -47,9 +52,9 @@ public:
     }
 
     void exit() {
-        MediaEditor::exit();
         gui.invertColorFilter.removeListener(this, &ImageEditor::invertImage);
         gui.edgeFilter.removeListener(this, &ImageEditor::edgeImage);
+        MediaEditor::exit();
     }
 
     void invertImage(bool& toggleValue) {
@@ -59,7 +64,7 @@ public:
         }
         else
         {
-            colorImg.setFromPixels(img->getPixels());
+            colorImg.setFromPixels(img.getPixels());
         }
     }
 
@@ -70,11 +75,10 @@ public:
         }
         else
         {
-            colorImg.setFromPixels(img->getPixels());
+            colorImg.setFromPixels(img.getPixels());
         }
     }
 
 private:
-    ImageMedia* img;
-    FilterPanel gui; // GUI just for images
+    ImageMedia img;
 };
