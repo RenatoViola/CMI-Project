@@ -12,13 +12,15 @@
 class VersionControlPage
 {
 public:
-	void setup();
+	void setup(string filepath);
 	void draw();
 	void update();
 	void exit();
 
 	void gotoHomePage();
+	void gotoFilePage();
 	void mouseReleased(int x, int y, int button);
+	string getCurrentFilePath();
 
 	MediaCircle mediaCir;
 
@@ -45,7 +47,7 @@ public:
 private:
 
 	bool bLearnBackground;
-
+	string selectedFilePath;
 	void checkForMovement();
 };
 

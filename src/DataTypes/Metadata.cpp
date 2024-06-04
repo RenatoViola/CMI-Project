@@ -281,8 +281,8 @@ vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image
 		return a.second > b.second;
 	});
 
-	if (vec.size() > 4) {
-		vec.resize(4);
+	if (vec.size() > 8) {
+		vec.resize(8);
 	}
 
 	vector<std::string> filenames;

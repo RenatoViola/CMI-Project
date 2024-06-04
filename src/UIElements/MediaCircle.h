@@ -6,13 +6,17 @@
 class MediaCircle
 {
 public:
+	~MediaCircle() {
+		exit();
+	}
 
-	void setup(vector<unique_ptr<Media>>&& items);
+	void setup(vector<string> paths);
 	void draw();
 	void update();
 	void exit();
-
-	Media* getSelectedMedia();
+	void mouseReleased(int x, int y, int button);
+	string getCurrentFilePath();
+	void updateBoundingBoxes();
 
 	const int MEDIA_WIDTH = 240;
 	const int MEDIA_HEIGHT = 180;
@@ -22,6 +26,9 @@ public:
 	double angleInRadians;
 
 	int selectedMedia;
+	ofEvent<void> clickedOnItem;
+
+	vector<ofRectangle> boundingBoxes;
 	vector<unique_ptr<Media>> items;
 };
 

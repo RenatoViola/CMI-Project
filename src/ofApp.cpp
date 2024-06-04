@@ -116,6 +116,9 @@ void ofApp::draw() {
 }
 
 void ofApp::changeScreen(int& page) {
+
+	string selectedFilePath = "";
+
 	switch (activePage)
 	{
 		// Close previous page
@@ -123,6 +126,7 @@ void ofApp::changeScreen(int& page) {
 		screenSaverPage.exit();
 		break;
 	case MAIN_PAGE:
+		selectedFilePath = homePage.getCurrentFilePath();
 		//	homePage.exit();
 		break;
 	case FILTERED_PAGE:
@@ -131,12 +135,17 @@ void ofApp::changeScreen(int& page) {
 		cameraPage.exit();
 		break;
 	case CONTROL_VERSION_PAGE:
-		verCtrPage.exit();
+		{
+			selectedFilePath = verCtrPage.getCurrentFilePath();
+			verCtrPage.exit();
+		}
 		break;
 	case IMAGE_PAGE:
+		selectedFilePath = imagePage.getFilePath();
 		imagePage.exit();
 		break;
 	case VIDEO_PAGE:
+		selectedFilePath = videoPage.getFilePath();
 		videoPage.exit();
 		break;
 	default:
@@ -159,13 +168,13 @@ void ofApp::changeScreen(int& page) {
 		cameraPage.setup(1280, 720);
 		break;
 	case CONTROL_VERSION_PAGE:
-		verCtrPage.setup();
+		verCtrPage.setup(selectedFilePath);
 		break;
 	case IMAGE_PAGE:
-		imagePage.setup(homePage.getCurrentFilePath());
+		imagePage.setup(selectedFilePath);
 		break;
 	case VIDEO_PAGE:
-		videoPage.setup(homePage.getCurrentFilePath());
+		videoPage.setup(selectedFilePath);
 		break;
 	default:
 		break;

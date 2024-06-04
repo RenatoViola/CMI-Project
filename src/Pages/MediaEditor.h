@@ -11,6 +11,7 @@ public:
 
 	void setup(string filePath) {
 
+		this->filePath = filePath;
 		homeBtn.setup("homeIcon.png", 100, 50, 50);
 		versionBtn.setup("versionIcon.png", 100, 50, 200);
 		gui.setup(filePath);
@@ -71,6 +72,11 @@ public:
 		contourFinder.findContours(binaryImg, 20, (displayWidth * displayHeight) / 2, 10, false);
 	}
 
+	string getFilePath() {
+		return filePath;
+	}
+
+	string filePath;
 	FilterPanel gui;
 	ofEvent<int> redirectEvent;
 	ofxCvColorImage colorImg;

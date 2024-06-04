@@ -1,7 +1,11 @@
 #include "VersionControlPage.h"
+#include <Metadata.h>
+#include <ImageMedia.h>
 
-void VersionControlPage::setup()
+void VersionControlPage::setup(string filePath)
 {
+	ofLogError() << "VER CONTROL: " << filePath << endl;
+
 	homeBtn.setup("homeIcon.png", 100, 50, 50);
 	ofAddListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
 
@@ -18,19 +22,45 @@ void VersionControlPage::setup()
 
 	// TODO - initialize media circle / find and load media files
 	/* Initialize media circle */
-	ofDirectory videoDir;
-	vector<unique_ptr<Media>> videos;
-	videoDir.listDir("videos/");
 
-	int NUM_VIDEOS = 8;
-	videos.reserve(NUM_VIDEOS);
-
-	for (int i = 0; i < NUM_VIDEOS; i++) {
-		auto video = make_unique<VideoMedia>();
-		video->load(videoDir.getPath(i));
-		videos.push_back(move(video));
+	// Test object recognition
+	unique_ptr<Media> file;
+	if (Media::isImage(filePath))
+	{
+		file = make_unique<ImageMedia>();
 	}
-	mediaCir.setup(move(videos));
+	else
+	{
+		file = make_unique<VideoMedia>();
+	}
+	file->load(filePath);
+	file->update();
+
+	ofDirectory imgDir;
+	imgDir.allowExt("jpg");
+	imgDir.listDir("images/");
+
+	ofDirectory vidDir;
+	vidDir.allowExt("mp4");
+	vidDir.listDir("videos/");
+
+	vector<string> img_paths, vid_paths;
+	img_paths.reserve(imgDir.size());
+	vid_paths.reserve(vidDir.size());
+
+	for (int i = 0; i < imgDir.size(); i++) {
+		img_paths.push_back(imgDir.getPath(i));
+	}
+
+	for (int i = 0; i < vidDir.size(); i++) {
+		vid_paths.push_back(vidDir.getPath(i));
+	}
+
+	vector<string> matching_paths = Metadata::filesWithObject(file->getPixels(), img_paths, vid_paths);
+	
+	mediaCir.setup(matching_paths);
+
+	ofAddListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
 }
 
 void VersionControlPage::draw()
@@ -108,14 +138,6 @@ void VersionControlPage::update()
 	
 }
 
-void VersionControlPage::exit() {
-	mediaCir.exit();
-	videoGrabber.close();
-	currentFrame.clear();
-	diff.clear();
-	bgImage.clear();
-}
-
 void VersionControlPage::checkForMovement()
 {
 
@@ -135,6 +157,41 @@ void VersionControlPage::gotoHomePage()
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+void VersionControlPage::gotoFilePage()
+{
+	selectedFilePath = mediaCir.getCurrentFilePath();
+
+	int PAGE;
+	if (Media::isImage(selectedFilePath))
+	{
+		PAGE = IMAGE_PAGE;
+	}
+	else
+	{
+		PAGE = VIDEO_PAGE;
+	}
+	 
+	ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+
 void VersionControlPage::mouseReleased(int x, int y, int button) {
 	homeBtn.mouseReleased(x, y, button);
+	mediaCir.mouseReleased(x, y, button);
+}
+
+
+string VersionControlPage::getCurrentFilePath() {
+	return selectedFilePath;
+}
+
+
+void VersionControlPage::exit() {
+	mediaCir.exit();
+	videoGrabber.close();
+	currentFrame.clear();
+	diff.clear();
+	bgImage.clear();
+
+	ofRemoveListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
 }

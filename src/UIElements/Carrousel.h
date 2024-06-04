@@ -21,7 +21,7 @@ public:
 	void previous();
 	string getCurrentFilePath();
 
-	int width = 320, height = 240, gridSpacing = 30, numFilesToShow = 5;
+	const int width = 320, height = 240, gridSpacing = 30, numFilesToShow = 5;
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
 	int current = 0, currentWidth = 40, currentHeight = 30;
 	int horizontalMiddle = (ofGetHeight() - height) / 2;
