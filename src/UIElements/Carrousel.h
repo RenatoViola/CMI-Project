@@ -11,7 +11,7 @@ public:
 		exit();
 	}
 
-	void setup(vector<unique_ptr<Media>>&& items, int verticalPos, string label);
+	void setup(string directory, int verticalPos, bool isImageCarrousel);
 	void exit();
 	void draw();
 	void update();
@@ -19,7 +19,7 @@ public:
 	void mouseReleased(int x, int y, int button);
 	void next();
 	void previous();
-	Media* getCurrentMedia();
+	string getCurrentFilePath();
 
 	int width = 320, height = 240, gridSpacing = 30, numFilesToShow = 5;
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
@@ -29,8 +29,7 @@ public:
 	int startX = (ofGetWidth() - totalWidth) / 2;
 	int startY, lastX;
 	float step = 0;
-	bool loadFromTheRight = true;
-	string label;
+	bool loadFromTheRight = true, isImageCarrousel;
 
 	ofRectangle fullCarrousel, selectedFile;
 

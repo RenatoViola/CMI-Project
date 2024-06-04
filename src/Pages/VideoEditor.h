@@ -10,16 +10,22 @@
 class VideoEditor : public MediaEditor {
 public:
 
-    void setup(VideoMedia* media) {
-        video = media;
-        MediaEditor::setup(video);
+    void setup(string filePath) {
+
+        MediaEditor::setup(filePath);
+
+        video.load(filePath);
+        video.update();
+
+        Media::setFullScreenSizeAndPos(video.getWidth(), video.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
+        colorImg.allocate(video.getWidth(), video.getHeight());
     }
 
     void update() {
-        video->update();
+        video.update();
 
-        if (video->getContent().isFrameNew()) {
-            colorImg.setFromPixels(video->getPixels());
+        if (video.getContent().isFrameNew()) {
+            colorImg.setFromPixels(video.getPixels());
 
             if (gui.invertColorFilter)
             {
@@ -37,7 +43,7 @@ public:
 
     void draw() override {
 
-        video->play();
+        video.play();
         ofSetColor(ofColor::black);
         ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
         ofSetColor(ofColor::white);
@@ -51,7 +57,7 @@ public:
             MediaEditor::drawEdges();
         }
         else {
-            video->draw(xPos, yPos, displayWidth, displayHeight);
+            video.draw(xPos, yPos, displayWidth, displayHeight);
         }
 
         homeBtn.draw();
@@ -60,5 +66,5 @@ public:
     }
 
 private:
-    VideoMedia* video;
+    VideoMedia video;
 };

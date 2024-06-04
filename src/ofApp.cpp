@@ -162,10 +162,10 @@ void ofApp::changeScreen(int& page) {
 		verCtrPage.setup();
 		break;
 	case IMAGE_PAGE:
-		imagePage.setup(dynamic_cast<ImageMedia*>(homePage.getSelectedMedia()));
+		imagePage.setup(homePage.getCurrentFilePath());
 		break;
 	case VIDEO_PAGE:
-		videoPage.setup(dynamic_cast<VideoMedia*>(homePage.getSelectedMedia()));
+		videoPage.setup(homePage.getCurrentFilePath());
 		break;
 	default:
 		break;

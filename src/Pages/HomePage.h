@@ -17,12 +17,12 @@ public:
     void gotoVideoPage();
     void gotoCameraPage();
     void gotoSavescreenPage();
-    Media* getSelectedMedia();
+    string getCurrentFilePath();
 
     ofEvent<int> redirectEvent;
    
 private:
     Carrousel imageCarrousel, videoCarrousel;
-    Media* selectedMedia;
+    string selectedFilePath;
     Button cameraBtn, lockBtn;
 };
