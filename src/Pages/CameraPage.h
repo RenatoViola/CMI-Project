@@ -8,11 +8,13 @@ class CameraPage {
 	public:
 
 		void setup(int width, int height);
-		void update(bool detectionEnabled);
-		void drawCamera(bool detectionEnabled);
+		void update();
+		void drawCamera();
 		void exit();
 		void mouseReleased(int x, int y, int button);
 		void gotoHomePage();
+		void gotoSearchResultPage();
+		void toggleFaceDetection();
 
 		ofEvent<int> redirectEvent;
 
@@ -26,6 +28,7 @@ class CameraPage {
 
 		int camWidth;
 		int camHeight;
+		bool facialDetectionEnabled;
 
-		Button homeBtn;
+		Button homeBtn, faceBtn, searchBtn;
 };

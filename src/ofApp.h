@@ -49,7 +49,5 @@ public:
 
 	#pragma endregion
 
-	bool openedImage, openedVideo, displayCamera, detectionEnabled;
-
 	int activePage;
 };

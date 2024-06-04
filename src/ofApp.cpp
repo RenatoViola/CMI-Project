@@ -11,9 +11,6 @@ void ofApp::setup() {
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
-
-	
-	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
 
@@ -25,32 +22,6 @@ void ofApp::setup() {
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
-
-	// Test recognition
-	/*ofImage img;
-	img.load("./o0.jpg");
-
-	ofDirectory imgDir;
-	imgDir.allowExt("jpg");
-	imgDir.listDir("images/");
-
-	ofDirectory vidDir;
-	vidDir.allowExt("mp4");
-	vidDir.listDir("videos/");
-
-	vector<string> img_paths, vid_paths;
-	img_paths.reserve(imgDir.size());
-	vid_paths.reserve(vidDir.size());
-
-	for (int i = 0; i < imgDir.size(); i++) {
-		img_paths.push_back(imgDir.getPath(i));
-	}
-
-	for (int i = 0; i < vidDir.size(); i++) {
-		vid_paths.push_back(vidDir.getPath(i));
-	}
-
-	vector<string> matching_paths = Metadata::filesWithObject(img.getPixels(), img_paths, vid_paths);*/
 }
 
 //--------------------------------------------------------------
@@ -66,7 +37,7 @@ void ofApp::update() {
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
-			cameraPage.update(detectionEnabled);
+			cameraPage.update();
 			break;
 		case CONTROL_VERSION_PAGE:
 			verCtrPage.update();
@@ -78,11 +49,6 @@ void ofApp::update() {
 			break;
 		default:
 			break;
-	}
-
-	if (activePage != CAMERA_PAGE)
-	{
-		detectionEnabled = false;
 	}
 }
 
@@ -99,7 +65,7 @@ void ofApp::draw() {
 		case FILTERED_PAGE:
 			break;
 		case CAMERA_PAGE:
-			cameraPage.drawCamera(detectionEnabled);
+			cameraPage.drawCamera();
 			break;
 		case CONTROL_VERSION_PAGE:
 			verCtrPage.draw();
@@ -185,14 +151,6 @@ void ofApp::changeScreen(int& page) {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	switch (key) 
-	{
-		case 'f':
-			detectionEnabled = !detectionEnabled;
-			break;
-		default:
-			break;
-	}
 }
 
 //--------------------------------------------------------------
