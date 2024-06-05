@@ -22,6 +22,7 @@ void ofApp::setup() {
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
+	ofAddListener(filteredPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -35,6 +36,7 @@ void ofApp::update() {
 			homePage.update();
 			break;
 		case FILTERED_PAGE:
+			filteredPage.update();
 			break;
 		case CAMERA_PAGE:
 			cameraPage.update();
@@ -63,6 +65,7 @@ void ofApp::draw() {
 			homePage.draw();
 			break;
 		case FILTERED_PAGE:
+			filteredPage.draw();
 			break;
 		case CAMERA_PAGE:
 			cameraPage.drawCamera();
@@ -96,6 +99,10 @@ void ofApp::changeScreen(int& page) {
 		//	homePage.exit();
 		break;
 	case FILTERED_PAGE:
+		{
+			selectedFilePath = filteredPage.getCurrentFilePath();
+			filteredPage.exit();
+		}
 		break;
 	case CAMERA_PAGE:
 		cameraPage.exit();
@@ -129,6 +136,7 @@ void ofApp::changeScreen(int& page) {
 		//	homePage.setup();
 		break;
 	case FILTERED_PAGE:
+		filteredPage.setup(cameraPage.getCapturedFrame());
 		break;
 	case CAMERA_PAGE:
 		cameraPage.setup(1280, 720);
@@ -205,6 +213,7 @@ void ofApp::mouseReleased(int x, int y, int button) {
 			homePage.mouseReleased(x, y, button);
 			break;
 		case FILTERED_PAGE:
+			filteredPage.mouseReleased(x, y, button);
 			break;
 		case CAMERA_PAGE:
 			cameraPage.mouseReleased(x, y, button);

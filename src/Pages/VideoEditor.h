@@ -19,6 +19,8 @@ public:
 
         Media::setFullScreenSizeAndPos(video.getWidth(), video.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
         colorImg.allocate(video.getWidth(), video.getHeight());
+
+        video.play();
     }
 
     void update() {
@@ -43,7 +45,6 @@ public:
 
     void draw() override {
 
-        video.play();
         ofSetColor(ofColor::black);
         ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
         ofSetColor(ofColor::white);
@@ -63,6 +64,11 @@ public:
         homeBtn.draw();
         versionBtn.draw();
         gui.draw();
+    }
+
+    void exit() {
+        MediaEditor::exit();
+        video.stop();
     }
 
 private:

@@ -97,12 +97,18 @@ void CameraPage::gotoHomePage() {
 }
 
 void CameraPage::gotoSearchResultPage() {
-	int PAGE = MAIN_PAGE;
+	capturedFrame = colorImg.getPixels();
+
+	int PAGE = FILTERED_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
 void CameraPage::toggleFaceDetection() {
 	facialDetectionEnabled = !facialDetectionEnabled;
+}
+
+ofPixels CameraPage::getCapturedFrame() const {
+	return capturedFrame;
 }
 
 void CameraPage::exit() {

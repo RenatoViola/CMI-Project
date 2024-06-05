@@ -11,7 +11,6 @@ public:
     void load(const std::string& filePath) {
         this->filePath = filePath;
         video.load(filePath);
-    //    video.setLoopState(OF_LOOP_NORMAL);
     }
 
     void draw(float x, float y, float w, float h) {
@@ -104,5 +103,9 @@ public:
 
     ofPixels& getPixels() {
         return video.getPixels();
+    }
+
+    void stop() {
+        video.stop();
     }
 };

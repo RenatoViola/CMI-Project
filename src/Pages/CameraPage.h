@@ -15,10 +15,12 @@ class CameraPage {
 		void gotoHomePage();
 		void gotoSearchResultPage();
 		void toggleFaceDetection();
+		ofPixels getCapturedFrame() const;
 
 		ofEvent<int> redirectEvent;
 
 		ofVideoGrabber vidGrabber;
+		ofPixels capturedFrame;
 
 		ofxCvHaarFinder finder;
 		ofxCvColorImage colorImg;
