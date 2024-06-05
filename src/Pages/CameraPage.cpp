@@ -6,6 +6,8 @@ void CameraPage::setup(int width, int height) {
 	camWidth = width;  // try to grab at this size.
 	camHeight = height;
 
+	facialDetectionEnabled = false;
+
 	//get back a list of devices.
 	vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
@@ -36,16 +38,21 @@ void CameraPage::setup(int width, int height) {
 	// finder.setScaleHaar(1.5);
 
 	homeBtn.setup("homeIcon.png", 100, 50, 50);
+	searchBtn.setup("searchIcon.png", 100, 50, 200);
+	faceBtn.setup("faceIcon.png", 100, 200, 50);
+
 	ofAddListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
+	ofAddListener(searchBtn.clickedInside, this, &CameraPage::gotoSearchResultPage);
+	ofAddListener(faceBtn.clickedInside, this, &CameraPage::toggleFaceDetection);
 }
 
-void CameraPage::update(bool detectionEnabled) {
+void CameraPage::update() {
 	vidGrabber.update();
 
 	if (vidGrabber.isFrameNew()) {
 		colorImg.setFromPixels(vidGrabber.getPixels());
 
-		if (detectionEnabled)
+		if (facialDetectionEnabled)
 		{
 			grayImg = colorImg;
 			finder.findHaarObjects(grayImg);
@@ -54,7 +61,7 @@ void CameraPage::update(bool detectionEnabled) {
 }
 
 //--------------------------------------------------------------
-void CameraPage::drawCamera(bool detectionEnabled) {
+void CameraPage::drawCamera() {
     ofSetColor(ofColor::white);
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
@@ -63,8 +70,10 @@ void CameraPage::drawCamera(bool detectionEnabled) {
 
     colorImg.draw(drawPosX, drawPosY);
     homeBtn.draw();
+	searchBtn.draw();
+	faceBtn.draw();
 
-    if (detectionEnabled) {
+    if (facialDetectionEnabled) {
         ofNoFill();
         ofSetColor(ofColor::steelBlue);
         for (int i = 0; i < finder.blobs.size(); i++) {
@@ -78,6 +87,8 @@ void CameraPage::drawCamera(bool detectionEnabled) {
 
 void CameraPage::mouseReleased(int x, int y, int button) {
 	homeBtn.mouseReleased(x, y, button);
+	searchBtn.mouseReleased(x, y, button);
+	faceBtn.mouseReleased(x, y, button);
 }
 
 void CameraPage::gotoHomePage() {
@@ -85,10 +96,28 @@ void CameraPage::gotoHomePage() {
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+void CameraPage::gotoSearchResultPage() {
+	capturedFrame = colorImg.getPixels();
+
+	int PAGE = FILTERED_PAGE;
+	ofNotifyEvent(redirectEvent, PAGE, this);
+}
+
+void CameraPage::toggleFaceDetection() {
+	facialDetectionEnabled = !facialDetectionEnabled;
+}
+
+ofPixels CameraPage::getCapturedFrame() const {
+	return capturedFrame;
+}
+
 void CameraPage::exit() {
 	vidGrabber.close();
 	colorImg.clear();
 	grayImg.clear();
 	faceRects.clear();
+
 	ofRemoveListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
+	ofRemoveListener(searchBtn.clickedInside, this, &CameraPage::gotoSearchResultPage);
+	ofRemoveListener(faceBtn.clickedInside, this, &CameraPage::toggleFaceDetection);
 }

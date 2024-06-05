@@ -10,6 +10,7 @@
 #include "Pages/VideoEditor.h"
 #include "Pages/ImageEditor.h"
 #include "Pages/VersionControlPage.h"
+#include <FilteredPage.h>
 
 
 class ofApp : public ofBaseApp {
@@ -46,10 +47,9 @@ public:
 	VersionControlPage verCtrPage;
 	ImageEditor imagePage;
 	VideoEditor videoPage;
+	FilteredPage filteredPage;
 
 	#pragma endregion
-
-	bool openedImage, openedVideo, displayCamera, detectionEnabled;
 
 	int activePage;
 };

@@ -11,9 +11,6 @@ void ofApp::setup() {
 
 	// Uncomment this to show movies with alpha channels
 	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
-
-	
-	detectionEnabled = false;
 	
 	activePage = SCREEN_SAVER_PAGE;
 
@@ -25,32 +22,7 @@ void ofApp::setup() {
 	ofAddListener(videoPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(cameraPage.redirectEvent, this, &ofApp::changeScreen);
 	ofAddListener(verCtrPage.redirectEvent, this, &ofApp::changeScreen);
-
-	// Test recognition
-	/*ofImage img;
-	img.load("./o0.jpg");
-
-	ofDirectory imgDir;
-	imgDir.allowExt("jpg");
-	imgDir.listDir("images/");
-
-	ofDirectory vidDir;
-	vidDir.allowExt("mp4");
-	vidDir.listDir("videos/");
-
-	vector<string> img_paths, vid_paths;
-	img_paths.reserve(imgDir.size());
-	vid_paths.reserve(vidDir.size());
-
-	for (int i = 0; i < imgDir.size(); i++) {
-		img_paths.push_back(imgDir.getPath(i));
-	}
-
-	for (int i = 0; i < vidDir.size(); i++) {
-		vid_paths.push_back(vidDir.getPath(i));
-	}
-
-	vector<string> matching_paths = Metadata::filesWithObject(img.getPixels(), img_paths, vid_paths);*/
+	ofAddListener(filteredPage.redirectEvent, this, &ofApp::changeScreen);
 }
 
 //--------------------------------------------------------------
@@ -64,9 +36,10 @@ void ofApp::update() {
 			homePage.update();
 			break;
 		case FILTERED_PAGE:
+			filteredPage.update();
 			break;
 		case CAMERA_PAGE:
-			cameraPage.update(detectionEnabled);
+			cameraPage.update();
 			break;
 		case CONTROL_VERSION_PAGE:
 			verCtrPage.update();
@@ -78,11 +51,6 @@ void ofApp::update() {
 			break;
 		default:
 			break;
-	}
-
-	if (activePage != CAMERA_PAGE)
-	{
-		detectionEnabled = false;
 	}
 }
 
@@ -97,9 +65,10 @@ void ofApp::draw() {
 			homePage.draw();
 			break;
 		case FILTERED_PAGE:
+			filteredPage.draw();
 			break;
 		case CAMERA_PAGE:
-			cameraPage.drawCamera(detectionEnabled);
+			cameraPage.drawCamera();
 			break;
 		case CONTROL_VERSION_PAGE:
 			verCtrPage.draw();
@@ -116,6 +85,9 @@ void ofApp::draw() {
 }
 
 void ofApp::changeScreen(int& page) {
+
+	string selectedFilePath = "";
+
 	switch (activePage)
 	{
 		// Close previous page
@@ -123,20 +95,30 @@ void ofApp::changeScreen(int& page) {
 		screenSaverPage.exit();
 		break;
 	case MAIN_PAGE:
+		selectedFilePath = homePage.getCurrentFilePath();
 		//	homePage.exit();
 		break;
 	case FILTERED_PAGE:
+		{
+			selectedFilePath = filteredPage.getCurrentFilePath();
+			filteredPage.exit();
+		}
 		break;
 	case CAMERA_PAGE:
 		cameraPage.exit();
 		break;
 	case CONTROL_VERSION_PAGE:
-		verCtrPage.exit();
+		{
+			selectedFilePath = verCtrPage.getCurrentFilePath();
+			verCtrPage.exit();
+		}
 		break;
 	case IMAGE_PAGE:
+		selectedFilePath = imagePage.getFilePath();
 		imagePage.exit();
 		break;
 	case VIDEO_PAGE:
+		selectedFilePath = videoPage.getFilePath();
 		videoPage.exit();
 		break;
 	default:
@@ -154,18 +136,19 @@ void ofApp::changeScreen(int& page) {
 		//	homePage.setup();
 		break;
 	case FILTERED_PAGE:
+		filteredPage.setup(cameraPage.getCapturedFrame());
 		break;
 	case CAMERA_PAGE:
 		cameraPage.setup(1280, 720);
 		break;
 	case CONTROL_VERSION_PAGE:
-		verCtrPage.setup();
+		verCtrPage.setup(selectedFilePath);
 		break;
 	case IMAGE_PAGE:
-		imagePage.setup(homePage.getCurrentFilePath());
+		imagePage.setup(selectedFilePath);
 		break;
 	case VIDEO_PAGE:
-		videoPage.setup(homePage.getCurrentFilePath());
+		videoPage.setup(selectedFilePath);
 		break;
 	default:
 		break;
@@ -176,14 +159,6 @@ void ofApp::changeScreen(int& page) {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	switch (key) 
-	{
-		case 'f':
-			detectionEnabled = !detectionEnabled;
-			break;
-		default:
-			break;
-	}
 }
 
 //--------------------------------------------------------------
@@ -238,6 +213,7 @@ void ofApp::mouseReleased(int x, int y, int button) {
 			homePage.mouseReleased(x, y, button);
 			break;
 		case FILTERED_PAGE:
+			filteredPage.mouseReleased(x, y, button);
 			break;
 		case CAMERA_PAGE:
 			cameraPage.mouseReleased(x, y, button);

@@ -17,7 +17,9 @@ void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) 
 			item = make_unique<ImageMedia>();
 		else 
 			item = make_unique<VideoMedia>();
+
 		item->load(dir.getPath(i));
+		item->update();
 		items.push_back(move(item));
 	}
 
