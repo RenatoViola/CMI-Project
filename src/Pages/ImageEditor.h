@@ -10,15 +10,17 @@
 class ImageEditor : public MediaEditor {
 public:
 
-    void setup(string filePath) {
+    void setup(string filePath, int versionID) {
 
-        MediaEditor::setup(filePath);
+        MediaEditor::setup(filePath, versionID);
 
         img.load(filePath);
 
         Media::setFullScreenSizeAndPos(img.getWidth(), img.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
         colorImg.allocate(img.getWidth(), img.getHeight());
         colorImg.setFromPixels(img.getPixels());
+
+        setupVersion();
         
         gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
         gui.edgeFilter.addListener(this, &ImageEditor::edgeImage);
@@ -76,6 +78,27 @@ public:
         else
         {
             colorImg.setFromPixels(img.getPixels());
+        }
+    }
+
+    void setupVersion() {
+        bool b_value = true;
+
+        if (gui.asciiFilter)
+        {
+            return;
+        }
+        else if (gui.invertColorFilter)
+        {
+            invertImage(b_value);
+        }
+        else if (gui.edgeFilter)
+        {
+            edgeImage(b_value);
+        }
+        else 
+        {
+            return;
         }
     }
 

@@ -5,38 +5,41 @@
 
 
 //--------------------------------------------------------------
-void Metadata::load(string filename, ofXml& XML, bool isImage) {
+void Metadata::load(string filePath) {
 
-	const string PATH = (isImage ? "imagesXML/" : "videosXML/") + filename + ".xml";
+	ofXml XML;
+	bool isImage = Media::isImage(filePath);
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
 
 	if (!XML.load(PATH)) {
 		ofLogError() << "Couldn't load file: " << filename << "; " << "Will create one.";
 		XML.clear();
-		ofXml file = XML.appendChild("FILE");
+		ofXml file = XML.appendChild("METADATA");
 		vector<ofPixels> frames;
 
 		if (isImage)
 		{
 			ofImage img;
-			img.load("images/" + filename);
+			img.load(filePath);
 			frames = { img.getPixels() };
-			file.appendChild("TYPE").set("IMAGE");
 		}
 		else
 		{
 			ofVideoPlayer video;
-			video.load("videos/" + filename);
+			video.load(filePath);
 			frames = VideoMedia::extractFrames(video, 10);
-			file.appendChild("TYPE").set("VIDEO");
 		}
 		processFileMetadata(filename, frames, file);
-		save(filename, XML, isImage);
+		save(filePath, XML);
 	}
 }
 
 //--------------------------------------------------------------
-void Metadata::save(string filename, ofXml& XML, bool isImage) {
-	const string PATH = (isImage ? "imagesXML/" : "videosXML/") + filename + ".xml";
+void Metadata::save(string filePath, ofXml& XML) {
+
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
 
 	if (!XML.save(PATH)) {
 		ofLogError() << "Couldn't save file:" << filename << ";";
@@ -48,11 +51,6 @@ set<string> Metadata::getTags(ofXml& XML) {
 	set<string> tags;
 
 	auto xmlTags = XML.find("//TAGS/TAG");
-
-	if (xmlTags.empty())
-	{
-		throw std::runtime_error("There are no tags for this file.");
-	}
 
 	for (auto& tag : xmlTags) {
 		tags.insert(tag.getValue());
@@ -75,8 +73,6 @@ void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, of
 	ofPixels& firstFrame = frames.at(0);
 	detectEdges(firstFrame, XML.appendChild("EDGE_DISTRIBUTION"));
 	detectTextureCharacteristics(firstFrame, XML.appendChild("TEXTURE_CHARACTERISTICS"));
-	
-	XML.appendChild("OBJECT_OCCURRENCES");
 }
 
 
@@ -355,26 +351,29 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 	return countNonZero(match_mask);
 }
 
-FileMetadata Metadata::parseMetadata(const string& filename) {
-	FileMetadata metadata;
-	ofXml xml;
+FileMetadata Metadata::parseMetadata(const string& filePath) {
 
-	if (!xml.load(filename)) {
+	FileMetadata metadata;
+	ofXml root;
+	bool isImage = Media::isImage(filePath);
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
+
+	if (!root.load(PATH)) {
 		cerr << "Error loading file: " << filename << endl;
 		return metadata;
 	}
 
-	// Parse file type
-	metadata.path = xml.getAttribute("TYPE").getValue();
+	auto xml = root.findFirst("//METADATA");
 
 	// Parse filename
-	metadata.path = xml.getAttribute("FILENAME").getValue();
+	metadata.path = xml.getChild("FILENAME").getValue();
 
 	// Parse tags
 	metadata.tags = getTags(xml);
 
 	// Parse luminance
-	metadata.luminance = xml.getAttribute("LUMINANCE").getDoubleValue();
+	metadata.luminance = xml.getChild("LUMINANCE").getDoubleValue();
 
 	// Parse color
 	auto color = xml.findFirst("COLOR");
@@ -383,7 +382,7 @@ FileMetadata Metadata::parseMetadata(const string& filename) {
 	metadata.blue = color.getChild("BLUE").getIntValue();
 
 	// Parse number of faces
-	metadata.numFaces = xml.getAttribute("NUM_FACES").getIntValue();
+	metadata.numFaces = xml.getChild("NUM_FACES").getIntValue();
 
 	// Parse edge distribution
 	vector<string> edgeTags = { "VERTICAL", "HORIZONTAL", "DEGREES_45", "DEGREES_135", "NON_DIRECTIONAL" };
@@ -468,11 +467,38 @@ double Metadata::calculateSimilarity(const FileMetadata& file1, const FileMetada
 }
 
 
-vector<string> Metadata::findRelatedFiles(string filepath, vector<string>& image_paths, vector<string> video_paths) {
+vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image_paths, vector<string> video_paths) {
 	
+	ofXml xml;
+	const string PATH = "xml/" + filePath + ".xml";
+	vector<string> filenames;
+	filenames.reserve(8);
+
+	// Load related files if already present in metadata
+	if (!xml.load(PATH))
+	{
+		ofLogError() << "Couldn't load file: " << filePath << ".";
+		return filenames;
+	}
+	else
+	{
+		auto xmlFiles = xml.find("//RELATED_FILES/FILE");
+
+		for (auto& file : xmlFiles) {
+			filenames.push_back(file.getValue());
+		}
+
+		if (!filenames.empty())
+		{
+			return filenames;
+		}
+	}
+		
+	// Perform computation
+
 	vector<pair<string, double>> vec;
 
-	FileMetadata f1 = parseMetadata(filepath);
+	FileMetadata f1 = parseMetadata(filePath);
 	FileMetadata f2;
 	double similarity;
 
@@ -494,20 +520,53 @@ vector<string> Metadata::findRelatedFiles(string filepath, vector<string>& image
 		return a.second > b.second;
 	});
 
+	vec.erase(vec.begin());
+
 	if (vec.size() > 8) {
 		vec.resize(8);
 	}
-
-	vector<std::string> filenames;
-	filenames.reserve(vec.size());
 
 	for (const auto& pair : vec) {
 		filenames.push_back(pair.first);
 	}
 
-	for (const auto& pair : vec) {
-		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	// Add RELATED_FILES section
+	auto metadataNode = xml.findFirst("//METADATA");
+	if (metadataNode) {
+		auto relatedFilesNode = metadataNode.appendChild("RELATED_FILES");
+		for (const string& filename : filenames) {
+			relatedFilesNode.appendChild("FILE").set(filename);
+		}
 	}
 
+	xml.save(PATH);
+
 	return filenames;
+}
+
+
+vector<pair<int, string>> Metadata::getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames) {
+	
+	vector<pair<int, string>> result;
+
+	ofXml xml;
+	string loadPath = "versions/" + filePath + ".xml";
+
+	if (xml.load(loadPath)) {
+
+		auto xmlFiles = xml.find("//METADATA/VERSIONS/VERSION");
+
+		for (auto& file : xmlFiles) {
+			int versionID = file.getAttribute("ID").getIntValue();
+			result.emplace_back(versionID, filePath);
+			ofLogError() << versionID << "||" << loadPath << endl;
+		}
+	}
+
+	// Add related filenames to fill the vector up to 8 elements
+	for (size_t i = 0; i < relatedFilenames.size() && result.size() < 8; ++i) {
+		result.emplace_back(0, relatedFilenames[i]);
+	}
+
+	return result;
 }

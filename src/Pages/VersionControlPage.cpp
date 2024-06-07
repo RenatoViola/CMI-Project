@@ -37,13 +37,20 @@ void VersionControlPage::setup(string filePath)
 		vid_paths.push_back(vidDir.getPath(i));
 	}
 
-	vector<string> matching_paths = Metadata::filesWithObject(pixels, img_paths, vid_paths);
+	vector<string> related_files = Metadata::findRelatedFiles(filePath, img_paths, vid_paths);
+	files = Metadata::getVersionedRelatedFiles(filePath, related_files);
+	
+	vector<string> filenames;
+	filenames.reserve(files.size());
+	for (const auto& pair : files) {
+		filenames.push_back(pair.second);
+	}
 	
 	img.allocate(pixels.getWidth(), pixels.getHeight());
 	img.setFromPixels(pixels);
 
 	homeBtn.setup("homeIcon.png", 100, 50, 50);
-	mediaCir.setup(matching_paths);
+	mediaCir.setup(filenames);
 
 	ofAddListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
@@ -74,6 +81,7 @@ void VersionControlPage::gotoHomePage()
 void VersionControlPage::gotoFilePage()
 {
 	selectedFilePath = mediaCir.getCurrentFilePath();
+	selectedVersion = files[mediaCir.getCurrentIndex()].first;
 
 	int PAGE;
 	if (Media::isImage(selectedFilePath))
@@ -99,6 +107,9 @@ string VersionControlPage::getCurrentFilePath() {
 	return selectedFilePath;
 }
 
+int VersionControlPage::getCurrentVersion() {
+	return selectedVersion;
+}
 
 void VersionControlPage::exit() {
 	mediaCir.exit();

@@ -16,6 +16,7 @@ public:
 	void exit();
 	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
+	int getCurrentIndex();
 	void updateBoundingBoxes();
 
 	const int MEDIA_WIDTH = 240;
@@ -31,4 +32,3 @@ public:
 	vector<ofRectangle> boundingBoxes;
 	vector<unique_ptr<Media>> items;
 };
-

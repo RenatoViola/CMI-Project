@@ -55,9 +55,9 @@ void FilteredPage::draw()
 	float displayWidth, displayHeight, xPos, yPos;
 	Media::setFullScreenSizeAndPos(CAMERA_WIDTH, CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
 
-	/*ofSetHexColor(0xffffff);
-	diff.draw(xPos, yPos, displayWidth, displayHeight);
-	contourFinder.draw(xPos, yPos, displayWidth, displayHeight);*/
+	//ofSetHexColor(0xffffff);
+	//diff.draw(xPos, yPos, displayWidth, displayHeight);
+	//contourFinder.draw(xPos, yPos, displayWidth, displayHeight);
 
 	img.draw(xPos, yPos, displayWidth, displayHeight);
 

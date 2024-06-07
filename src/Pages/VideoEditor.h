@@ -10,9 +10,9 @@
 class VideoEditor : public MediaEditor {
 public:
 
-    void setup(string filePath) {
+    void setup(string filePath, int versionID) {
 
-        MediaEditor::setup(filePath);
+        MediaEditor::setup(filePath, versionID);
 
         video.load(filePath);
         video.update();

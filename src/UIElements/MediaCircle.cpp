@@ -20,7 +20,6 @@ void MediaCircle::setup(vector<string> paths)
 
 	/* Calculate image pos in circle */
 	angleInRadians = 2 * PI / this->items.size();
-	cout << angleInRadians << endl;
 
 	// Setup bounding rectangles
 	updateBoundingBoxes();
@@ -68,6 +67,9 @@ string MediaCircle::getCurrentFilePath() {
 	return items[selectedMedia].get()->getFilePath();
 }
 
+int MediaCircle::getCurrentIndex() {
+	return selectedMedia;
+}
 
 void MediaCircle::updateBoundingBoxes() {
 	int centerX = ofGetWidth() / 2;
