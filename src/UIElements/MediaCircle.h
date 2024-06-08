@@ -30,4 +30,5 @@ public:
 	vector<ofRectangle> boundingBoxes;
 	vector<unique_ptr<Media>> items;
 	vector<tuple<int, string, string>> versions;
+	ofTrueTypeFont myFont;
 };

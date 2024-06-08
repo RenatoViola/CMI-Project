@@ -9,7 +9,7 @@ void HomePage::setup() {
     imageCarrousel.setup("images/", horizontalMiddle - mediaHeight / 2, true);
 
     // Bottom half of the screen
-    videoCarrousel.setup("videos/", horizontalMiddle + mediaHeight, false);
+    videoCarrousel.setup("videos/", horizontalMiddle + mediaHeight + 50, false);
 
     // Mouse event listeners
     ofAddListener(imageCarrousel.clickedOnSelected, this, &HomePage::gotoImagePage);

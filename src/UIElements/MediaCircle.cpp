@@ -20,6 +20,7 @@ void MediaCircle::setup(vector<string>& paths, int radius, int width, int height
 
 		item->load(path);
 		item->update();
+		item->getThumbnail();
 		items.push_back(move(item));
 	}
 
@@ -28,6 +29,8 @@ void MediaCircle::setup(vector<string>& paths, int radius, int width, int height
 
 	// Setup bounding rectangles
 	updateBoundingBoxes();
+
+	myFont.load("JuliusSansOne-Regular.ttf", 11);
 }
 
 void MediaCircle::update()
@@ -44,20 +47,28 @@ void MediaCircle::draw()
 	{
 		Media* m = items[i].get();
 		const ofRectangle& rect = boundingBoxes[i];
+		stringstream caption;
+		ofRectangle border;
+		border.set(rect.x - 5, rect.y - 5, rect.width + 10, rect.height + 10);
+		
 		if (i + 1 <= versions.size())
 		{
-			ofRectangle border;
-			border.set(rect.x - 10, rect.y - 10, rect.width + 20, rect.height + 20);
-			ofSetColor(ofColor::paleGreen);
-			ofDrawRectRounded(border, 10);
-
 			auto t = versions[i];
-			stringstream caption;
 			caption << "ALT. " << get<0>(t) << " | " << get<2>(t) << endl;
-			ofSetColor(ofColor::black);
-			ofDrawBitmapString(caption.str(), rect.x, rect.y);
-			ofSetColor(ofColor::white);
+			ofSetColor(ofColor::paleGreen);
 		}
+		else
+		{
+			caption << (Media::isImage(m->getFilePath()) ? "IMAGE" : "VIDEO") << endl;
+			ofSetColor(ofColor::lightCyan);
+		}
+
+		ofDrawRectRounded(border, 10);
+		float textWidth = myFont.stringWidth(caption.str());
+		ofSetColor(ofColor::black);
+		myFont.drawString(caption.str(), rect.x + (rect.width - textWidth) / 2.0f, rect.y - 10);
+		ofSetColor(ofColor::white);
+
 		m->draw(rect.x, rect.y, rect.width, rect.height);
 	}
 }
