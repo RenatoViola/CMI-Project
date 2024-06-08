@@ -38,9 +38,13 @@ public:
         video.play();
     }
 
-    void pause() {
+    void toggleReproduction() {
         frameByframe = !frameByframe;
         video.setPaused(frameByframe);
+    }
+
+    bool isPaused() {
+        return frameByframe;
     }
 
     static vector<ofPixels> extractFrames(ofVideoPlayer& video, int skip) {

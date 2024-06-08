@@ -21,10 +21,18 @@ public:
         colorImg.allocate(video.getWidth(), video.getHeight());
 
         video.play();
+
+        int b_radius = 300;
+        float b_width, b_height, b_x, b_y;
+        Media::setFullScreenSizeAndPos(b_radius, b_radius, &b_width, &b_height, &b_x, &b_y);
+        playButton.setup("icons/resumeIcon.png", b_radius, b_x, b_y);
+
+        ofAddListener(playButton.clickedInside, this, &VideoEditor::toggleVideoReproduction);
     }
 
     void update() {
         video.update();
+        playButton.update();
 
         if (video.getContent().isFrameNew()) {
             colorImg.setFromPixels(video.getPixels());
@@ -64,13 +72,26 @@ public:
         homeBtn.draw();
         versionBtn.draw();
         gui.draw();
+        playButton.timedDraw();
+    }
+
+    void mouseReleased(int x, int y, int button) {
+        MediaEditor::mouseReleased(x, y, button);
+        playButton.mouseReleased(x, y, button);
     }
 
     void exit() {
         MediaEditor::exit();
         video.stop();
+        ofRemoveListener(playButton.clickedInside, this, &VideoEditor::toggleVideoReproduction);
+    }
+
+    void toggleVideoReproduction() {
+        video.toggleReproduction();
+        playButton.loadIcon(video.isPaused() ? "icons/playIcon.png" : "icons/resumeIcon.png");
     }
 
 private:
     VideoMedia video;
+    Button playButton;
 };

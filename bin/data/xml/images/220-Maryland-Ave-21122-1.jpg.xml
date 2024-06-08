@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <METADATA>
 	<FILENAME>220-Maryland-Ave-21122-1.jpg</FILENAME>
-	<TAGS />
+	<TAGS>
+		<TAG>house</TAG>
+	</TAGS>
 	<LUMINANCE>117.285</LUMINANCE>
 	<COLOR>
 		<RED>115</RED>

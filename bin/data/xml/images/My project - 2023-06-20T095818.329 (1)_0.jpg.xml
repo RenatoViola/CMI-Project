@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <METADATA>
 	<FILENAME>My project - 2023-06-20T095818.329 (1)_0.jpg</FILENAME>
-	<TAGS />
+	<TAGS>
+		<TAG>house</TAG>
+	</TAGS>
 	<LUMINANCE>157.862</LUMINANCE>
 	<COLOR>
 		<RED>145</RED>
