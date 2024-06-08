@@ -39,8 +39,8 @@ void FilteredPage::setup(ofPixels& frame)
 
 	vector<string> matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
 
-	homeBtn.setup("homeIcon.png", 100, 50, 50);
-	mediaCir.setup(matching_paths);
+	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
+	mediaCir.setup(matching_paths, 400, 380, 270);
 
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);

@@ -22,6 +22,7 @@ public:
     virtual float getWidth() = 0;
     virtual float getHeight() = 0;
     virtual ofPixels& getPixels() = 0;
+    virtual ofPixels& getThumbnail() = 0;
 
     static void setFullScreenSizeAndPos(float width, float height, float* displayWidth, float* displayHeight, float* xPos, float* yPos)
     {

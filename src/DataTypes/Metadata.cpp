@@ -247,7 +247,8 @@ vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image
 	Mat desc1;
 	vector<KeyPoint> kpts1;
 
-	Ptr<Feature2D> detector = SIFT::create();
+	/*Ptr<Feature2D> detector = SIFT::create();*/
+	Ptr<Feature2D> detector = ORB::create();
 	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
 	
 	for (string path : image_paths)
@@ -277,8 +278,8 @@ vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image
 		return a.second > b.second;
 	});
 
-	if (vec.size() > 8) {
-		vec.resize(8);
+	if (vec.size() > 4) {
+		vec.resize(4);
 	}
 
 	vector<std::string> filenames;
@@ -310,7 +311,8 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 	Mat desc2;
 	vector<KeyPoint> kpts2;
 
-	Ptr<Feature2D> detector = SIFT::create();
+	/*Ptr<Feature2D> detector = SIFT::create();*/
+	Ptr<Feature2D> detector = ORB::create();
 	detector->detectAndCompute(img2, Mat(), kpts2, desc2);
 
 	BFMatcher desc_matcher(cv::NORM_L2, true);
@@ -547,7 +549,25 @@ vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image
 
 vector<pair<int, string>> Metadata::getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames) {
 	
+	vector<tuple<int, string, string>> versions = getVersionedDates(filePath);
 	vector<pair<int, string>> result;
+
+	for (size_t i = 0; i < versions.size() && versions.size() < 8; ++i) {
+		result.emplace_back(get<0>(versions[i]), get<1>(versions[i]));
+	}
+
+	// Add related filenames to fill the vector up to 8 elements
+	for (size_t i = 0; i < relatedFilenames.size() && result.size() < 8; ++i) {
+		result.emplace_back(0, relatedFilenames[i]);
+	}
+
+	return result;
+}
+
+
+vector<tuple<int, string, string>> Metadata::getVersionedDates(const string& filePath) {
+
+	vector<tuple<int, string, string>> result;
 
 	ofXml xml;
 	string loadPath = "versions/" + filePath + ".xml";
@@ -558,14 +578,9 @@ vector<pair<int, string>> Metadata::getVersionedRelatedFiles(const string& fileP
 
 		for (auto& file : xmlFiles) {
 			int versionID = file.getAttribute("ID").getIntValue();
-			result.emplace_back(versionID, filePath);
-			ofLogError() << versionID << "||" << loadPath << endl;
+			string date = file.getChild("DATE").getValue();
+			result.emplace_back(versionID, filePath, date);
 		}
-	}
-
-	// Add related filenames to fill the vector up to 8 elements
-	for (size_t i = 0; i < relatedFilenames.size() && result.size() < 8; ++i) {
-		result.emplace_back(0, relatedFilenames[i]);
 	}
 
 	return result;

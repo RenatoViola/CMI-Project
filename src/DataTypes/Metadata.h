@@ -29,6 +29,7 @@ public:
 	static double calculateSimilarity(const FileMetadata& file1, const FileMetadata& file2);
 
 	static vector<pair<int, string>> getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames);
+	static vector<tuple<int, string, string>> getVersionedDates(const string& filePath);
 	
 	// SAVE VERSION
 	// GET VERSIONS AND RELATED FILES

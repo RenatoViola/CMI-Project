@@ -10,7 +10,7 @@ public:
 		exit();
 	}
 
-	void setup(vector<string> paths);
+	void setup(vector<string>& paths, int radius, int width, int height);
 	void draw();
 	void update();
 	void exit();
@@ -18,11 +18,9 @@ public:
 	string getCurrentFilePath();
 	int getCurrentIndex();
 	void updateBoundingBoxes();
+	void setVersions(const string& filePath);
 
-	const int MEDIA_WIDTH = 240;
-	const int MEDIA_HEIGHT = 180;
-
-	const int CIRCLE_RADIUS = 400;
+	int radius, width, height;
 
 	double angleInRadians;
 
@@ -31,4 +29,5 @@ public:
 
 	vector<ofRectangle> boundingBoxes;
 	vector<unique_ptr<Media>> items;
+	vector<tuple<int, string, string>> versions;
 };

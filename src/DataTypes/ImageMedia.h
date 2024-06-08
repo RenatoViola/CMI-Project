@@ -96,4 +96,9 @@ public:
     {
         return image.getPixels();
     }
+
+    ofPixels& getThumbnail() 
+    {
+        return image.getPixels();
+    }
 };

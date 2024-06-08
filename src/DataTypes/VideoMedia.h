@@ -105,7 +105,13 @@ public:
         return video.getPixels();
     }
 
+    ofPixels& getThumbnail() {
+        return extractFirstFrame(video);
+    }
+
     void stop() {
         video.stop();
     }
+
+
 };

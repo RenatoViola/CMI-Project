@@ -17,11 +17,10 @@ void VersionControlPage::setup(string filePath)
 		pixels = VideoMedia::extractFirstFrame(temp);
 	}
 
-	ofDirectory imgDir;
+	// GET THE PATHS FOR MEDIA FILES
+	ofDirectory imgDir, vidDir;
 	imgDir.allowExt("jpg");
-	imgDir.listDir("images/");
-
-	ofDirectory vidDir;
+	imgDir.listDir("images/"); 
 	vidDir.allowExt("mp4");
 	vidDir.listDir("videos/");
 
@@ -29,14 +28,13 @@ void VersionControlPage::setup(string filePath)
 	img_paths.reserve(imgDir.size());
 	vid_paths.reserve(vidDir.size());
 
-	for (int i = 0; i < imgDir.size(); i++) {
+	for (int i = 0; i < imgDir.size(); i++)
 		img_paths.push_back(imgDir.getPath(i));
-	}
 
-	for (int i = 0; i < vidDir.size(); i++) {
+	for (int i = 0; i < vidDir.size(); i++)
 		vid_paths.push_back(vidDir.getPath(i));
-	}
 
+	// FIND THE RELATED FILES
 	vector<string> related_files = Metadata::findRelatedFiles(filePath, img_paths, vid_paths);
 	files = Metadata::getVersionedRelatedFiles(filePath, related_files);
 	
@@ -49,8 +47,9 @@ void VersionControlPage::setup(string filePath)
 	img.allocate(pixels.getWidth(), pixels.getHeight());
 	img.setFromPixels(pixels);
 
-	homeBtn.setup("homeIcon.png", 100, 50, 50);
-	mediaCir.setup(filenames);
+	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
+	mediaCir.setup(filenames, 400, 240, 180);
+	mediaCir.setVersions(filePath);
 
 	ofAddListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
@@ -58,10 +57,10 @@ void VersionControlPage::setup(string filePath)
 
 void VersionControlPage::draw()
 {
-	float displaywidth, displayheight, xpos, ypos;
-	Media::setFullScreenSizeAndPos(FILE_WIDTH, FILE_HEIGHT, &displaywidth, &displayheight, &xpos, &ypos);
+	float displayWidth, displayHeight, xPos, yPos;
+	Media::setFullScreenSizeAndPos(FILE_WIDTH, FILE_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
 
-	img.draw(xpos, ypos, displaywidth, displayheight);
+	img.draw(xPos, yPos, displayWidth, displayHeight);
 
 	mediaCir.draw();
 	homeBtn.draw();

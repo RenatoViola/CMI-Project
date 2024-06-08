@@ -1,9 +1,14 @@
 #include "MediaCircle.h"
 #include <ImageMedia.h>
 #include <VideoMedia.h>
+#include <Metadata.h>
 
-void MediaCircle::setup(vector<string> paths)
+void MediaCircle::setup(vector<string>& paths, int radius, int width, int height)
 {
+	this->radius = radius;
+	this->width = width;
+	this->height = height;
+
 	items.reserve(paths.size());
 
 	for (string path : paths) {
@@ -35,11 +40,24 @@ void MediaCircle::update()
 
 void MediaCircle::draw()
 {
-//	ofSetColor(ofColor::white);
 	for (int i = 0; i < items.size(); i++)
 	{
 		Media* m = items[i].get();
 		const ofRectangle& rect = boundingBoxes[i];
+		if (i + 1 <= versions.size())
+		{
+			ofRectangle border;
+			border.set(rect.x - 10, rect.y - 10, rect.width + 20, rect.height + 20);
+			ofSetColor(ofColor::paleGreen);
+			ofDrawRectRounded(border, 10);
+
+			auto t = versions[i];
+			stringstream caption;
+			caption << "ALT. " << get<0>(t) << " | " << get<2>(t) << endl;
+			ofSetColor(ofColor::black);
+			ofDrawBitmapString(caption.str(), rect.x, rect.y);
+			ofSetColor(ofColor::white);
+		}
 		m->draw(rect.x, rect.y, rect.width, rect.height);
 	}
 }
@@ -80,13 +98,17 @@ void MediaCircle::updateBoundingBoxes() {
 	{
 		double angle = angleInRadians * i;
 
-		float x = centerX + CIRCLE_RADIUS * cos(angle);
-		float y = centerY + CIRCLE_RADIUS * sin(angle);
+		float x = centerX + radius * cos(angle);
+		float y = centerY + radius * sin(angle);
 
-		x -= MEDIA_WIDTH / 2;
-		y -= MEDIA_HEIGHT / 2;
+		x -= width / 2;
+		y -= height / 2;
 
-		ofRectangle rect(x, y, MEDIA_WIDTH, MEDIA_HEIGHT);
+		ofRectangle rect(x, y, width, height);
 		boundingBoxes.push_back(rect);
 	}
+}
+
+void MediaCircle::setVersions(const string& filePath) {
+	this->versions = Metadata::getVersionedDates(filePath);
 }
