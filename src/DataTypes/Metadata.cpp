@@ -238,32 +238,6 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
 
-void Metadata::checkOpenMP() {
-	const int size = 100;
-	int array[size];
-	int sum = 0;
-
-	// Initialize the array
-	for (int i = 0; i < size; ++i) {
-		array[i] = i + 1;
-	}
-
-	// Parallelize this loop with OpenMP
-//#pragma omp parallel for reduction(+:sum)
-	for (int i = 0; i < size; ++i) {
-		sum += array[i];
-		// Print the thread ID and the current index
-		int thread_id = omp_get_thread_num();
-//#pragma omp critical
-		{
-			std::cout << "Thread " << thread_id << " processing index " << i << std::endl;
-		}
-	}
-
-	std::cout << "Sum of array elements is " << sum << std::endl;
-}
-
-
 vector<string> Metadata::filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths) {
 	const size_t total_paths = image_paths.size() + video_paths.size();
 	std::vector<std::pair<string, int>> vec(total_paths);

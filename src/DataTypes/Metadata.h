@@ -30,8 +30,6 @@ public:
 
 	static vector<pair<int, string>> getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames);
 	static vector<tuple<int, string, string>> getVersionedDates(const string& filePath);
-
-	static void checkOpenMP();
 	
 	// SAVE VERSION
 	// GET VERSIONS AND RELATED FILES

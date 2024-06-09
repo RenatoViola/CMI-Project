@@ -15,8 +15,12 @@ void FilterPanel::setup(const string& filePath)
 		gui.add(asciiFilter.setup("ASCII", false));
 	}
 	
-	gui.add(invertColorFilter.setup("Inverted Colors", false));
 	gui.add(edgeFilter.setup("Edge Filter", false));
+	gui.add(invertColorFilter.setup("Inverted Colors", false));
+	gui.add(blurFilter.setup("Blur", false));
+	gui.add(blurGaussianFilter.setup("Gaussian blur", false));
+	gui.add(dilateFilter.setup("Dilate", false));
+	gui.add(erodeFilter.setup("Erode", false));
 	
 	gui.add(spaceLabel.setup("", ""));
 	gui.add(changesLabel.setup("CHANGES", ""));
@@ -75,14 +79,18 @@ void FilterPanel::saveButtonPressed() {
 	versionNode.appendChild("DATE").set(ofGetTimestampString("%Y-%m-%d %H:%M:%S"));
 	auto filtersNode = versionNode.appendChild("FILTERS");
 
-	filtersNode.appendChild("INVERTED_COLORS").set(static_cast<int>(invertColorFilter));
-	filtersNode.appendChild("EDGE_FILTER").set(static_cast<int>(edgeFilter));
-
 	if (isImageFile)
 	{
 		filtersNode.appendChild("ASCII_FILTER").set(static_cast<int>(asciiFilter));
 	}
-	
+
+	filtersNode.appendChild("EDGE_FILTER").set(static_cast<int>(edgeFilter));
+	filtersNode.appendChild("INVERTED_COLORS").set(static_cast<int>(invertColorFilter));
+	filtersNode.appendChild("BLUR").set(static_cast<int>(blurFilter));
+	filtersNode.appendChild("GAUSSIAN_BLUR").set(static_cast<int>(blurGaussianFilter));
+	filtersNode.appendChild("DILATE").set(static_cast<int>(dilateFilter));
+	filtersNode.appendChild("ERODE").set(static_cast<int>(erodeFilter));
+
 	if (!xml.save(savePath)) {
 		ofLogError() << "Couldn't save file: " << savePath;
 	}
@@ -112,13 +120,17 @@ void FilterPanel::loadVersionInfo(int versionID) {
 		return;
 	}
 
-	invertColorFilter = filtersNode.getChild("INVERTED_COLORS").getIntValue();
-	edgeFilter = filtersNode.getChild("EDGE_FILTER").getIntValue();
-
 	if (isImageFile)
 	{
 		asciiFilter = filtersNode.getChild("ASCII_FILTER").getIntValue();
 	}
+
+	edgeFilter = filtersNode.getChild("EDGE_FILTER").getIntValue();
+	invertColorFilter = filtersNode.getChild("INVERTED_COLORS").getIntValue();
+	blurFilter = filtersNode.getChild("BLUR").getIntValue();
+	blurGaussianFilter = filtersNode.getChild("GAUSSIAN_BLUR").getIntValue();
+	dilateFilter = filtersNode.getChild("DILATE").getIntValue();
+	erodeFilter = filtersNode.getChild("ERODE").getIntValue();
 	
 	ofLogNotice() << "Loaded filter settings from version ID: " << versionID << " in file: " << loadPath;
 }

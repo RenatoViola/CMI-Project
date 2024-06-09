@@ -37,16 +37,33 @@ public:
         if (video.getContent().isFrameNew()) {
             colorImg.setFromPixels(video.getPixels());
 
-            if (gui.invertColorFilter)
+            if (gui.edgeFilter)
+            {
+                MediaEditor::findContours();
+            }
+            else if (gui.invertColorFilter)
             {
                 colorImg.invert();
             }
-            else if (gui.edgeFilter) {
-                MediaEditor::findContours();
-            }
-            else 
+            else if (gui.blurFilter)
             {
-                // other stuff
+                colorImg.blur();
+            }
+            else if (gui.blurGaussianFilter)
+            {
+                colorImg.blurGaussian();
+            }
+            else if (gui.dilateFilter)
+            {
+                colorImg.dilate();
+            }
+            else if (gui.erodeFilter)
+            {
+                colorImg.erode();
+            }
+            else
+            {
+                // nothing
             }
         }
     }
@@ -57,7 +74,13 @@ public:
         ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
         ofSetColor(ofColor::white);
 
-        if (gui.invertColorFilter)
+        if (
+            gui.invertColorFilter
+            || gui.blurFilter
+            || gui.blurGaussianFilter
+            || gui.dilateFilter
+            || gui.erodeFilter
+            )
         {
             colorImg.draw(xPos, yPos, displayWidth, displayHeight);
         }
