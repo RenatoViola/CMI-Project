@@ -578,7 +578,7 @@ double Metadata::calculateSimilarity(const FileMetadata& file1, const FileMetada
 
 
 vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image_paths, vector<string>& video_paths) {
-	
+
 	ofXml xml;
 	const string PATH = "xml/" + filePath + ".xml";
 	vector<string> filenames;
@@ -603,7 +603,7 @@ vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image
 			return filenames;
 		}
 	}
-		
+
 	// Perform computation
 
 	vector<pair<string, double>> vec;
@@ -612,17 +612,15 @@ vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image
 	FileMetadata f2;
 	double similarity;
 
-	for (int i = 0; i < image_paths.size(); ++i)
+	for (string path : image_paths)
 	{
-		const string& path = image_paths[i];
 		f2 = parseMetadata(path);
 		similarity = calculateSimilarity(f1, f2);
 		vec.emplace_back(path, similarity);
 	}
 
-	for (int i = 0; i < video_paths.size(); ++i)
+	for (string path : video_paths)
 	{
-		const string& path = image_paths[i];
 		f2 = parseMetadata(path);
 		similarity = calculateSimilarity(f1, f2);
 		vec.emplace_back(path, similarity);
@@ -630,7 +628,7 @@ vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image
 
 	sort(vec.begin(), vec.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
 		return a.second > b.second;
-	});
+		});
 
 	vec.erase(vec.begin());
 
