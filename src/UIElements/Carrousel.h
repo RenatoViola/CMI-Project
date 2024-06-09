@@ -35,4 +35,6 @@ public:
 
 	ofEvent<void> clickedOnSelected;
 	vector<unique_ptr<Media>> items;
+
+	ofTrueTypeFont myFont;
 };

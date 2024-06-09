@@ -5,6 +5,19 @@ void ofApp::setup() {
 	ofBackground(255, 255, 255);
 	ofSetVerticalSync(true);
 
+	// LOAD METADATA
+	ofDirectory imgDir, vidDir;
+	imgDir.allowExt("jpg");
+	imgDir.listDir("images/");
+	vidDir.allowExt("mp4");
+	vidDir.listDir("videos/");
+	
+	for (int i = 0; i < imgDir.size(); i++)
+		Metadata::load(imgDir.getPath(i));
+
+	for (int i = 0; i < vidDir.size(); i++)
+		Metadata::load(vidDir.getPath(i));
+
 	// setup Screen Saver Page
 	screenSaverPage.setup();
 	homePage.setup();
@@ -87,6 +100,7 @@ void ofApp::draw() {
 void ofApp::changeScreen(int& page) {
 
 	string selectedFilePath = "";
+	int versionID = 0;
 
 	switch (activePage)
 	{
@@ -110,6 +124,7 @@ void ofApp::changeScreen(int& page) {
 	case CONTROL_VERSION_PAGE:
 		{
 			selectedFilePath = verCtrPage.getCurrentFilePath();
+			versionID = verCtrPage.getCurrentVersion();
 			verCtrPage.exit();
 		}
 		break;
@@ -145,10 +160,10 @@ void ofApp::changeScreen(int& page) {
 		verCtrPage.setup(selectedFilePath);
 		break;
 	case IMAGE_PAGE:
-		imagePage.setup(selectedFilePath);
+		imagePage.setup(selectedFilePath, versionID);
 		break;
 	case VIDEO_PAGE:
-		videoPage.setup(selectedFilePath);
+		videoPage.setup(selectedFilePath, versionID);
 		break;
 	default:
 		break;

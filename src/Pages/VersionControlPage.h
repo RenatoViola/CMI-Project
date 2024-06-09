@@ -23,6 +23,7 @@ public:
 	void gotoFilePage();
 	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
+	int getCurrentVersion();
 
 	MediaCircle mediaCir;
 
@@ -34,6 +35,9 @@ public:
 
 private:
 	string selectedFilePath;
+	int selectedVersion;
 	ofxCvColorImage img;
+
+	vector<pair<int, string>> files;
 };
 

@@ -39,8 +39,8 @@ void FilteredPage::setup(ofPixels& frame)
 
 	vector<string> matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
 
-	homeBtn.setup("homeIcon.png", 100, 50, 50);
-	mediaCir.setup(matching_paths);
+	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
+	mediaCir.setup(matching_paths, 350, CAMERA_WIDTH, CAMERA_HEIGHT);
 
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
@@ -55,9 +55,9 @@ void FilteredPage::draw()
 	float displayWidth, displayHeight, xPos, yPos;
 	Media::setFullScreenSizeAndPos(CAMERA_WIDTH, CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
 
-	/*ofSetHexColor(0xffffff);
-	diff.draw(xPos, yPos, displayWidth, displayHeight);
-	contourFinder.draw(xPos, yPos, displayWidth, displayHeight);*/
+	//ofSetHexColor(0xffffff);
+	//diff.draw(xPos, yPos, displayWidth, displayHeight);
+	//contourFinder.draw(xPos, yPos, displayWidth, displayHeight);
 
 	img.draw(xPos, yPos, displayWidth, displayHeight);
 

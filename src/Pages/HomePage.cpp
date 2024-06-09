@@ -9,15 +9,15 @@ void HomePage::setup() {
     imageCarrousel.setup("images/", horizontalMiddle - mediaHeight / 2, true);
 
     // Bottom half of the screen
-    videoCarrousel.setup("videos/", horizontalMiddle + mediaHeight, false);
+    videoCarrousel.setup("videos/", horizontalMiddle + mediaHeight + 50, false);
 
     // Mouse event listeners
     ofAddListener(imageCarrousel.clickedOnSelected, this, &HomePage::gotoImagePage);
     ofAddListener(videoCarrousel.clickedOnSelected, this, &HomePage::gotoVideoPage);
     
     // Buttons and their listeners
-    cameraBtn.setup("cameraIcon.png", 100, 80, 50);
-    lockBtn.setup("lockIcon.png", 100, ofGetWidth() - 180, 50);
+    cameraBtn.setup("icons/cameraIcon.png", 100, 80, 50);
+    lockBtn.setup("icons/lockIcon.png", 100, ofGetWidth() - 180, 50);
 
     ofAddListener(cameraBtn.clickedInside, this, &HomePage::gotoCameraPage);
     ofAddListener(lockBtn.clickedInside, this, &HomePage::gotoSavescreenPage);

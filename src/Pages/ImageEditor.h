@@ -10,18 +10,24 @@
 class ImageEditor : public MediaEditor {
 public:
 
-    void setup(string filePath) {
+    void setup(string filePath, int versionID) {
 
-        MediaEditor::setup(filePath);
+        MediaEditor::setup(filePath, versionID);
 
         img.load(filePath);
 
         Media::setFullScreenSizeAndPos(img.getWidth(), img.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
         colorImg.allocate(img.getWidth(), img.getHeight());
         colorImg.setFromPixels(img.getPixels());
+
+        setupVersion();
         
-        gui.invertColorFilter.addListener(this, &ImageEditor::invertImage);
-        gui.edgeFilter.addListener(this, &ImageEditor::edgeImage);
+        gui.edgeFilter.addListener(this, &ImageEditor::edge);
+        gui.invertColorFilter.addListener(this, &ImageEditor::invert);
+        gui.blurFilter.addListener(this, &ImageEditor::blur);
+        gui.blurGaussianFilter.addListener(this, &ImageEditor::gaussianBlur);
+        gui.dilateFilter.addListener(this, &ImageEditor::dilate);
+        gui.erodeFilter.addListener(this, &ImageEditor::erode);
     }
 
     void draw() override {
@@ -34,13 +40,19 @@ public:
         {
             img.drawInAscii();
         }
-        else if (gui.invertColorFilter)
-        {
-            colorImg.draw(xPos, yPos, displayWidth, displayHeight);
-        }
         else if (gui.edgeFilter)
         {
             MediaEditor::drawEdges();
+        }
+        else if (
+                gui.invertColorFilter 
+                || gui.blurFilter 
+                || gui.blurGaussianFilter 
+                || gui.dilateFilter 
+                || gui.erodeFilter
+            )
+        {
+            colorImg.draw(xPos, yPos, displayWidth, displayHeight);
         }
         else {
             img.draw(xPos, yPos, displayWidth, displayHeight);
@@ -52,33 +64,72 @@ public:
     }
 
     void exit() {
-        gui.invertColorFilter.removeListener(this, &ImageEditor::invertImage);
-        gui.edgeFilter.removeListener(this, &ImageEditor::edgeImage);
+        gui.invertColorFilter.removeListener(this, &ImageEditor::invert);
+        gui.edgeFilter.removeListener(this, &ImageEditor::edge);
+        gui.blurFilter.removeListener(this, &ImageEditor::blur);
+        gui.blurGaussianFilter.removeListener(this, &ImageEditor::gaussianBlur);
+        gui.dilateFilter.removeListener(this, &ImageEditor::dilate);
+        gui.erodeFilter.removeListener(this, &ImageEditor::erode);
         MediaEditor::exit();
     }
 
-    void invertImage(bool& toggleValue) {
-        if (toggleValue)
-        {
-            colorImg.invert();
-        }
-        else
-        {
-            colorImg.setFromPixels(img.getPixels());
-        }
-    }
+    void setupVersion() {
+        bool b_value = true;
 
-    void edgeImage(bool& toggleValue) {
-        if (toggleValue)
+        if (gui.edgeFilter)
         {
-            MediaEditor::findContours();
+            edge(b_value);
         }
-        else
+        else if (gui.invertColorFilter)
         {
-            colorImg.setFromPixels(img.getPixels());
+            invert(b_value);
+        }
+        else if (gui.blurFilter)
+        {
+            blur(b_value);
+        }
+        else if (gui.blurGaussianFilter)
+        {
+            gaussianBlur(b_value);
+        }
+        else if (gui.dilateFilter)
+        {
+            dilate(b_value);
+        }
+        else if (gui.erodeFilter)
+        {
+            erode(b_value);
+        }
+        else 
+        {
+            return;
         }
     }
 
 private:
     ImageMedia img;
+
+    void edge(bool& toggleValue) {
+        toggleValue ? MediaEditor::findContours() : colorImg.setFromPixels(img.getPixels());
+    }
+
+    void invert(bool& toggleValue) {
+        toggleValue ? colorImg.invert() : colorImg.setFromPixels(img.getPixels());
+    }
+
+    void blur(bool& toggleValue) {
+        toggleValue ? colorImg.blur() : colorImg.setFromPixels(img.getPixels());
+    }
+
+    void gaussianBlur(bool& toggleValue) {
+        toggleValue ? colorImg.blurGaussian() : colorImg.setFromPixels(img.getPixels());
+    }
+
+    void dilate(bool& toggleValue) {
+        toggleValue ? colorImg.dilate() : colorImg.setFromPixels(img.getPixels());
+    }
+
+    void erode(bool& toggleValue) {
+        toggleValue ? colorImg.erode() : colorImg.setFromPixels(img.getPixels());
+    }
 };

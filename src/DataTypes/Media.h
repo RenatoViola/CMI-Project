@@ -22,6 +22,7 @@ public:
     virtual float getWidth() = 0;
     virtual float getHeight() = 0;
     virtual ofPixels& getPixels() = 0;
+    virtual ofPixels& getThumbnail() = 0;
 
     static void setFullScreenSizeAndPos(float width, float height, float* displayWidth, float* displayHeight, float* xPos, float* yPos)
     {
@@ -46,6 +47,14 @@ public:
             }
             else return false;
         }
+    }
+
+    static string getFileName(const string& filePath) {
+        size_t pos = filePath.find_last_of("/");
+        if (pos == string::npos) {
+            return filePath; // No slash found, return the original path
+        }
+        return filePath.substr(pos + 1);
     }
 };
 

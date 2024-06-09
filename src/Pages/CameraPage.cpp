@@ -37,9 +37,9 @@ void CameraPage::setup(int width, int height) {
 	finder.setup("haarcascade_frontalface_alt_tree.xml");
 	// finder.setScaleHaar(1.5);
 
-	homeBtn.setup("homeIcon.png", 100, 50, 50);
-	searchBtn.setup("searchIcon.png", 100, 50, 200);
-	faceBtn.setup("faceIcon.png", 100, 200, 50);
+	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
+	searchBtn.setup("icons/searchIcon.png", 100, 50, 200);
+	faceBtn.setup("icons/faceIcon.png", 100, 200, 50);
 
 	ofAddListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
 	ofAddListener(searchBtn.clickedInside, this, &CameraPage::gotoSearchResultPage);

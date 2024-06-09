@@ -20,6 +20,7 @@ void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) 
 
 		item->load(dir.getPath(i));
 		item->update();
+		item->getThumbnail();
 		items.push_back(move(item));
 	}
 
@@ -29,6 +30,8 @@ void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) 
 	fullCarrousel.set(startX, startY, totalWidth, height);
 	
 	selectedFile.set(xPos - currentWidth / 2, startY - currentHeight / 2, width + currentWidth, height + currentHeight);
+
+	myFont.load("JuliusSansOne-Regular.ttf", 32);
 }
 
 void Carrousel::exit() {
@@ -40,7 +43,10 @@ void Carrousel::draw() {
 	step = ofLerp(step, space, 0.05);
 
 	ofSetColor(ofColor::black);
-	ofDrawBitmapString(isImageCarrousel ? "IMAGES" : "VIDEOS", startX + totalWidth / 2 - 18, startY - 50);
+	string title = isImageCarrousel ? "IMAGES" : "VIDEOS";
+	float textWidth = myFont.stringWidth(title);
+
+	myFont.drawString(title, (ofGetWidth() - textWidth) / 2.0f, startY - 50);
 
 	ofSetColor(ofColor::white);
 	for (int i = 0; i < numFilesToShow; i++) {

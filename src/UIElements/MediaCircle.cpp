@@ -1,9 +1,14 @@
 #include "MediaCircle.h"
 #include <ImageMedia.h>
 #include <VideoMedia.h>
+#include <Metadata.h>
 
-void MediaCircle::setup(vector<string> paths)
+void MediaCircle::setup(vector<string>& paths, int radius, int width, int height)
 {
+	this->radius = radius;
+	this->width = width;
+	this->height = height;
+
 	items.reserve(paths.size());
 
 	for (string path : paths) {
@@ -15,15 +20,17 @@ void MediaCircle::setup(vector<string> paths)
 
 		item->load(path);
 		item->update();
+		item->getThumbnail();
 		items.push_back(move(item));
 	}
 
 	/* Calculate image pos in circle */
 	angleInRadians = 2 * PI / this->items.size();
-	cout << angleInRadians << endl;
 
 	// Setup bounding rectangles
 	updateBoundingBoxes();
+
+	myFont.load("JuliusSansOne-Regular.ttf", 11);
 }
 
 void MediaCircle::update()
@@ -36,11 +43,32 @@ void MediaCircle::update()
 
 void MediaCircle::draw()
 {
-//	ofSetColor(ofColor::white);
 	for (int i = 0; i < items.size(); i++)
 	{
 		Media* m = items[i].get();
 		const ofRectangle& rect = boundingBoxes[i];
+		stringstream caption;
+		ofRectangle border;
+		border.set(rect.x - 5, rect.y - 5, rect.width + 10, rect.height + 10);
+		
+		if (i + 1 <= versions.size())
+		{
+			auto t = versions[i];
+			caption << "ALT. " << get<0>(t) << " | " << get<2>(t) << endl;
+			ofSetColor(ofColor::paleGreen);
+		}
+		else
+		{
+			caption << (Media::isImage(m->getFilePath()) ? "IMAGE" : "VIDEO") << endl;
+			ofSetColor(ofColor::lightCyan);
+		}
+
+		ofDrawRectRounded(border, 10);
+		float textWidth = myFont.stringWidth(caption.str());
+		ofSetColor(ofColor::black);
+		myFont.drawString(caption.str(), rect.x + (rect.width - textWidth) / 2.0f, rect.y - 10);
+		ofSetColor(ofColor::white);
+
 		m->draw(rect.x, rect.y, rect.width, rect.height);
 	}
 }
@@ -68,6 +96,9 @@ string MediaCircle::getCurrentFilePath() {
 	return items[selectedMedia].get()->getFilePath();
 }
 
+int MediaCircle::getCurrentIndex() {
+	return selectedMedia;
+}
 
 void MediaCircle::updateBoundingBoxes() {
 	int centerX = ofGetWidth() / 2;
@@ -78,13 +109,17 @@ void MediaCircle::updateBoundingBoxes() {
 	{
 		double angle = angleInRadians * i;
 
-		float x = centerX + CIRCLE_RADIUS * cos(angle);
-		float y = centerY + CIRCLE_RADIUS * sin(angle);
+		float x = centerX + radius * cos(angle);
+		float y = centerY + radius * sin(angle);
 
-		x -= MEDIA_WIDTH / 2;
-		y -= MEDIA_HEIGHT / 2;
+		x -= width / 2;
+		y -= height / 2;
 
-		ofRectangle rect(x, y, MEDIA_WIDTH, MEDIA_HEIGHT);
+		ofRectangle rect(x, y, width, height);
 		boundingBoxes.push_back(rect);
 	}
+}
+
+void MediaCircle::setVersions(const string& filePath) {
+	this->versions = Metadata::getVersionedDates(filePath);
 }

@@ -2,41 +2,48 @@
 #include "VideoMedia.h"
 #include <opencv2/features2d.hpp>
 #include <constants_c.h>
+#include <omp.h>
+#include <algorithm>
+#include <execution>
+#include <mutex>
 
 
 //--------------------------------------------------------------
-void Metadata::load(string filename, ofXml& XML, bool isImage) {
+void Metadata::load(string filePath) {
 
-	const string PATH = (isImage ? "imagesXML/" : "videosXML/") + filename + ".xml";
+	ofXml XML;
+	bool isImage = Media::isImage(filePath);
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
 
 	if (!XML.load(PATH)) {
 		ofLogError() << "Couldn't load file: " << filename << "; " << "Will create one.";
 		XML.clear();
-		ofXml file = XML.appendChild("FILE");
+		ofXml file = XML.appendChild("METADATA");
 		vector<ofPixels> frames;
 
 		if (isImage)
 		{
 			ofImage img;
-			img.load("images/" + filename);
+			img.load(filePath);
 			frames = { img.getPixels() };
-			file.appendChild("TYPE").set("IMAGE");
 		}
 		else
 		{
 			ofVideoPlayer video;
-			video.load("videos/" + filename);
+			video.load(filePath);
 			frames = VideoMedia::extractFrames(video, 10);
-			file.appendChild("TYPE").set("VIDEO");
 		}
 		processFileMetadata(filename, frames, file);
-		save(filename, XML, isImage);
+		save(filePath, XML);
 	}
 }
 
 //--------------------------------------------------------------
-void Metadata::save(string filename, ofXml& XML, bool isImage) {
-	const string PATH = (isImage ? "imagesXML/" : "videosXML/") + filename + ".xml";
+void Metadata::save(string filePath, ofXml& XML) {
+
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
 
 	if (!XML.save(PATH)) {
 		ofLogError() << "Couldn't save file:" << filename << ";";
@@ -48,11 +55,6 @@ set<string> Metadata::getTags(ofXml& XML) {
 	set<string> tags;
 
 	auto xmlTags = XML.find("//TAGS/TAG");
-
-	if (xmlTags.empty())
-	{
-		throw std::runtime_error("There are no tags for this file.");
-	}
 
 	for (auto& tag : xmlTags) {
 		tags.insert(tag.getValue());
@@ -75,8 +77,6 @@ void Metadata::processFileMetadata(string filename, vector<ofPixels>& frames, of
 	ofPixels& firstFrame = frames.at(0);
 	detectEdges(firstFrame, XML.appendChild("EDGE_DISTRIBUTION"));
 	detectTextureCharacteristics(firstFrame, XML.appendChild("TEXTURE_CHARACTERISTICS"));
-	
-	XML.appendChild("OBJECT_OCCURRENCES");
 }
 
 
@@ -238,66 +238,146 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
 
+vector<string> Metadata::filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths) {
+	const size_t total_paths = image_paths.size() + video_paths.size();
+	std::vector<std::pair<string, int>> vec(total_paths);
+	size_t vec_size = 0; // Tracks the number of valid entries
 
-vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image_paths, vector<string> video_paths) {
-
-	vector<pair<string, int>> vec;
-
+	// Convert ofPixels to Mat
 	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
 	if (img1.channels() != 1) {
 		cvtColor(img1, img1, COLOR_RGB2GRAY);
 	}
-	
+
+	// Feature detection and description
 	Mat desc1;
 	vector<KeyPoint> kpts1;
-
 	Ptr<Feature2D> detector = SIFT::create();
 	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
-	
-	for (string path : image_paths)
-	{
-		ofImage image2;
-		image2.load(path);
-		int occurrences = countOccurrencesInFrame(image2.getPixels(), desc1, kpts1);
-		if (occurrences > 0)
-		{
-			vec.emplace_back(path, occurrences);
+
+	// Process image paths
+#pragma omp parallel for
+	for (int i = 0; i < image_paths.size(); ++i) {
+		ofImage img2;
+		if (img2.load(image_paths[i])) {
+			int occurrences = countOccurrencesInFrame(img2.getPixels(), desc1, kpts1);
+			if (occurrences > 0) {
+#pragma omp critical
+				{
+					vec[vec_size++] = std::make_pair(image_paths[i], occurrences);
+				}
+			}
 		}
 	}
 
-	for (string path : video_paths)
-	{
+	std::vector<ofPixels> v_frames;
+	for (const string& path : video_paths) {
 		ofVideoPlayer video;
-		video.load(path);
-		ofPixels frame = VideoMedia::extractFirstFrame(video);
-		int occurrences = countOccurrencesInFrame(frame, desc1, kpts1);
-		if (occurrences > 0)
-		{
-			vec.emplace_back(path, occurrences);
+		if (video.load(path)) {
+			ofPixels frame = VideoMedia::extractFirstFrame(video);
+			v_frames.push_back(frame);
 		}
 	}
 
-	sort(vec.begin(), vec.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
+	// Process video frames in parallel
+#pragma omp parallel for
+	for (int i = 0; i < video_paths.size(); ++i) {
+		int occurrences = countOccurrencesInFrame(v_frames[i], desc1, kpts1);
+		if (occurrences > 0) {
+#pragma omp critical
+			{
+				vec[vec_size++] = std::make_pair(video_paths[i], occurrences);
+			}
+		}
+	}
+
+	// Resize vector to actual number of valid entries
+	vec.resize(vec_size);
+
+	// Sort by occurrences in descending order
+	std::sort(vec.begin(), vec.end(), [](const std::pair<string, int>& a, const std::pair<string, int>& b) {
 		return a.second > b.second;
-	});
+		});
 
-	if (vec.size() > 8) {
-		vec.resize(8);
-	}
-
-	vector<std::string> filenames;
-	filenames.reserve(vec.size());
-
-	for (const auto& pair : vec) {
-		filenames.push_back(pair.first);
-	}
-
-	for (const auto& pair : vec) {
-		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	// Prepare the final vector of filenames
+	vector<string> filenames;
+	size_t limit = std::min(vec_size, size_t(4)); // Limit to top 4 results
+	filenames.reserve(limit);
+	for (size_t i = 0; i < limit; ++i) {
+		filenames.push_back(vec[i].first);
 	}
 
 	return filenames;
 }
+
+// ALTERNATE VERSION USING std::thread
+//vector<string> Metadata::filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths) {
+//	const size_t total_paths = image_paths.size() + video_paths.size();
+//	std::vector<std::pair<string, int>> vec(total_paths);
+//	std::mutex vec_mutex;
+//	size_t vec_size = 0; // Tracks the number of valid entries
+//
+//	// Convert ofPixels to Mat
+//	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+//	if (img1.channels() != 1) {
+//		cvtColor(img1, img1, COLOR_RGB2GRAY);
+//	}
+//
+//	// Feature detection and description
+//	Mat desc1;
+//	vector<KeyPoint> kpts1;
+//	Ptr<Feature2D> detector = SIFT::create();
+//	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
+//
+//	// Process image paths in parallel using for_each with parallel execution
+//	std::for_each(std::execution::par, image_paths.begin(), image_paths.end(), [&](const string& path) {
+//		ofImage img2;
+//		if (img2.load(path)) {
+//			int occurrences = countOccurrencesInFrame(img2.getPixels(), desc1, kpts1);
+//			if (occurrences > 0) {
+//				std::lock_guard<std::mutex> lock(vec_mutex);
+//				vec[vec_size++] = std::make_pair(path, occurrences);
+//			}
+//		}
+//		});
+//
+//	std::vector<ofPixels> v_frames;
+//	for (const string& path : video_paths) {
+//		ofVideoPlayer video;
+//		if (video.load(path)) {
+//			ofPixels frame = VideoMedia::extractFirstFrame(video);
+//			v_frames.push_back(frame);
+//		}
+//	}
+//
+//	// Process video frames in parallel using for_each with parallel execution
+//	std::for_each(std::execution::par, video_paths.begin(), video_paths.end(), [&](const string& path) {
+//		int index = &path - &video_paths[0]; // Calculate the index
+//		int occurrences = countOccurrencesInFrame(v_frames[index], desc1, kpts1);
+//		if (occurrences > 0) {
+//			std::lock_guard<std::mutex> lock(vec_mutex);
+//			vec[vec_size++] = std::make_pair(path, occurrences);
+//		}
+//		});
+//
+//	// Resize vector to actual number of valid entries
+//	vec.resize(vec_size);
+//
+//	// Sort by occurrences in descending order
+//	std::sort(vec.begin(), vec.end(), [](const std::pair<string, int>& a, const std::pair<string, int>& b) {
+//		return a.second > b.second;
+//		});
+//
+//	// Prepare the final vector of filenames
+//	vector<string> filenames;
+//	size_t limit = std::min(vec_size, size_t(4)); // Limit to top 4 results
+//	filenames.reserve(limit);
+//	for (size_t i = 0; i < limit; ++i) {
+//		filenames.push_back(vec[i].first);
+//	}
+//
+//	return filenames;
+//}
 
 
 int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPoint>& kpts1) {
@@ -355,26 +435,29 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 	return countNonZero(match_mask);
 }
 
-FileMetadata Metadata::parseMetadata(const string& filename) {
-	FileMetadata metadata;
-	ofXml xml;
+FileMetadata Metadata::parseMetadata(const string& filePath) {
 
-	if (!xml.load(filename)) {
+	FileMetadata metadata;
+	ofXml root;
+	bool isImage = Media::isImage(filePath);
+	string filename = Media::getFileName(filePath);
+	const string PATH = "xml/" + filePath + ".xml";
+
+	if (!root.load(PATH)) {
 		cerr << "Error loading file: " << filename << endl;
 		return metadata;
 	}
 
-	// Parse file type
-	metadata.path = xml.getAttribute("TYPE").getValue();
+	auto xml = root.findFirst("//METADATA");
 
 	// Parse filename
-	metadata.path = xml.getAttribute("FILENAME").getValue();
+	metadata.path = xml.getChild("FILENAME").getValue();
 
 	// Parse tags
 	metadata.tags = getTags(xml);
 
 	// Parse luminance
-	metadata.luminance = xml.getAttribute("LUMINANCE").getDoubleValue();
+	metadata.luminance = xml.getChild("LUMINANCE").getDoubleValue();
 
 	// Parse color
 	auto color = xml.findFirst("COLOR");
@@ -383,7 +466,7 @@ FileMetadata Metadata::parseMetadata(const string& filename) {
 	metadata.blue = color.getChild("BLUE").getIntValue();
 
 	// Parse number of faces
-	metadata.numFaces = xml.getAttribute("NUM_FACES").getIntValue();
+	metadata.numFaces = xml.getChild("NUM_FACES").getIntValue();
 
 	// Parse edge distribution
 	vector<string> edgeTags = { "VERTICAL", "HORIZONTAL", "DEGREES_45", "DEGREES_135", "NON_DIRECTIONAL" };
@@ -468,11 +551,38 @@ double Metadata::calculateSimilarity(const FileMetadata& file1, const FileMetada
 }
 
 
-vector<string> Metadata::findRelatedFiles(string filepath, vector<string>& image_paths, vector<string> video_paths) {
-	
+vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image_paths, vector<string>& video_paths) {
+
+	ofXml xml;
+	const string PATH = "xml/" + filePath + ".xml";
+	vector<string> filenames;
+	filenames.reserve(8);
+
+	// Load related files if already present in metadata
+	if (!xml.load(PATH))
+	{
+		ofLogError() << "Couldn't load file: " << filePath << ".";
+		return filenames;
+	}
+	else
+	{
+		auto xmlFiles = xml.find("//RELATED_FILES/FILE");
+
+		for (auto& file : xmlFiles) {
+			filenames.push_back(file.getValue());
+		}
+
+		if (!filenames.empty())
+		{
+			return filenames;
+		}
+	}
+
+	// Perform computation
+
 	vector<pair<string, double>> vec;
 
-	FileMetadata f1 = parseMetadata(filepath);
+	FileMetadata f1 = parseMetadata(filePath);
 	FileMetadata f2;
 	double similarity;
 
@@ -492,22 +602,68 @@ vector<string> Metadata::findRelatedFiles(string filepath, vector<string>& image
 
 	sort(vec.begin(), vec.end(), [](const pair<string, double>& a, const pair<string, double>& b) {
 		return a.second > b.second;
-	});
+		});
+
+	vec.erase(vec.begin());
 
 	if (vec.size() > 8) {
 		vec.resize(8);
 	}
 
-	vector<std::string> filenames;
-	filenames.reserve(vec.size());
-
 	for (const auto& pair : vec) {
 		filenames.push_back(pair.first);
 	}
 
-	for (const auto& pair : vec) {
-		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	// Add RELATED_FILES section
+	auto metadataNode = xml.findFirst("//METADATA");
+	if (metadataNode) {
+		auto relatedFilesNode = metadataNode.appendChild("RELATED_FILES");
+		for (const string& filename : filenames) {
+			relatedFilesNode.appendChild("FILE").set(filename);
+		}
 	}
 
+	xml.save(PATH);
+
 	return filenames;
+}
+
+
+vector<pair<int, string>> Metadata::getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames) {
+	
+	vector<tuple<int, string, string>> versions = getVersionedDates(filePath);
+	vector<pair<int, string>> result;
+
+	for (size_t i = 0; i < versions.size() && versions.size() < 8; ++i) {
+		result.emplace_back(get<0>(versions[i]), get<1>(versions[i]));
+	}
+
+	// Add related filenames to fill the vector up to 8 elements
+	for (size_t i = 0; i < relatedFilenames.size() && result.size() < 8; ++i) {
+		result.emplace_back(0, relatedFilenames[i]);
+	}
+
+	return result;
+}
+
+
+vector<tuple<int, string, string>> Metadata::getVersionedDates(const string& filePath) {
+
+	vector<tuple<int, string, string>> result;
+
+	ofXml xml;
+	string loadPath = "versions/" + filePath + ".xml";
+
+	if (xml.load(loadPath)) {
+
+		auto xmlFiles = xml.find("//METADATA/VERSIONS/VERSION");
+
+		for (auto& file : xmlFiles) {
+			int versionID = file.getAttribute("ID").getIntValue();
+			string date = file.getChild("DATE").getValue();
+			result.emplace_back(versionID, filePath, date);
+		}
+	}
+
+	return result;
 }

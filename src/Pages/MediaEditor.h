@@ -9,13 +9,17 @@ class MediaEditor
 {
 public:
 
-	void setup(string filePath) {
+	void setup(string filePath, int versionID) {
 
 		this->filePath = filePath;
-		homeBtn.setup("homeIcon.png", 100, 50, 50);
-		versionBtn.setup("versionIcon.png", 100, 50, 200);
+		homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
+		versionBtn.setup("icons/versionIcon.png", 100, 50, 200);
 		gui.setup(filePath);
-
+		if (versionID != 0)
+		{
+			gui.loadVersionInfo(versionID);
+		}
+		
 		ofAddListener(homeBtn.clickedInside, this, &MediaEditor::gotoHomePage);
 		ofAddListener(versionBtn.clickedInside, this, &MediaEditor::gotoVersionPage);
 	}

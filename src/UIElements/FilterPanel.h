@@ -19,7 +19,7 @@ public:
 
 	bool panelVisibility, isImageFile;
 
-	ofxToggle invertColorFilter, asciiFilter, edgeFilter;
+	ofxToggle invertColorFilter, asciiFilter, edgeFilter, blurFilter, blurGaussianFilter, dilateFilter, erodeFilter;
 	ofxLabel filtersLabel, changesLabel, spaceLabel;
 
 	ofxPanel gui;
