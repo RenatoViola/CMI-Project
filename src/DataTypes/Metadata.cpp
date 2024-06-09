@@ -2,6 +2,10 @@
 #include "VideoMedia.h"
 #include <opencv2/features2d.hpp>
 #include <constants_c.h>
+#include <omp.h>
+#include <algorithm>
+#include <execution>
+#include <mutex>
 
 
 //--------------------------------------------------------------
@@ -234,67 +238,172 @@ void Metadata::calculateStats(const string& filterName, Mat& filteredMat, ofXml&
 	filterSection.appendChild("STANDARD_DEVIATION").set(deviation[0]);
 }
 
+void Metadata::checkOpenMP() {
+	const int size = 100;
+	int array[size];
+	int sum = 0;
 
-vector<string> Metadata::filesWithObject(ofPixels& pixels, vector<string>& image_paths, vector<string> video_paths) {
+	// Initialize the array
+	for (int i = 0; i < size; ++i) {
+		array[i] = i + 1;
+	}
 
-	vector<pair<string, int>> vec;
+	// Parallelize this loop with OpenMP
+//#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < size; ++i) {
+		sum += array[i];
+		// Print the thread ID and the current index
+		int thread_id = omp_get_thread_num();
+//#pragma omp critical
+		{
+			std::cout << "Thread " << thread_id << " processing index " << i << std::endl;
+		}
+	}
 
+	std::cout << "Sum of array elements is " << sum << std::endl;
+}
+
+
+vector<string> Metadata::filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths) {
+	const size_t total_paths = image_paths.size() + video_paths.size();
+	std::vector<std::pair<string, int>> vec(total_paths);
+	size_t vec_size = 0; // Tracks the number of valid entries
+
+	// Convert ofPixels to Mat
 	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
 	if (img1.channels() != 1) {
 		cvtColor(img1, img1, COLOR_RGB2GRAY);
 	}
-	
+
+	// Feature detection and description
 	Mat desc1;
 	vector<KeyPoint> kpts1;
-
-	/*Ptr<Feature2D> detector = SIFT::create();*/
-	Ptr<Feature2D> detector = ORB::create();
+	Ptr<Feature2D> detector = SIFT::create();
 	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
-	
-	for (string path : image_paths)
-	{
-		ofImage image2;
-		image2.load(path);
-		int occurrences = countOccurrencesInFrame(image2.getPixels(), desc1, kpts1);
-		if (occurrences > 0)
-		{
-			vec.emplace_back(path, occurrences);
+
+	// Process image paths
+#pragma omp parallel for
+	for (int i = 0; i < image_paths.size(); ++i) {
+		ofImage img2;
+		if (img2.load(image_paths[i])) {
+			int occurrences = countOccurrencesInFrame(img2.getPixels(), desc1, kpts1);
+			if (occurrences > 0) {
+#pragma omp critical
+				{
+					vec[vec_size++] = std::make_pair(image_paths[i], occurrences);
+				}
+			}
 		}
 	}
 
-	for (string path : video_paths)
-	{
+	std::vector<ofPixels> v_frames;
+	for (const string& path : video_paths) {
 		ofVideoPlayer video;
-		video.load(path);
-		ofPixels frame = VideoMedia::extractFirstFrame(video);
-		int occurrences = countOccurrencesInFrame(frame, desc1, kpts1);
-		if (occurrences > 0)
-		{
-			vec.emplace_back(path, occurrences);
+		if (video.load(path)) {
+			ofPixels frame = VideoMedia::extractFirstFrame(video);
+			v_frames.push_back(frame);
 		}
 	}
 
-	sort(vec.begin(), vec.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
+	// Process video frames in parallel
+#pragma omp parallel for
+	for (int i = 0; i < video_paths.size(); ++i) {
+		int occurrences = countOccurrencesInFrame(v_frames[i], desc1, kpts1);
+		if (occurrences > 0) {
+#pragma omp critical
+			{
+				vec[vec_size++] = std::make_pair(video_paths[i], occurrences);
+			}
+		}
+	}
+
+	// Resize vector to actual number of valid entries
+	vec.resize(vec_size);
+
+	// Sort by occurrences in descending order
+	std::sort(vec.begin(), vec.end(), [](const std::pair<string, int>& a, const std::pair<string, int>& b) {
 		return a.second > b.second;
-	});
+		});
 
-	if (vec.size() > 4) {
-		vec.resize(4);
-	}
-
-	vector<std::string> filenames;
-	filenames.reserve(vec.size());
-
-	for (const auto& pair : vec) {
-		filenames.push_back(pair.first);
-	}
-
-	for (const auto& pair : vec) {
-		ofLogError() << "PAIR " << pair.first << ": " << pair.second << std::endl;
+	// Prepare the final vector of filenames
+	vector<string> filenames;
+	size_t limit = std::min(vec_size, size_t(4)); // Limit to top 4 results
+	filenames.reserve(limit);
+	for (size_t i = 0; i < limit; ++i) {
+		filenames.push_back(vec[i].first);
 	}
 
 	return filenames;
 }
+
+// ALTERNATE VERSION USING std::thread
+//vector<string> Metadata::filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths) {
+//	const size_t total_paths = image_paths.size() + video_paths.size();
+//	std::vector<std::pair<string, int>> vec(total_paths);
+//	std::mutex vec_mutex;
+//	size_t vec_size = 0; // Tracks the number of valid entries
+//
+//	// Convert ofPixels to Mat
+//	Mat img1(pixels.getWidth(), pixels.getHeight(), CV_8UC(pixels.getNumChannels()), pixels.getData());
+//	if (img1.channels() != 1) {
+//		cvtColor(img1, img1, COLOR_RGB2GRAY);
+//	}
+//
+//	// Feature detection and description
+//	Mat desc1;
+//	vector<KeyPoint> kpts1;
+//	Ptr<Feature2D> detector = SIFT::create();
+//	detector->detectAndCompute(img1, Mat(), kpts1, desc1);
+//
+//	// Process image paths in parallel using for_each with parallel execution
+//	std::for_each(std::execution::par, image_paths.begin(), image_paths.end(), [&](const string& path) {
+//		ofImage img2;
+//		if (img2.load(path)) {
+//			int occurrences = countOccurrencesInFrame(img2.getPixels(), desc1, kpts1);
+//			if (occurrences > 0) {
+//				std::lock_guard<std::mutex> lock(vec_mutex);
+//				vec[vec_size++] = std::make_pair(path, occurrences);
+//			}
+//		}
+//		});
+//
+//	std::vector<ofPixels> v_frames;
+//	for (const string& path : video_paths) {
+//		ofVideoPlayer video;
+//		if (video.load(path)) {
+//			ofPixels frame = VideoMedia::extractFirstFrame(video);
+//			v_frames.push_back(frame);
+//		}
+//	}
+//
+//	// Process video frames in parallel using for_each with parallel execution
+//	std::for_each(std::execution::par, video_paths.begin(), video_paths.end(), [&](const string& path) {
+//		int index = &path - &video_paths[0]; // Calculate the index
+//		int occurrences = countOccurrencesInFrame(v_frames[index], desc1, kpts1);
+//		if (occurrences > 0) {
+//			std::lock_guard<std::mutex> lock(vec_mutex);
+//			vec[vec_size++] = std::make_pair(path, occurrences);
+//		}
+//		});
+//
+//	// Resize vector to actual number of valid entries
+//	vec.resize(vec_size);
+//
+//	// Sort by occurrences in descending order
+//	std::sort(vec.begin(), vec.end(), [](const std::pair<string, int>& a, const std::pair<string, int>& b) {
+//		return a.second > b.second;
+//		});
+//
+//	// Prepare the final vector of filenames
+//	vector<string> filenames;
+//	size_t limit = std::min(vec_size, size_t(4)); // Limit to top 4 results
+//	filenames.reserve(limit);
+//	for (size_t i = 0; i < limit; ++i) {
+//		filenames.push_back(vec[i].first);
+//	}
+//
+//	return filenames;
+//}
 
 
 int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPoint>& kpts1) {
@@ -311,8 +420,7 @@ int Metadata::countOccurrencesInFrame(ofPixels& pixels, Mat& desc1, vector<KeyPo
 	Mat desc2;
 	vector<KeyPoint> kpts2;
 
-	/*Ptr<Feature2D> detector = SIFT::create();*/
-	Ptr<Feature2D> detector = ORB::create();
+	Ptr<Feature2D> detector = SIFT::create();
 	detector->detectAndCompute(img2, Mat(), kpts2, desc2);
 
 	BFMatcher desc_matcher(cv::NORM_L2, true);
@@ -469,7 +577,7 @@ double Metadata::calculateSimilarity(const FileMetadata& file1, const FileMetada
 }
 
 
-vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image_paths, vector<string> video_paths) {
+vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image_paths, vector<string>& video_paths) {
 	
 	ofXml xml;
 	const string PATH = "xml/" + filePath + ".xml";
@@ -504,15 +612,17 @@ vector<string> Metadata::findRelatedFiles(string filePath, vector<string>& image
 	FileMetadata f2;
 	double similarity;
 
-	for (string path : image_paths)
+	for (int i = 0; i < image_paths.size(); ++i)
 	{
+		const string& path = image_paths[i];
 		f2 = parseMetadata(path);
 		similarity = calculateSimilarity(f1, f2);
 		vec.emplace_back(path, similarity);
 	}
 
-	for (string path : video_paths)
+	for (int i = 0; i < video_paths.size(); ++i)
 	{
+		const string& path = image_paths[i];
 		f2 = parseMetadata(path);
 		similarity = calculateSimilarity(f1, f2);
 		vec.emplace_back(path, similarity);

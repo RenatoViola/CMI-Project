@@ -12,8 +12,8 @@ public:
 	static void load(string filePath);
 	static void save(string filePath, ofXml& XML);
 	static set<string> getTags(ofXml& XML);
-	static vector<string> filesWithObject(ofPixels& pixels, vector<string>& image_paths, vector<string> video_paths);
-	static vector<string> findRelatedFiles(string path, vector<string>& image_paths, vector<string> video_paths);
+	static vector<string> filesWithObject(ofPixels& pixels, const vector<string>& image_paths, const vector<string>& video_paths);
+	static vector<string> findRelatedFiles(string path, vector<string>& image_paths, vector<string>& video_paths);
 
 	static void processFileMetadata(string fileName, vector<ofPixels>& frames, ofXml& XML);
 	static void calculateAverageColorAndLuminanceInFrame(ofPixels& pixels, ofColor& color, float* luminance);
@@ -30,6 +30,8 @@ public:
 
 	static vector<pair<int, string>> getVersionedRelatedFiles(const string& filePath, const vector<string>& relatedFilenames);
 	static vector<tuple<int, string, string>> getVersionedDates(const string& filePath);
+
+	static void checkOpenMP();
 	
 	// SAVE VERSION
 	// GET VERSIONS AND RELATED FILES

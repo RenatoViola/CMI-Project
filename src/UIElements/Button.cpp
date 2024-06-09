@@ -14,7 +14,7 @@ void Button::update()
 	uint64_t elapsedTime = currentTime - startTime;
 
 	if (elapsedTime < 1000) { // Fully opaque for the first 500 milliseconds (0.5 seconds)
-		fadeAlpha = 255.0f;
+		fadeAlpha = ofLerp(0.0f, 255.0f, (elapsedTime * 5) / 1000.0f);
 	}
 	else if (elapsedTime < 2000) { // Fade out over the next 1000 milliseconds (1 second)
 		float fadeTime = elapsedTime - 1000;

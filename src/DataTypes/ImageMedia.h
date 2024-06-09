@@ -15,7 +15,7 @@ private:
     {
         float sWidth = ofGetWidth(), sHeight = ofGetHeight();
         float displayWidth, displayHeight, xPos, yPos;
-        setFullScreenSizeAndPos(image.getWidth(), image.getHeight(), & displayWidth, &displayHeight, &xPos, &yPos);
+        setFullScreenSizeAndPos(image.getWidth(), image.getHeight(), &displayWidth, &displayHeight, &xPos, &yPos);
 
         ofImage resizedImg;
         resizedImg.allocate(displayWidth, displayHeight, OF_IMAGE_GRAYSCALE);
@@ -72,9 +72,11 @@ public:
         return image.getHeight();
     }
 
-    void exit() 
-    {
-    //    image.clear();
+    void exit() {
+        image.clear();
+        asciiFbo.end();
+        asciiFbo.clear();
+        asciiArt.clear();
     }
 
     void draw(float x, float y, float w, float h)
