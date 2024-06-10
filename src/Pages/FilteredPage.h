@@ -18,11 +18,14 @@ public:
 
 	void gotoHomePage();
 	void gotoFilePage();
+	void moveToFilePage(const string& path);
 	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
 	void setupGridAreas();
 	void checkBlobs();
+	void trackBlobs();
 	void filterBlobs(float minBlobSize);
+	void triggerEvent(int row, int col);
 
 
 	string selectedFilePath;
@@ -42,6 +45,14 @@ public:
 	ofxCvColorImage colorImg;
 	ofxCvGrayscaleImage grayImg;
 
+	const int TIME_WINDOW = 1000; // Time window in milliseconds (1 second)
+	const int BLOB_THRESHOLD = 1; // Threshold for number of blobs to trigger the event
+	const int MAX_BLOBS = 50;
+
 	ofRectangle gridAreas[3][3];
+	int blobCount[3][3];
+	unsigned long long blobTimestamps[3][3][50];
+
+	vector<string> matching_paths;
 };
 

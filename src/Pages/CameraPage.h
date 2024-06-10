@@ -13,6 +13,7 @@ class CameraPage {
 		void exit();
 		void mouseReleased(int x, int y, int button);
 		void gotoHomePage();
+		void initiateSearchResultPage();
 		void gotoSearchResultPage();
 		void toggleFaceDetection();
 		ofPixels getCapturedFrame() const;
@@ -33,4 +34,9 @@ class CameraPage {
 		bool facialDetectionEnabled;
 
 		Button homeBtn, faceBtn, searchBtn;
+		bool showLoadingMessage = false;
+		uint64_t startTime;
+		bool isRedirecting = false;
+
+		ofTrueTypeFont myFont;
 };

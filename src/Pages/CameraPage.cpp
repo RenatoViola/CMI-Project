@@ -32,13 +32,14 @@ void CameraPage::setup(int width, int height) {
 	grayImg.allocate(width, height);
 
 	finder.setup("haarcascade_frontalface_alt_tree.xml");
+	myFont.load("JuliusSansOne-Regular.ttf", 32);
 
 	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
 	searchBtn.setup("icons/searchIcon.png", 100, 50, 200);
 	faceBtn.setup("icons/faceIcon.png", 100, 200, 50);
 
 	ofAddListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
-	ofAddListener(searchBtn.clickedInside, this, &CameraPage::gotoSearchResultPage);
+	ofAddListener(searchBtn.clickedInside, this, &CameraPage::initiateSearchResultPage);
 	ofAddListener(faceBtn.clickedInside, this, &CameraPage::toggleFaceDetection);
 }
 
@@ -53,6 +54,12 @@ void CameraPage::update() {
 			grayImg = colorImg;
 			finder.findHaarObjects(grayImg);
 		}
+	}
+
+	// Handle the redirection with a delay
+	if (isRedirecting && (ofGetElapsedTimeMillis() - startTime) > 500) {
+		gotoSearchResultPage();
+		isRedirecting = false;
 	}
 }
 
@@ -78,6 +85,14 @@ void CameraPage::drawCamera() {
         }
         ofFill();
     }
+
+	if (showLoadingMessage) {
+		ofSetColor(ofColor::black);
+		string loadingMessage = "LOADING MATCHES... THIS MIGHT TAKE A BIT :)";
+		float textWidth = myFont.stringWidth(loadingMessage);
+		myFont.drawString(loadingMessage, drawPosX + ((camWidth - textWidth) / 2.0f), drawPosY + camHeight + 50);
+		ofSetColor(ofColor::white);
+	}
 }
 
 
@@ -92,9 +107,16 @@ void CameraPage::gotoHomePage() {
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
-void CameraPage::gotoSearchResultPage() {
+void CameraPage::initiateSearchResultPage() {
 	capturedFrame = colorImg.getPixels();
+	showLoadingMessage = true;
 
+	// Record the start time and set the redirection flag
+	startTime = ofGetElapsedTimeMillis();
+	isRedirecting = true;
+}
+
+void CameraPage::gotoSearchResultPage() {
 	int PAGE = FILTERED_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
@@ -112,6 +134,8 @@ void CameraPage::exit() {
 	colorImg.clear();
 	grayImg.clear();
 	faceRects.clear();
+	showLoadingMessage = false;
+	isRedirecting = false;
 
 	ofRemoveListener(homeBtn.clickedInside, this, &CameraPage::gotoHomePage);
 	ofRemoveListener(searchBtn.clickedInside, this, &CameraPage::gotoSearchResultPage);

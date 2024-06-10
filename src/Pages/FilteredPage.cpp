@@ -1,5 +1,7 @@
 #include "FilteredPage.h"
 
+
+
 void FilteredPage::setup(ofPixels& frame)
 {
 	/* Camera Vision Properties */
@@ -33,7 +35,7 @@ void FilteredPage::setup(ofPixels& frame)
 		vid_paths.push_back(vidDir.getPath(i));
 	}
 
-	vector<string> matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
+	matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
 
 	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
 	mediaCir.setup(matching_paths, 350, DISPLAY_CAMERA_WIDTH, DISPLAY_CAMERA_HEIGHT);
@@ -44,6 +46,16 @@ void FilteredPage::setup(ofPixels& frame)
 
 	// Setup the grid areas
 	setupGridAreas();
+
+	// Initialize blob tracking
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			blobCount[i][j] = 0;
+			for (int k = 0; k < MAX_BLOBS; ++k) {
+				blobTimestamps[i][j][k] = 0;
+			}
+		}
+	}
 
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
@@ -100,6 +112,7 @@ void FilteredPage::update()
 	}
 
 	filterBlobs(20000);
+	trackBlobs();
 	checkBlobs();
 
 	mediaCir.update();
@@ -113,7 +126,12 @@ void FilteredPage::gotoHomePage()
 
 void FilteredPage::gotoFilePage()
 {
-	selectedFilePath = mediaCir.getCurrentFilePath();
+	moveToFilePage(mediaCir.getCurrentFilePath());
+}
+
+void FilteredPage::moveToFilePage(const string& path)
+{
+	selectedFilePath = path;
 
 	int PAGE;
 	if (Media::isImage(selectedFilePath))
@@ -149,26 +167,6 @@ void FilteredPage::setupGridAreas() {
 	}
 }
 
-void FilteredPage::checkBlobs() {
-        for (int i = 0; i < finder.blobs.size(); i++) {
-            ofRectangle cur = finder.blobs[i].boundingRect;
-
-            float r_xPos = cur.x * scaleX;
-            float r_yPos = cur.y * scaleY;
-            ofPoint normalizedPos(r_xPos + xPos, r_yPos + yPos);
-
-            // Check non-diagonal and non-middle areas
-            if (gridAreas[0][1].inside(normalizedPos)) {
-				ofLogError() << "UP" << endl; // Top middle area
-            } else if (gridAreas[1][0].inside(normalizedPos)) {
-				ofLogError() << "LEFT" << endl; // Middle left area
-            } else if (gridAreas[1][2].inside(normalizedPos)) {
-				ofLogError() << "RIGHT" << endl;; // Middle right area
-            } else if (gridAreas[2][1].inside(normalizedPos)) {
-				ofLogError() << "BOTTOM" << endl; // Bottom middle area
-            }
-        }
-}
 
 void FilteredPage::filterBlobs(float minBlobSize) {
 	std::vector<ofxCvBlob> filteredBlobs;
@@ -178,6 +176,74 @@ void FilteredPage::filterBlobs(float minBlobSize) {
 		}
 	}
 	finder.blobs = filteredBlobs;
+}
+
+void FilteredPage::trackBlobs() {
+	unsigned long long currentTime = ofGetElapsedTimeMillis();
+
+	// Add new blobs
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		ofRectangle cur = finder.blobs[i].boundingRect;
+		float r_xPos = cur.x * scaleX;
+		float r_yPos = cur.y * scaleY;
+		ofPoint normalizedPos(r_xPos + xPos, r_yPos + yPos);
+
+		for (int row = 0; row < 3; ++row) {
+			for (int col = 0; col < 3; ++col) {
+				if (gridAreas[row][col].inside(normalizedPos)) {
+					// Add timestamp for the blob in the current area
+					blobTimestamps[row][col][blobCount[row][col] % MAX_BLOBS] = currentTime;
+					blobCount[row][col]++;
+				}
+			}
+		}
+	}
+
+	// Clean up old entries
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 3; ++col) {
+			int validBlobs = 0;
+			for (int k = 0; k < MAX_BLOBS; ++k) {
+				if (currentTime - blobTimestamps[row][col][k] <= TIME_WINDOW) {
+					blobTimestamps[row][col][validBlobs++] = blobTimestamps[row][col][k];
+				}
+			}
+			blobCount[row][col] = validBlobs;
+		}
+	}
+}
+
+
+void FilteredPage::checkBlobs() {
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 3; ++col) {
+			if ((row == 0 && col == 1) || (row == 1 && col == 0) || (row == 1 && col == 2) || (row == 2 && col == 1)) {
+				if (blobCount[row][col] >= BLOB_THRESHOLD) {
+					triggerEvent(row, col);
+				}
+			}
+		}
+	}
+}
+
+void FilteredPage::triggerEvent(int row, int col) {
+	if (row == 0 && col == 1) {
+		ofLogNotice() << "UP"; // Top middle area
+		selectedFilePath = matching_paths[3];
+	}
+	else if (row == 1 && col == 0) {
+		ofLogNotice() << "LEFT"; // Middle left area
+		selectedFilePath = matching_paths[2];
+	}
+	else if (row == 1 && col == 2) {
+		ofLogNotice() << "RIGHT"; // Middle right area
+		selectedFilePath = matching_paths[0];
+	}
+	else if (row == 2 && col == 1) {
+		ofLogNotice() << "BOTTOM"; // Bottom middle area
+		selectedFilePath = matching_paths[1];
+	}
+	moveToFilePage(selectedFilePath);
 }
 
 void FilteredPage::exit() {
