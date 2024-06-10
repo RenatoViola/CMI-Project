@@ -31,11 +31,7 @@ void CameraPage::setup(int width, int height) {
 	colorImg.allocate(width, height);
 	grayImg.allocate(width, height);
 
-//	finder.setup("haarcascade_frontalface_default.xml");
-//	finder.setup("haarcascade_frontalface_alt.xml");
-//	finder.setup("haarcascade_frontalface_alt2.xml");
 	finder.setup("haarcascade_frontalface_alt_tree.xml");
-	// finder.setScaleHaar(1.5);
 
 	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
 	searchBtn.setup("icons/searchIcon.png", 100, 50, 200);
@@ -75,7 +71,7 @@ void CameraPage::drawCamera() {
 
     if (facialDetectionEnabled) {
         ofNoFill();
-        ofSetColor(ofColor::steelBlue);
+        ofSetColor(ofColor::red);
         for (int i = 0; i < finder.blobs.size(); i++) {
             ofRectangle cur = finder.blobs[i].boundingRect;
             ofDrawRectangle(cur.x + drawPosX, cur.y + drawPosY, cur.width, cur.height);

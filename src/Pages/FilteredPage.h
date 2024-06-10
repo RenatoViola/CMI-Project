@@ -20,6 +20,11 @@ public:
 	void gotoFilePage();
 	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
+	void setupGridAreas();
+	void checkBlobs();
+	void filterBlobs(float minBlobSize);
+
+
 	string selectedFilePath;
 
 	MediaCircle mediaCir;
@@ -27,26 +32,16 @@ public:
 	ofEvent<int> redirectEvent;
 	Button homeBtn;
 
-#pragma region Camera Vision properties
+	
+	const int CAMERA_WIDTH = 1280, CAMERA_HEIGHT = 720, DISPLAY_CAMERA_WIDTH = 320, DISPLAY_CAMERA_HEIGHT = 240;
 
-	const int CAMERA_HEIGHT = 240;
-	const int CAMERA_WIDTH = 320;
-	const int THRESHOLD = 70;
-	const double ALPHA = 0.001;
+	float displayWidth, displayHeight, xPos, yPos, scaleX, scaleY;
 
-	ofxCvGrayscaleImage currentFrame;
-	ofxCvGrayscaleImage bgImage;
-	ofxCvGrayscaleImage diff;
+	ofVideoGrabber vidGrabber;
+	ofxCvHaarFinder finder;
+	ofxCvColorImage colorImg;
+	ofxCvGrayscaleImage grayImg;
 
-	ofVideoGrabber videoGrabber;
-
-	ofxCvContourFinder 	contourFinder;
-
-#pragma endregion
-
-	bool bLearnBackground;
-	void checkForMovement();
-
-	ofxCvColorImage img;
+	ofRectangle gridAreas[3][3];
 };
 

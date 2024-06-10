@@ -3,20 +3,16 @@
 void FilteredPage::setup(ofPixels& frame)
 {
 	/* Camera Vision Properties */
-	bLearnBackground = true;
+	vidGrabber.setDeviceID(0);
+	vidGrabber.setDesiredFrameRate(30);
+	vidGrabber.setVerbose(true);
+	vidGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	videoGrabber.setDeviceID(0);
-	videoGrabber.setDesiredFrameRate(30);
-	videoGrabber.setVerbose(true);
-	videoGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
+	colorImg.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	grayImg.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	currentFrame.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
-	bgImage.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	finder.setup("aGest.xml");
 
-	// TODO - initialize media circle / find and load media files
-	/* Initialize media circle */
-
-	// Test object recognition
 	ofDirectory imgDir;
 	imgDir.allowExt("jpg");
 	imgDir.listDir("images/");
@@ -40,27 +36,53 @@ void FilteredPage::setup(ofPixels& frame)
 	vector<string> matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
 
 	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
-	mediaCir.setup(matching_paths, 350, CAMERA_WIDTH, CAMERA_HEIGHT);
+	mediaCir.setup(matching_paths, 350, DISPLAY_CAMERA_WIDTH, DISPLAY_CAMERA_HEIGHT);
+
+	Media::setFullScreenSizeAndPos(DISPLAY_CAMERA_WIDTH, DISPLAY_CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
+	scaleX = displayWidth / CAMERA_WIDTH;
+	scaleY = displayHeight / CAMERA_HEIGHT;
+
+	// Setup the grid areas
+	setupGridAreas();
 
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
-
-	img.allocate(frame.getWidth(), frame.getHeight());
-	img.setFromPixels(frame);
 }
 
 
 void FilteredPage::draw()
 {
-	float displayWidth, displayHeight, xPos, yPos;
-	Media::setFullScreenSizeAndPos(CAMERA_WIDTH, CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
+	// Draw the resized image
+	colorImg.draw(xPos, yPos, displayWidth, displayHeight);
 
-	//ofSetHexColor(0xffffff);
-	//diff.draw(xPos, yPos, displayWidth, displayHeight);
-	//contourFinder.draw(xPos, yPos, displayWidth, displayHeight);
+	// Draw the grid for debugging purposes
+	ofNoFill();
+	ofSetColor(ofColor::blue);
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			ofDrawRectangle(gridAreas[i][j]);
+		}
+	}
 
-	img.draw(xPos, yPos, displayWidth, displayHeight);
+	// Draw the bounding boxes for blobs
+	ofNoFill();
+	ofSetColor(ofColor::red);
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		ofRectangle cur = finder.blobs[i].boundingRect;
 
+		// Normalize the positions and sizes
+		float r_xPos = cur.x * scaleX;
+		float r_yPos = cur.y * scaleY;
+		float r_displayWidth = cur.getWidth() * scaleX;
+		float r_displayHeight = cur.getHeight() * scaleY;
+
+		// Draw the rectangles at the correct position
+		ofDrawRectangle(r_xPos + xPos, r_yPos + yPos, r_displayWidth, r_displayHeight);
+	}
+	ofFill();
+	ofSetColor(ofColor::white);
+
+	// Draw the other UI elements
 	mediaCir.draw();
 	homeBtn.draw();
 }
@@ -68,70 +90,20 @@ void FilteredPage::draw()
 
 void FilteredPage::update()
 {
-	videoGrabber.update();
+	vidGrabber.update();
 
-	if (videoGrabber.isFrameNew()) {
-
-		ofxCvColorImage color;
-		color.setFromPixels(videoGrabber.getPixels());
-		color.mirror(false, true); // flip image horizontaly
-		currentFrame = color;
-
-#pragma region Learn Background
-
-		if (bLearnBackground) {
-			bLearnBackground = false;
-			bgImage = currentFrame;
-		}
-
-#pragma endregion
-
-		diff.absDiff(bgImage, currentFrame);
-		diff.threshold(THRESHOLD);
-
-#pragma region Background subtraction over time
-
-		// Convert ofxCvGrayscaleImage to cv::Mat
-		cv::Mat frame = cv::cvarrToMat(currentFrame.getCvImage());
-		cv::Mat bgMat = cv::cvarrToMat(bgImage.getCvImage());
-
-		// Convert to float type for accumulateWeighted
-		frame.convertTo(frame, CV_32F);
-		bgMat.convertTo(bgMat, CV_32F);
-
-		try {
-			// Background updated over time
-			cv::accumulateWeighted(frame, bgMat, ALPHA);
-			bgMat.convertTo(bgMat, CV_8U);
-			bgImage.setFromPixels(bgMat.data, bgMat.cols, bgMat.rows);
-		}
-		catch (const cv::Exception& e) {
-			std::cerr << "cv::Exception: " << e.what() << std::endl;
-
-		}
-
-#pragma endregion
-
-		checkForMovement();
+	if (vidGrabber.isFrameNew()) {
+		colorImg.setFromPixels(vidGrabber.getPixels());
+		colorImg.mirror(false, true);
+		grayImg = colorImg;
+		finder.findHaarObjects(grayImg);
 	}
+
+	filterBlobs(20000);
+	checkBlobs();
 
 	mediaCir.update();
 }
-
-
-void FilteredPage::checkForMovement()
-{
-
-#pragma region Find countours blobs
-
-	int maxArea = (CAMERA_HEIGHT * CAMERA_WIDTH) / 3;
-
-	contourFinder.findContours(diff, 20, maxArea, 10, false);
-
-#pragma endregion
-
-}
-
 
 void FilteredPage::gotoHomePage()
 {
@@ -165,15 +137,57 @@ string FilteredPage::getCurrentFilePath() {
 	return selectedFilePath;
 }
 
+
+void FilteredPage::setupGridAreas() {
+	float cellWidth = displayWidth / 3;
+	float cellHeight = displayHeight / 3;
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			gridAreas[i][j] = ofRectangle(xPos + j * cellWidth, yPos + i * cellHeight, cellWidth, cellHeight);
+		}
+	}
+}
+
+void FilteredPage::checkBlobs() {
+        for (int i = 0; i < finder.blobs.size(); i++) {
+            ofRectangle cur = finder.blobs[i].boundingRect;
+
+            float r_xPos = cur.x * scaleX;
+            float r_yPos = cur.y * scaleY;
+            ofPoint normalizedPos(r_xPos + xPos, r_yPos + yPos);
+
+            // Check non-diagonal and non-middle areas
+            if (gridAreas[0][1].inside(normalizedPos)) {
+				ofLogError() << "UP" << endl; // Top middle area
+            } else if (gridAreas[1][0].inside(normalizedPos)) {
+				ofLogError() << "LEFT" << endl; // Middle left area
+            } else if (gridAreas[1][2].inside(normalizedPos)) {
+				ofLogError() << "RIGHT" << endl;; // Middle right area
+            } else if (gridAreas[2][1].inside(normalizedPos)) {
+				ofLogError() << "BOTTOM" << endl; // Bottom middle area
+            }
+        }
+}
+
+void FilteredPage::filterBlobs(float minBlobSize) {
+	std::vector<ofxCvBlob> filteredBlobs;
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		if (finder.blobs[i].boundingRect.getArea() > minBlobSize) {
+			filteredBlobs.push_back(finder.blobs[i]);
+		}
+	}
+	finder.blobs = filteredBlobs;
+}
+
 void FilteredPage::exit() {
 	mediaCir.exit();
-	videoGrabber.close();
-	currentFrame.clear();
-	diff.clear();
-	bgImage.clear();
+	colorImg.clear();
+	grayImg.clear();
+	vidGrabber.close();
 
 	ofRemoveListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofRemoveListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
 
-	img.clear();
+	
 }
