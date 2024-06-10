@@ -29,6 +29,7 @@ void FilterPanel::setup(const string& filePath)
 	saveBtn.addListener(this, &FilterPanel::saveButtonPressed);
 }
 
+
 void FilterPanel::draw()
 {
 	// auto draw?
@@ -38,11 +39,6 @@ void FilterPanel::draw()
 	}
 }
 
-
-void FilterPanel::collapseButton()
-{
-	panelVisibility = !panelVisibility;
-}
 
 void FilterPanel::saveButtonPressed() {
 	ofXml xml;

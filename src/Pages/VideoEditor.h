@@ -1,16 +1,11 @@
 #pragma once
-
-#include "ofMain.h"
 #include "DataTypes/VideoMedia.h"
-#include "UIElements/FilterPanel.h"
-#include "UIElements/Button.h"
-#include "ofxOpenCv.h"
 #include "MediaEditor.h"
 
 class VideoEditor : public MediaEditor {
 public:
 
-    void setup(string filePath, int versionID) {
+    void setup(const string& filePath, int versionID) {
 
         MediaEditor::setup(filePath, versionID);
 
@@ -29,6 +24,7 @@ public:
 
         ofAddListener(playButton.clickedInside, this, &VideoEditor::toggleVideoReproduction);
     }
+
 
     void update() {
         video.update();
@@ -68,8 +64,9 @@ public:
         }
     }
 
-    void draw() override {
 
+    void draw() 
+    {
         ofSetColor(ofColor::black);
         ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
         ofSetColor(ofColor::white);
@@ -98,10 +95,6 @@ public:
         playButton.timedDraw();
     }
 
-    void mouseReleased(int x, int y, int button) {
-        MediaEditor::mouseReleased(x, y, button);
-        playButton.mouseReleased(x, y, button);
-    }
 
     void exit() {
         MediaEditor::exit();
@@ -109,12 +102,19 @@ public:
         ofRemoveListener(playButton.clickedInside, this, &VideoEditor::toggleVideoReproduction);
     }
 
+
+    void mouseReleased(int x, int y, int button) {
+        MediaEditor::mouseReleased(x, y, button);
+        playButton.mouseReleased(x, y, button);
+    }
+
+    
+private:
     void toggleVideoReproduction() {
         video.toggleReproduction();
         playButton.loadIcon(video.isPaused() ? "icons/playIcon.png" : "icons/resumeIcon.png");
     }
 
-private:
     VideoMedia video;
     Button playButton;
 };

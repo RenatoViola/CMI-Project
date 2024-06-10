@@ -17,9 +17,13 @@ public:
 	void update();
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
+	string getCurrentFilePath();
+
+	ofEvent<void> clickedOnSelected;
+
+private:
 	void next();
 	void previous();
-	string getCurrentFilePath();
 
 	const int width = 320, height = 240, gridSpacing = 30, numFilesToShow = 5;
 	int totalWidth = numFilesToShow * width + (numFilesToShow - 1) * gridSpacing;
@@ -32,9 +36,6 @@ public:
 	bool loadFromTheRight = true, isImageCarrousel;
 
 	ofRectangle fullCarrousel, selectedFile;
-
-	ofEvent<void> clickedOnSelected;
 	vector<unique_ptr<Media>> items;
-
 	ofTrueTypeFont myFont;
 };

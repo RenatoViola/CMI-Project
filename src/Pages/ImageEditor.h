@@ -1,17 +1,12 @@
 #pragma once
-
-#include "ofMain.h"
-#include <ofxOpenCv.h>
 #include "DataTypes/ImageMedia.h"
-#include "UIElements/FilterPanel.h"
-#include <UIElements/Button.h>
-#include "MediaEditor.h"
+#include <MediaEditor.h>
 
 class ImageEditor : public MediaEditor {
 public:
 
-    void setup(string filePath, int versionID) {
-
+    void setup(const string& filePath, int versionID)
+    {
         MediaEditor::setup(filePath, versionID);
 
         img.load(filePath);
@@ -30,8 +25,9 @@ public:
         gui.erodeFilter.addListener(this, &ImageEditor::erode);
     }
 
-    void draw() override {
 
+    void draw() 
+    {
         ofSetColor(ofColor::black);
         ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
         ofSetColor(ofColor::white);
@@ -63,7 +59,9 @@ public:
         gui.draw();
     }
 
-    void exit() {
+
+    void exit() 
+    {
         gui.invertColorFilter.removeListener(this, &ImageEditor::invert);
         gui.edgeFilter.removeListener(this, &ImageEditor::edge);
         gui.blurFilter.removeListener(this, &ImageEditor::blur);
@@ -73,6 +71,8 @@ public:
         MediaEditor::exit();
     }
 
+
+private:
     void setupVersion() {
         bool b_value = true;
 
@@ -100,36 +100,42 @@ public:
         {
             erode(b_value);
         }
-        else 
+        else
         {
             return;
         }
     }
 
-private:
-    ImageMedia img;
 
     void edge(bool& toggleValue) {
         toggleValue ? MediaEditor::findContours() : colorImg.setFromPixels(img.getPixels());
     }
 
+
     void invert(bool& toggleValue) {
         toggleValue ? colorImg.invert() : colorImg.setFromPixels(img.getPixels());
     }
+
 
     void blur(bool& toggleValue) {
         toggleValue ? colorImg.blur() : colorImg.setFromPixels(img.getPixels());
     }
 
+
     void gaussianBlur(bool& toggleValue) {
         toggleValue ? colorImg.blurGaussian() : colorImg.setFromPixels(img.getPixels());
     }
+
 
     void dilate(bool& toggleValue) {
         toggleValue ? colorImg.dilate() : colorImg.setFromPixels(img.getPixels());
     }
 
+
     void erode(bool& toggleValue) {
         toggleValue ? colorImg.erode() : colorImg.setFromPixels(img.getPixels());
     }
+
+
+    ImageMedia img;
 };

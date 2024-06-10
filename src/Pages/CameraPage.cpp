@@ -43,6 +43,7 @@ void CameraPage::setup(int width, int height) {
 	ofAddListener(faceBtn.clickedInside, this, &CameraPage::toggleFaceDetection);
 }
 
+
 void CameraPage::update() {
 	vidGrabber.update();
 
@@ -63,7 +64,7 @@ void CameraPage::update() {
 	}
 }
 
-//--------------------------------------------------------------
+
 void CameraPage::drawCamera() {
     ofSetColor(ofColor::white);
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
@@ -102,10 +103,12 @@ void CameraPage::mouseReleased(int x, int y, int button) {
 	faceBtn.mouseReleased(x, y, button);
 }
 
+
 void CameraPage::gotoHomePage() {
 	int PAGE = MAIN_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
+
 
 void CameraPage::initiateSearchResultPage() {
 	capturedFrame = colorImg.getPixels();
@@ -116,18 +119,22 @@ void CameraPage::initiateSearchResultPage() {
 	isRedirecting = true;
 }
 
+
 void CameraPage::gotoSearchResultPage() {
 	int PAGE = FILTERED_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+
 void CameraPage::toggleFaceDetection() {
 	facialDetectionEnabled = !facialDetectionEnabled;
 }
 
+
 ofPixels CameraPage::getCapturedFrame() const {
 	return capturedFrame;
 }
+
 
 void CameraPage::exit() {
 	vidGrabber.close();

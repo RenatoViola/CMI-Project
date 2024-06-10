@@ -9,20 +9,22 @@ public:
 
     // Pure virtual methods
     virtual void load(const string& filePath) = 0;
-    virtual void exit() = 0;
-    virtual void draw(float x, float y, float w, float h) = 0;
     virtual void update() = 0;
+    virtual void draw(float x, float y, float w, float h) = 0;
+    virtual void exit() = 0;
     
-    string getFilePath() {
-        return filePath;
-    }
-
-    string filePath;
-
     virtual float getWidth() = 0;
     virtual float getHeight() = 0;
     virtual ofPixels& getPixels() = 0;
     virtual ofPixels& getThumbnail() = 0;
+
+    void setFilePath(const string& filePath) {
+        this->filePath = filePath;
+    }
+
+    string getFilePath() {
+        return filePath;
+    }
 
     static void setFullScreenSizeAndPos(float width, float height, float* displayWidth, float* displayHeight, float* xPos, float* yPos)
     {
@@ -56,5 +58,8 @@ public:
         }
         return filePath.substr(pos + 1);
     }
+
+private:
+    string filePath;
 };
 

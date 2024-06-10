@@ -12,17 +12,17 @@ public:
     void draw();
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
-
-    void gotoImagePage();
-    void gotoVideoPage();
-    void gotoCameraPage();
-    void gotoSavescreenPage();
     string getCurrentFilePath();
 
     ofEvent<int> redirectEvent;
    
 private:
-    Carrousel imageCarrousel, videoCarrousel;
+    void gotoImagePage();
+    void gotoVideoPage();
+    void gotoCameraPage();
+    void gotoSavescreenPage();
+
     string selectedFilePath;
+    Carrousel imageCarrousel, videoCarrousel;
     Button cameraBtn, lockBtn;
 };

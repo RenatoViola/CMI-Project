@@ -5,38 +5,37 @@
 
 class CameraPage {
 
-	public:
+public:
+	void setup(int width, int height);
+	void update();
+	void drawCamera();
+	void exit();
+	void mouseReleased(int x, int y, int button);
+	ofPixels getCapturedFrame() const;
 
-		void setup(int width, int height);
-		void update();
-		void drawCamera();
-		void exit();
-		void mouseReleased(int x, int y, int button);
-		void gotoHomePage();
-		void initiateSearchResultPage();
-		void gotoSearchResultPage();
-		void toggleFaceDetection();
-		ofPixels getCapturedFrame() const;
+	ofEvent<int> redirectEvent;
 
-		ofEvent<int> redirectEvent;
+private:
+	void gotoHomePage();
+	void initiateSearchResultPage();
+	void gotoSearchResultPage();
+	void toggleFaceDetection();
 
-		ofVideoGrabber vidGrabber;
-		ofPixels capturedFrame;
+	int camWidth;
+	int camHeight;
+	bool facialDetectionEnabled, showLoadingMessage = false, isRedirecting = false;
 
-		ofxCvHaarFinder finder;
-		ofxCvColorImage colorImg;
-		ofxCvGrayscaleImage grayImg;
+	ofVideoGrabber vidGrabber;
+	ofPixels capturedFrame;
 
-		vector <ofRectangle> faceRects;
+	ofxCvHaarFinder finder;
+	ofxCvColorImage colorImg;
+	ofxCvGrayscaleImage grayImg;
 
-		int camWidth;
-		int camHeight;
-		bool facialDetectionEnabled;
+	vector <ofRectangle> faceRects;
 
-		Button homeBtn, faceBtn, searchBtn;
-		bool showLoadingMessage = false;
-		uint64_t startTime;
-		bool isRedirecting = false;
+	Button homeBtn, faceBtn, searchBtn;
+	uint64_t startTime;
 
-		ofTrueTypeFont myFont;
+	ofTrueTypeFont myFont;
 };

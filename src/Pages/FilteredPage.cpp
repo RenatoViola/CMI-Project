@@ -1,7 +1,6 @@
 #include "FilteredPage.h"
 
 
-
 void FilteredPage::setup(ofPixels& frame)
 {
 	/* Camera Vision Properties */
@@ -47,18 +46,27 @@ void FilteredPage::setup(ofPixels& frame)
 	// Setup the grid areas
 	setupGridAreas();
 
-	// Initialize blob tracking
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			blobCount[i][j] = 0;
-			for (int k = 0; k < MAX_BLOBS; ++k) {
-				blobTimestamps[i][j][k] = 0;
-			}
-		}
-	}
-
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
+}
+
+
+void FilteredPage::update()
+{
+	vidGrabber.update();
+
+	if (vidGrabber.isFrameNew()) {
+		colorImg.setFromPixels(vidGrabber.getPixels());
+		colorImg.mirror(false, true);
+		grayImg = colorImg;
+		finder.findHaarObjects(grayImg);
+	}
+
+	filterBlobs(20000);
+	trackBlobs();
+	checkBlobs();
+
+	mediaCir.update();
 }
 
 
@@ -94,65 +102,31 @@ void FilteredPage::draw()
 	ofFill();
 	ofSetColor(ofColor::white);
 
-	// Draw the other UI elements
 	mediaCir.draw();
 	homeBtn.draw();
 }
 
 
-void FilteredPage::update()
-{
-	vidGrabber.update();
-
-	if (vidGrabber.isFrameNew()) {
-		colorImg.setFromPixels(vidGrabber.getPixels());
-		colorImg.mirror(false, true);
-		grayImg = colorImg;
-		finder.findHaarObjects(grayImg);
-	}
-
-	filterBlobs(20000);
-	trackBlobs();
-	checkBlobs();
-
-	mediaCir.update();
+string FilteredPage::getCurrentFilePath() {
+	return selectedFilePath;
 }
 
-void FilteredPage::gotoHomePage()
-{
-	int PAGE = MAIN_PAGE;
-	ofNotifyEvent(redirectEvent, PAGE, this);
+void FilteredPage::exit() {
+
+	mediaCir.exit();
+	colorImg.clear();
+	grayImg.clear();
+	vidGrabber.close();
+	matching_paths.clear();
+
+	ofRemoveListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
+	ofRemoveListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
 }
 
-void FilteredPage::gotoFilePage()
-{
-	moveToFilePage(mediaCir.getCurrentFilePath());
-}
-
-void FilteredPage::moveToFilePage(const string& path)
-{
-	selectedFilePath = path;
-
-	int PAGE;
-	if (Media::isImage(selectedFilePath))
-	{
-		PAGE = IMAGE_PAGE;
-	}
-	else
-	{
-		PAGE = VIDEO_PAGE;
-	}
-
-	ofNotifyEvent(redirectEvent, PAGE, this);
-}
 
 void FilteredPage::mouseReleased(int x, int y, int button) {
 	homeBtn.mouseReleased(x, y, button);
 	mediaCir.mouseReleased(x, y, button);
-}
-
-string FilteredPage::getCurrentFilePath() {
-	return selectedFilePath;
 }
 
 
@@ -163,6 +137,16 @@ void FilteredPage::setupGridAreas() {
 	for (int i = 0; i < 3; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			gridAreas[i][j] = ofRectangle(xPos + j * cellWidth, yPos + i * cellHeight, cellWidth, cellHeight);
+		}
+	}
+
+	// Initialize blob tracking
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			blobCount[i][j] = 0;
+			for (int k = 0; k < MAX_BLOBS; ++k) {
+				blobTimestamps[i][j][k] = 0;
+			}
 		}
 	}
 }
@@ -177,6 +161,7 @@ void FilteredPage::filterBlobs(float minBlobSize) {
 	}
 	finder.blobs = filteredBlobs;
 }
+
 
 void FilteredPage::trackBlobs() {
 	unsigned long long currentTime = ofGetElapsedTimeMillis();
@@ -219,41 +204,57 @@ void FilteredPage::checkBlobs() {
 		for (int col = 0; col < 3; ++col) {
 			if ((row == 0 && col == 1) || (row == 1 && col == 0) || (row == 1 && col == 2) || (row == 2 && col == 1)) {
 				if (blobCount[row][col] >= BLOB_THRESHOLD) {
-					triggerEvent(row, col);
+					// trigger event
+					if (row == 0 && col == 1) {
+						ofLogNotice() << "UP"; // Top middle area
+						selectedFilePath = matching_paths[3];
+					}
+					else if (row == 1 && col == 0) {
+						ofLogNotice() << "LEFT"; // Middle left area
+						selectedFilePath = matching_paths[2];
+					}
+					else if (row == 1 && col == 2) {
+						ofLogNotice() << "RIGHT"; // Middle right area
+						selectedFilePath = matching_paths[0];
+					}
+					else if (row == 2 && col == 1) {
+						ofLogNotice() << "BOTTOM"; // Bottom middle area
+						selectedFilePath = matching_paths[1];
+					}
+					moveToFilePage(selectedFilePath);
 				}
 			}
 		}
 	}
 }
 
-void FilteredPage::triggerEvent(int row, int col) {
-	if (row == 0 && col == 1) {
-		ofLogNotice() << "UP"; // Top middle area
-		selectedFilePath = matching_paths[3];
-	}
-	else if (row == 1 && col == 0) {
-		ofLogNotice() << "LEFT"; // Middle left area
-		selectedFilePath = matching_paths[2];
-	}
-	else if (row == 1 && col == 2) {
-		ofLogNotice() << "RIGHT"; // Middle right area
-		selectedFilePath = matching_paths[0];
-	}
-	else if (row == 2 && col == 1) {
-		ofLogNotice() << "BOTTOM"; // Bottom middle area
-		selectedFilePath = matching_paths[1];
-	}
-	moveToFilePage(selectedFilePath);
+
+void FilteredPage::gotoHomePage()
+{
+	int PAGE = MAIN_PAGE;
+	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
-void FilteredPage::exit() {
-	mediaCir.exit();
-	colorImg.clear();
-	grayImg.clear();
-	vidGrabber.close();
 
-	ofRemoveListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
-	ofRemoveListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
+void FilteredPage::gotoFilePage()
+{
+	moveToFilePage(mediaCir.getCurrentFilePath());
+}
 
-	
+
+void FilteredPage::moveToFilePage(const string& path)
+{
+	selectedFilePath = path;
+
+	int PAGE;
+	if (Media::isImage(selectedFilePath))
+	{
+		PAGE = IMAGE_PAGE;
+	}
+	else
+	{
+		PAGE = VIDEO_PAGE;
+	}
+
+	ofNotifyEvent(redirectEvent, PAGE, this);
 }
