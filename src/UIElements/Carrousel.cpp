@@ -34,9 +34,13 @@ void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) 
 	myFont.load("JuliusSansOne-Regular.ttf", 32);
 }
 
-void Carrousel::exit() {
-	items.clear();
+
+void Carrousel::update() {
+	for (auto& item : items) {
+		item->update();
+	}
 }
+
 
 void Carrousel::draw() {
 	// Calculate progressive step 
@@ -77,15 +81,21 @@ void Carrousel::draw() {
 	}
 }
 
-void Carrousel::update() {
-	for (auto& item : items) {
-		item->update();
-	}
+
+string Carrousel::getCurrentFilePath() {
+	return items[current].get()->getFilePath();
 }
+
+
+void Carrousel::exit() {
+	items.clear();
+}
+
 
 void Carrousel::mousePressed(int x, int y, int button) {
 	lastX = x;
 }
+
 
 void Carrousel::mouseReleased(int x, int y, int button) {
 
@@ -109,6 +119,7 @@ void Carrousel::mouseReleased(int x, int y, int button) {
 	}
 }
 
+
 void Carrousel::next() {
 	if (items.size() > 0) {
 		++current %= items.size();
@@ -117,6 +128,7 @@ void Carrousel::next() {
 	}
 }
 
+
 void Carrousel::previous() {
 	if (items.size() > 0) {
 		if (--current == -1)
@@ -124,8 +136,4 @@ void Carrousel::previous() {
 		step = 0;
 		loadFromTheRight = false;
 	}
-}
-
-string Carrousel::getCurrentFilePath() {
-	return items[current].get()->getFilePath();
 }

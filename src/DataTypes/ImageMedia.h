@@ -3,10 +3,76 @@
 
 class ImageMedia : public Media
 {
+public:
+    void load(const string& filePath)
+    {
+        this->setFilePath(filePath);
+        image.load(filePath);
+        font.load("Courier New Bold.ttf", 9);
+        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
+        generateAsciiArt();
+    }
+
+
+    void update()
+    {
+        // No-op since ofImage doesn't require updating.
+    }
+
+
+    void draw(float x, float y, float w, float h)
+    {
+        image.draw(x, y, w, h);
+    }
+
+
+    void exit() {
+        image.clear();
+        asciiFbo.end();
+        asciiFbo.clear();
+        asciiArt.clear();
+    }
+
+
+    float getWidth()
+    {
+        return image.getWidth();
+    }
+
+
+    float getHeight()
+    {
+        return image.getHeight();
+    }
+
+    
+    ofImage getContent()
+    {
+        return image;
+    }
+
+
+    ofPixels& getPixels()
+    {
+        return image.getPixels();
+    }
+
+
+    ofPixels& getThumbnail()
+    {
+        return image.getPixels();
+    }
+
+
+    void drawInAscii()
+    {
+        asciiFbo.draw(0, 0);
+    }
+
+
 private:
-    // characters used in the ascii filter
     string asciiCharacters;
-    ofTrueTypeFont font; // font to be used
+    ofTrueTypeFont font;
     ofImage image;
     vector<string> asciiArt;
     ofFbo asciiFbo;
@@ -45,62 +111,5 @@ private:
             font.drawString(asciiArt[i], xPos, yPos + i * 9);
         }
         asciiFbo.end();
-    }
-
-public:
-    void load(const std::string& filePath) 
-    {
-        this->filePath = filePath;
-        image.load(filePath);
-        font.load("Courier New Bold.ttf", 9);
-        asciiCharacters = string("  ..,,,'''``--_:;^^**""=+<>iv%&xclrs)/){}I?!][1taeo7zjLunT#@JCwfy325Fp6mqSghVd4EgXPGZbYkOA8U$KHDBWNMR0Q");
-        generateAsciiArt();
-    }
-
-    void update() 
-    {
-        // No-op since ofImage doesn't require updating.
-    }
-
-    float getWidth() 
-    {
-        return image.getWidth();
-    }
-
-    float getHeight()
-    {
-        return image.getHeight();
-    }
-
-    void exit() {
-        image.clear();
-        asciiFbo.end();
-        asciiFbo.clear();
-        asciiArt.clear();
-    }
-
-    void draw(float x, float y, float w, float h)
-    {
-        image.draw(x, y, w, h);
-    }
-
-    void drawInAscii()
-    {
-        asciiFbo.draw(0, 0);
-    }
-    
-    ofImage getContent() 
-    {
-        return image;
-    }
-
-    ofPixels& getPixels() 
-    {
-        return image.getPixels();
-    }
-
-    ofPixels& getThumbnail() 
-    {
-        return image.getPixels();
     }
 };

@@ -10,21 +10,17 @@ class FilterPanel
 public:
 	void setup(const string& filePath);
 	void draw();
-	void exit();
-	
-	void collapseButton();
-
-	void saveButtonPressed();
 	void loadVersionInfo(int versionID);
-
-	bool panelVisibility, isImageFile;
+	void exit();
 
 	ofxToggle invertColorFilter, asciiFilter, edgeFilter, blurFilter, blurGaussianFilter, dilateFilter, erodeFilter;
+
+private:
+	void saveButtonPressed();
+	
+	bool panelVisibility, isImageFile;
 	ofxLabel filtersLabel, changesLabel, spaceLabel;
-
 	ofxPanel gui;
-
 	ofxButton saveBtn;
-
 	string filePath;
 };

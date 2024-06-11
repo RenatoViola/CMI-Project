@@ -2,6 +2,10 @@
 
 #include "ofMain.h"
 #include "DataTypes/Media.h"
+#include <ImageMedia.h>
+#include <VideoMedia.h>
+#include <Metadata.h>
+
 
 class MediaCircle
 {
@@ -13,20 +17,19 @@ public:
 	void setup(vector<string>& paths, int radius, int width, int height);
 	void draw();
 	void update();
-	void exit();
-	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
 	int getCurrentIndex();
-	void updateBoundingBoxes();
 	void setVersions(const string& filePath);
+	void exit();
+	void mouseReleased(int x, int y, int button);
 
-	int radius, width, height;
-
-	double angleInRadians;
-
-	int selectedMedia;
 	ofEvent<void> clickedOnItem;
-
+	
+private:
+	void updateBoundingBoxes();
+	
+	int radius, width, height, selectedMedia;
+	double angleInRadians;
 	vector<ofRectangle> boundingBoxes;
 	vector<unique_ptr<Media>> items;
 	vector<tuple<int, string, string>> versions;

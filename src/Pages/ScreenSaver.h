@@ -2,8 +2,8 @@
 
 #include "ofMain.h"
 #include <ofxOpenCv.h>
-
-//#define CAMERA_DEBUG		// uncommented to draw the diff image
+#include <DataTypes/Media.h>
+#include <screen_names.h>
 
 class ScreenSaver
 {
@@ -13,27 +13,24 @@ public:
 	void update();
 	void exit();
 
-	const string PATH = "./screenSaver.jpg";
-	const int CAMERA_HEIGHT = 240;
-	const int CAMERA_WIDTH = 320;
+	ofEvent<int> redirectEvent;
 
-	const int THRESHOLD = 70;
+private:
+	void checkForMovement();
+
+	bool bLearnBackground , changeScreen;
+	int counterToLearn;
+
+	const string PATH = "./screenSaver.jpg";
+	const int CAMERA_HEIGHT = 240, CAMERA_WIDTH = 320, THRESHOLD = 70;
 	const double ALPHA = 0.01;
+
 	ofImage img;
 	ofxCvColorImage colorImg;
 
 	ofxCvGrayscaleImage currentFrame;
 	ofxCvGrayscaleImage bgImage;
 	ofxCvGrayscaleImage diff;
-	
+
 	ofVideoGrabber videoGrabber;
-
-	ofEvent<int> redirectEvent;
-
-private:
-
-	bool bLearnBackground , changeScreen;
-	int counterToLearn;
-
-	void checkForMovement();
 };

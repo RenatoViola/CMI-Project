@@ -3,13 +3,13 @@
 #include "ofApp.h"
 #include "UIElements/FilterPanel.h"
 #include "DataTypes/Media.h"
-#include "DataTypes/Metadata.h"
+#include <ofxOpenCv.h>
 
 class MediaEditor
 {
 public:
 
-	void setup(string filePath, int versionID) {
+	void setup(const string& filePath, int versionID) {
 
 		this->filePath = filePath;
 		homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
@@ -24,28 +24,32 @@ public:
 		ofAddListener(versionBtn.clickedInside, this, &MediaEditor::gotoVersionPage);
 	}
 
+
+	virtual void draw() = 0;
+
+
+	string getFilePath() {
+		return filePath;
+	}
+
+
 	void exit() {
 		gui.exit();
 		ofRemoveListener(homeBtn.clickedInside, this, &MediaEditor::gotoHomePage);
 		ofRemoveListener(versionBtn.clickedInside, this, &MediaEditor::gotoVersionPage);
 	}
 
-	virtual void draw() = 0;
 
 	void mouseReleased(int x, int y, int button) {
 		homeBtn.mouseReleased(x, y, button);
 		versionBtn.mouseReleased(x, y, button);
 	}
 
-	void gotoHomePage() {
-		int PAGE = MAIN_PAGE;
-		ofNotifyEvent(redirectEvent, PAGE, this);
-	}
 
-	void gotoVersionPage() {
-		int PAGE = CONTROL_VERSION_PAGE;
-		ofNotifyEvent(redirectEvent, PAGE, this);
-	}
+	ofEvent<int> redirectEvent;
+
+
+protected:	
 
 	void drawEdges() {
 		for (int i = 0; i < contourFinder.nBlobs; i++) {
@@ -59,6 +63,7 @@ public:
 			polyline.draw();
 		}
 	}
+
 
 	void findContours() {
 		ofxCvGrayscaleImage grayImg, binaryImg;
@@ -76,16 +81,27 @@ public:
 		contourFinder.findContours(binaryImg, 20, (displayWidth * displayHeight) / 2, 10, false);
 	}
 
-	string getFilePath() {
-		return filePath;
-	}
 
-	string filePath;
+	float displayWidth, displayHeight, xPos, yPos;
 	FilterPanel gui;
-	ofEvent<int> redirectEvent;
 	ofxCvColorImage colorImg;
 	Button homeBtn, versionBtn;
+
+
+private:
+	void gotoHomePage() {
+		int PAGE = MAIN_PAGE;
+		ofNotifyEvent(redirectEvent, PAGE, this);
+	}
+
+
+	void gotoVersionPage() {
+		int PAGE = CONTROL_VERSION_PAGE;
+		ofNotifyEvent(redirectEvent, PAGE, this);
+	}
+
+
+	string filePath;
 	ofxCvContourFinder contourFinder;
-	float displayWidth, displayHeight, xPos, yPos;
 };
 

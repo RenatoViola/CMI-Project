@@ -1,5 +1,6 @@
 #include "HomePage.h"
 
+
 void HomePage::setup() {
 
     int mediaHeight = 240;
@@ -23,6 +24,26 @@ void HomePage::setup() {
     ofAddListener(lockBtn.clickedInside, this, &HomePage::gotoSavescreenPage);
 }
 
+
+void HomePage::update() {
+    imageCarrousel.update();
+    videoCarrousel.update();
+}
+
+
+void HomePage::draw() {
+    imageCarrousel.draw();
+    videoCarrousel.draw();
+    cameraBtn.draw();
+    lockBtn.draw();
+}
+
+
+string HomePage::getCurrentFilePath() {
+    return selectedFilePath;
+}
+
+
 void HomePage::exit() {
     imageCarrousel.exit();
     videoCarrousel.exit();
@@ -33,26 +54,12 @@ void HomePage::exit() {
     ofRemoveListener(lockBtn.clickedInside, this, &HomePage::gotoSavescreenPage);
 }
 
-void HomePage::update() {
-    imageCarrousel.update();
-    videoCarrousel.update();
-}
-
-void HomePage::draw() {
-    imageCarrousel.draw();
-    videoCarrousel.draw();
-    cameraBtn.draw();
-    lockBtn.draw();
-}
-
-string HomePage::getCurrentFilePath() {
-    return selectedFilePath;
-}
 
 void HomePage::mousePressed(int x, int y, int button) {
     imageCarrousel.mousePressed(x, y, button);
     videoCarrousel.mousePressed(x, y, button);
 }
+
 
 void HomePage::mouseReleased(int x, int y, int button) {
     imageCarrousel.mouseReleased(x, y, button);
@@ -61,12 +68,14 @@ void HomePage::mouseReleased(int x, int y, int button) {
     lockBtn.mouseReleased(x, y, button);
 }
 
+
 void HomePage::gotoImagePage() {
     selectedFilePath = imageCarrousel.getCurrentFilePath();
 
     int PAGE = IMAGE_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
+
 
 void HomePage::gotoVideoPage() {
     selectedFilePath = videoCarrousel.getCurrentFilePath();
@@ -75,10 +84,12 @@ void HomePage::gotoVideoPage() {
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+
 void HomePage::gotoCameraPage() {
     int PAGE = CAMERA_PAGE;
     ofNotifyEvent(redirectEvent, PAGE, this);
 }
+
 
 void HomePage::gotoSavescreenPage() {
     int PAGE = SCREEN_SAVER_PAGE;

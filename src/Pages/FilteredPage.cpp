@@ -1,22 +1,19 @@
 #include "FilteredPage.h"
 
+
 void FilteredPage::setup(ofPixels& frame)
 {
 	/* Camera Vision Properties */
-	bLearnBackground = true;
+	vidGrabber.setDeviceID(0);
+	vidGrabber.setDesiredFrameRate(30);
+	vidGrabber.setVerbose(true);
+	vidGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	videoGrabber.setDeviceID(0);
-	videoGrabber.setDesiredFrameRate(30);
-	videoGrabber.setVerbose(true);
-	videoGrabber.setup(CAMERA_WIDTH, CAMERA_HEIGHT);
+	colorImg.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	grayImg.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
 
-	currentFrame.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
-	bgImage.allocate(CAMERA_WIDTH, CAMERA_HEIGHT);
+	finder.setup("aGest.xml");
 
-	// TODO - initialize media circle / find and load media files
-	/* Initialize media circle */
-
-	// Test object recognition
 	ofDirectory imgDir;
 	imgDir.allowExt("jpg");
 	imgDir.listDir("images/");
@@ -37,99 +34,198 @@ void FilteredPage::setup(ofPixels& frame)
 		vid_paths.push_back(vidDir.getPath(i));
 	}
 
-	vector<string> matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
+	matching_paths = Metadata::filesWithObject(frame, img_paths, vid_paths);
 
 	homeBtn.setup("icons/homeIcon.png", 100, 50, 50);
-	mediaCir.setup(matching_paths, 350, CAMERA_WIDTH, CAMERA_HEIGHT);
+	mediaCir.setup(matching_paths, 350, DISPLAY_CAMERA_WIDTH, DISPLAY_CAMERA_HEIGHT);
+
+	Media::setFullScreenSizeAndPos(DISPLAY_CAMERA_WIDTH, DISPLAY_CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
+	scaleX = displayWidth / CAMERA_WIDTH;
+	scaleY = displayHeight / CAMERA_HEIGHT;
+
+	// Setup the grid areas
+	setupGridAreas();
 
 	ofAddListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
 	ofAddListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
+}
 
-	img.allocate(frame.getWidth(), frame.getHeight());
-	img.setFromPixels(frame);
+
+void FilteredPage::update()
+{
+	vidGrabber.update();
+
+	if (vidGrabber.isFrameNew()) {
+		colorImg.setFromPixels(vidGrabber.getPixels());
+		colorImg.mirror(false, true);
+		grayImg = colorImg;
+		finder.findHaarObjects(grayImg);
+	}
+
+	filterBlobs(20000);
+	trackBlobs();
+	checkBlobs();
+
+	mediaCir.update();
 }
 
 
 void FilteredPage::draw()
 {
-	float displayWidth, displayHeight, xPos, yPos;
-	Media::setFullScreenSizeAndPos(CAMERA_WIDTH, CAMERA_HEIGHT, &displayWidth, &displayHeight, &xPos, &yPos);
+	// Draw the resized image
+	colorImg.draw(xPos, yPos, displayWidth, displayHeight);
 
-	//ofSetHexColor(0xffffff);
-	//diff.draw(xPos, yPos, displayWidth, displayHeight);
-	//contourFinder.draw(xPos, yPos, displayWidth, displayHeight);
+	// Draw the grid for debugging purposes
+	ofNoFill();
+	ofSetColor(ofColor::blue);
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			ofDrawRectangle(gridAreas[i][j]);
+		}
+	}
 
-	img.draw(xPos, yPos, displayWidth, displayHeight);
+	// Draw the bounding boxes for blobs
+	ofNoFill();
+	ofSetColor(ofColor::red);
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		ofRectangle cur = finder.blobs[i].boundingRect;
+
+		// Normalize the positions and sizes
+		float r_xPos = cur.x * scaleX;
+		float r_yPos = cur.y * scaleY;
+		float r_displayWidth = cur.getWidth() * scaleX;
+		float r_displayHeight = cur.getHeight() * scaleY;
+
+		// Draw the rectangles at the correct position
+		ofDrawRectangle(r_xPos + xPos, r_yPos + yPos, r_displayWidth, r_displayHeight);
+	}
+	ofFill();
+	ofSetColor(ofColor::white);
 
 	mediaCir.draw();
 	homeBtn.draw();
 }
 
 
-void FilteredPage::update()
-{
-	videoGrabber.update();
+string FilteredPage::getCurrentFilePath() {
+	return selectedFilePath;
+}
 
-	if (videoGrabber.isFrameNew()) {
+void FilteredPage::exit() {
 
-		ofxCvColorImage color;
-		color.setFromPixels(videoGrabber.getPixels());
-		color.mirror(false, true); // flip image horizontaly
-		currentFrame = color;
+	mediaCir.exit();
+	colorImg.clear();
+	grayImg.clear();
+	vidGrabber.close();
+	matching_paths.clear();
 
-#pragma region Learn Background
-
-		if (bLearnBackground) {
-			bLearnBackground = false;
-			bgImage = currentFrame;
-		}
-
-#pragma endregion
-
-		diff.absDiff(bgImage, currentFrame);
-		diff.threshold(THRESHOLD);
-
-#pragma region Background subtraction over time
-
-		// Convert ofxCvGrayscaleImage to cv::Mat
-		cv::Mat frame = cv::cvarrToMat(currentFrame.getCvImage());
-		cv::Mat bgMat = cv::cvarrToMat(bgImage.getCvImage());
-
-		// Convert to float type for accumulateWeighted
-		frame.convertTo(frame, CV_32F);
-		bgMat.convertTo(bgMat, CV_32F);
-
-		try {
-			// Background updated over time
-			cv::accumulateWeighted(frame, bgMat, ALPHA);
-			bgMat.convertTo(bgMat, CV_8U);
-			bgImage.setFromPixels(bgMat.data, bgMat.cols, bgMat.rows);
-		}
-		catch (const cv::Exception& e) {
-			std::cerr << "cv::Exception: " << e.what() << std::endl;
-
-		}
-
-#pragma endregion
-
-		checkForMovement();
-	}
-
-	mediaCir.update();
+	ofRemoveListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
+	ofRemoveListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
 }
 
 
-void FilteredPage::checkForMovement()
-{
+void FilteredPage::mouseReleased(int x, int y, int button) {
+	homeBtn.mouseReleased(x, y, button);
+	mediaCir.mouseReleased(x, y, button);
+}
 
-#pragma region Find countours blobs
 
-	int maxArea = (CAMERA_HEIGHT * CAMERA_WIDTH) / 3;
+void FilteredPage::setupGridAreas() {
+	float cellWidth = displayWidth / 3;
+	float cellHeight = displayHeight / 3;
 
-	contourFinder.findContours(diff, 20, maxArea, 10, false);
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			gridAreas[i][j] = ofRectangle(xPos + j * cellWidth, yPos + i * cellHeight, cellWidth, cellHeight);
+		}
+	}
 
-#pragma endregion
+	// Initialize blob tracking
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			blobCount[i][j] = 0;
+			for (int k = 0; k < MAX_BLOBS; ++k) {
+				blobTimestamps[i][j][k] = 0;
+			}
+		}
+	}
+}
 
+
+void FilteredPage::filterBlobs(float minBlobSize) {
+	std::vector<ofxCvBlob> filteredBlobs;
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		if (finder.blobs[i].boundingRect.getArea() > minBlobSize) {
+			filteredBlobs.push_back(finder.blobs[i]);
+		}
+	}
+	finder.blobs = filteredBlobs;
+}
+
+
+void FilteredPage::trackBlobs() {
+	unsigned long long currentTime = ofGetElapsedTimeMillis();
+
+	// Add new blobs
+	for (int i = 0; i < finder.blobs.size(); i++) {
+		ofRectangle cur = finder.blobs[i].boundingRect;
+		float r_xPos = cur.x * scaleX;
+		float r_yPos = cur.y * scaleY;
+		ofPoint normalizedPos(r_xPos + xPos, r_yPos + yPos);
+
+		for (int row = 0; row < 3; ++row) {
+			for (int col = 0; col < 3; ++col) {
+				if (gridAreas[row][col].inside(normalizedPos)) {
+					// Add timestamp for the blob in the current area
+					blobTimestamps[row][col][blobCount[row][col] % MAX_BLOBS] = currentTime;
+					blobCount[row][col]++;
+				}
+			}
+		}
+	}
+
+	// Clean up old entries
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 3; ++col) {
+			int validBlobs = 0;
+			for (int k = 0; k < MAX_BLOBS; ++k) {
+				if (currentTime - blobTimestamps[row][col][k] <= TIME_WINDOW) {
+					blobTimestamps[row][col][validBlobs++] = blobTimestamps[row][col][k];
+				}
+			}
+			blobCount[row][col] = validBlobs;
+		}
+	}
+}
+
+
+void FilteredPage::checkBlobs() {
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 3; ++col) {
+			if ((row == 0 && col == 1) || (row == 1 && col == 0) || (row == 1 && col == 2) || (row == 2 && col == 1)) {
+				if (blobCount[row][col] >= BLOB_THRESHOLD) {
+					// trigger event
+					if (row == 0 && col == 1) {
+						ofLogNotice() << "UP"; // Top middle area
+						selectedFilePath = matching_paths[3];
+					}
+					else if (row == 1 && col == 0) {
+						ofLogNotice() << "LEFT"; // Middle left area
+						selectedFilePath = matching_paths[2];
+					}
+					else if (row == 1 && col == 2) {
+						ofLogNotice() << "RIGHT"; // Middle right area
+						selectedFilePath = matching_paths[0];
+					}
+					else if (row == 2 && col == 1) {
+						ofLogNotice() << "BOTTOM"; // Bottom middle area
+						selectedFilePath = matching_paths[1];
+					}
+					moveToFilePage(selectedFilePath);
+				}
+			}
+		}
+	}
 }
 
 
@@ -139,9 +235,16 @@ void FilteredPage::gotoHomePage()
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
 
+
 void FilteredPage::gotoFilePage()
 {
-	selectedFilePath = mediaCir.getCurrentFilePath();
+	moveToFilePage(mediaCir.getCurrentFilePath());
+}
+
+
+void FilteredPage::moveToFilePage(const string& path)
+{
+	selectedFilePath = path;
 
 	int PAGE;
 	if (Media::isImage(selectedFilePath))
@@ -154,26 +257,4 @@ void FilteredPage::gotoFilePage()
 	}
 
 	ofNotifyEvent(redirectEvent, PAGE, this);
-}
-
-void FilteredPage::mouseReleased(int x, int y, int button) {
-	homeBtn.mouseReleased(x, y, button);
-	mediaCir.mouseReleased(x, y, button);
-}
-
-string FilteredPage::getCurrentFilePath() {
-	return selectedFilePath;
-}
-
-void FilteredPage::exit() {
-	mediaCir.exit();
-	videoGrabber.close();
-	currentFrame.clear();
-	diff.clear();
-	bgImage.clear();
-
-	ofRemoveListener(homeBtn.clickedInside, this, &FilteredPage::gotoHomePage);
-	ofRemoveListener(mediaCir.clickedOnItem, this, &FilteredPage::gotoFilePage);
-
-	img.clear();
 }

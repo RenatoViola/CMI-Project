@@ -19,25 +19,21 @@ public:
 	void update();
 	void exit();
 
-	void gotoHomePage();
-	void gotoFilePage();
 	void mouseReleased(int x, int y, int button);
 	string getCurrentFilePath();
 	int getCurrentVersion();
 
-	MediaCircle mediaCir;
-
 	ofEvent<int> redirectEvent;
-	Button homeBtn;
-
-	const int FILE_HEIGHT = 240;
-	const int FILE_WIDTH = 320;
 
 private:
+	void gotoHomePage();
+	void gotoFilePage();
+
+	const int FILE_HEIGHT = 240, FILE_WIDTH = 320;
 	string selectedFilePath;
 	int selectedVersion;
-	ofxCvColorImage img;
-
 	vector<pair<int, string>> files;
+	ofxCvColorImage img;
+	MediaCircle mediaCir;
+	Button homeBtn;
 };
-

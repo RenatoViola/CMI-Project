@@ -3,49 +3,74 @@
 
 class VideoMedia : public Media
 {
-private:
-    bool frameByframe = false;
-    ofVideoPlayer video;
-
 public:
-    void load(const std::string& filePath) {
-        this->filePath = filePath;
+    void load(const string& filePath) {
+        this->setFilePath(filePath);
         video.load(filePath);
     }
 
-    void draw(float x, float y, float w, float h) {
-        video.draw(x, y, w, h);
-    }
 
     void update() {
         video.update();
     }
 
+
+    void draw(float x, float y, float w, float h) {
+        video.draw(x, y, w, h);
+    }
+
+    
     void exit() {
         video.stop();
     }
+
 
     float getWidth() {
         return video.getWidth();
     }
 
+
     float getHeight() {
         return video.getHeight();
     }
+
+
+    ofVideoPlayer getContent() {
+        return video;
+    }
+
+
+    ofPixels& getPixels() {
+        return video.getPixels();
+    }
+
+
+    ofPixels& getThumbnail() {
+        return extractFirstFrame(video);
+    }
+
 
     void play() {
         video.setLoopState(OF_LOOP_NORMAL);
         video.play();
     }
 
+
+    void stop() {
+        video.stop();
+    }
+
+
+    bool isPaused() {
+        return frameByframe;
+    }
+
+
     void toggleReproduction() {
         frameByframe = !frameByframe;
         video.setPaused(frameByframe);
     }
 
-    bool isPaused() {
-        return frameByframe;
-    }
 
     static vector<ofPixels> extractFrames(ofVideoPlayer& video, int skip) {
         vector<ofPixels> frames;
@@ -77,6 +102,7 @@ public:
         return frames;
     }
 
+
     static ofPixels extractFirstFrame(ofVideoPlayer& video) {
         ofPixels firstFrame;
 
@@ -101,21 +127,7 @@ public:
     }
 
 
-    ofVideoPlayer getContent() {
-        return video;
-    }
-
-    ofPixels& getPixels() {
-        return video.getPixels();
-    }
-
-    ofPixels& getThumbnail() {
-        return extractFirstFrame(video);
-    }
-
-    void stop() {
-        video.stop();
-    }
-
-
+private:
+    bool frameByframe = false;
+    ofVideoPlayer video;
 };

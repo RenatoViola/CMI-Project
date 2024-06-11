@@ -1,7 +1,5 @@
 #include "MediaCircle.h"
-#include <ImageMedia.h>
-#include <VideoMedia.h>
-#include <Metadata.h>
+
 
 void MediaCircle::setup(vector<string>& paths, int radius, int width, int height)
 {

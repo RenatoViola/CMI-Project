@@ -12,11 +12,14 @@ public:
 	void timedDraw();
 	void mouseReleased(int x, int y, int button);
 	void loadIcon(const std::string& iconPath);
-
 	bool inside(int x, int y);
+
+	ofEvent<void> clickedInside;
+
+private:
 	int radius, x, y;
 	ofImage icon;
-	ofEvent<void> clickedInside;
+	
 	uint64_t startTime; // To track the start time
 	float fadeAlpha;    // To track the alpha value for fading
 };

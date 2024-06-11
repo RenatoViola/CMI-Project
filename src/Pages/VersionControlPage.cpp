@@ -17,7 +17,7 @@ void VersionControlPage::setup(string filePath)
 		pixels = VideoMedia::extractFirstFrame(temp);
 	}
 
-	// GET THE PATHS FOR MEDIA FILES
+	// Paths for media files
 	ofDirectory imgDir, vidDir;
 	imgDir.allowExt("jpg");
 	imgDir.listDir("images/"); 
@@ -34,7 +34,7 @@ void VersionControlPage::setup(string filePath)
 	for (int i = 0; i < vidDir.size(); i++)
 		vid_paths.push_back(vidDir.getPath(i));
 
-	// FIND THE RELATED FILES
+	// Find the related files
 	vector<string> related_files = Metadata::findRelatedFiles(filePath, img_paths, vid_paths);
 	files = Metadata::getVersionedRelatedFiles(filePath, related_files);
 	
@@ -55,6 +55,13 @@ void VersionControlPage::setup(string filePath)
 	ofAddListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
 }
 
+
+void VersionControlPage::update()
+{
+	mediaCir.update();
+}
+
+
 void VersionControlPage::draw()
 {
 	float displayWidth, displayHeight, xPos, yPos;
@@ -66,16 +73,32 @@ void VersionControlPage::draw()
 	homeBtn.draw();
 }
 
-void VersionControlPage::update()
-{
-	mediaCir.update();
+
+string VersionControlPage::getCurrentFilePath() {
+	return selectedFilePath;
 }
+
+
+int VersionControlPage::getCurrentVersion() {
+	return selectedVersion;
+}
+
+
+void VersionControlPage::exit() {
+	mediaCir.exit();
+	img.clear();
+
+	ofRemoveListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
+	ofRemoveListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
+}
+
 
 void VersionControlPage::gotoHomePage()
 {
 	int PAGE = MAIN_PAGE;
 	ofNotifyEvent(redirectEvent, PAGE, this);
 }
+
 
 void VersionControlPage::gotoFilePage()
 {
@@ -99,21 +122,4 @@ void VersionControlPage::gotoFilePage()
 void VersionControlPage::mouseReleased(int x, int y, int button) {
 	homeBtn.mouseReleased(x, y, button);
 	mediaCir.mouseReleased(x, y, button);
-}
-
-
-string VersionControlPage::getCurrentFilePath() {
-	return selectedFilePath;
-}
-
-int VersionControlPage::getCurrentVersion() {
-	return selectedVersion;
-}
-
-void VersionControlPage::exit() {
-	mediaCir.exit();
-	img.clear();
-
-	ofRemoveListener(homeBtn.clickedInside, this, &VersionControlPage::gotoHomePage);
-	ofRemoveListener(mediaCir.clickedOnItem, this, &VersionControlPage::gotoFilePage);
 }

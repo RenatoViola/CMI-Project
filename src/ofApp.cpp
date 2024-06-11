@@ -21,9 +21,6 @@ void ofApp::setup() {
 	// setup Screen Saver Page
 	screenSaverPage.setup();
 	homePage.setup();
-
-	// Uncomment this to show movies with alpha channels
-	// videoPlayer.setPixelFormat(OF_PIXELS_RGBA);
 	
 	activePage = SCREEN_SAVER_PAGE;
 
