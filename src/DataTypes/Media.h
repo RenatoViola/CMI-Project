@@ -5,7 +5,7 @@
 class Media
 {
 public:
-    ~Media() {};
+    virtual ~Media() = default;
 
     // Pure virtual methods
     virtual void load(const string& filePath) = 0;
@@ -33,7 +33,7 @@ public:
         float scale = 1.0f;
 
         if (width > sWidth || height > sHeight)
-            scale = min(sWidth / width, sHeight / height);
+            scale = std::min(sWidth / width, sHeight / height);
 
         *displayWidth = width * scale;
         *displayHeight = height * scale;
@@ -49,6 +49,7 @@ public:
             }
             else return false;
         }
+        return false;
     }
 
     static string getFileName(const string& filePath) {

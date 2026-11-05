@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CMI Project — Image Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="browser.css">
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">RENATO VIOLA / INTERACTIVE PROJECT</span><h1>CMI Image Studio<span>.</span></h1></div>
+    <button id="fullscreen" type="button">Full screen ↗</button>
+  </header>
+  <main>
+    <div id="status" role="status">Loading the studio…</div>
+    <canvas id="canvas" tabindex="0" aria-label="Interactive image browser and filter editor" oncontextmenu="event.preventDefault()"></canvas>
+  </main>
+  <footer><span>Browse the gallery, open an image, and experiment with filters.</span><span>C++ · openFrameworks · OpenCV</span></footer>
+  <script src="browser.js"></script>
+  {{{ SCRIPT }}}
+</body>
+</html>

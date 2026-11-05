@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include <filter_names.h>
-#include "Carrousel.h"
+#include "DataTypes/Media.h"
 
 class FilterPanel
 {

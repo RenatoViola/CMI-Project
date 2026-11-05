@@ -1,0 +1,16 @@
+:root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif; color: #232722; background: #f3f3ed; }
+* { box-sizing: border-box; }
+body { margin: 0 auto; padding: 32px 36px 20px; max-width: 1600px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 24px; }
+.eyebrow { font-size: 10px; letter-spacing: .18em; color: #65715e; font-weight: 650; }
+h1 { font-size: clamp(24px, 3vw, 38px); margin: 8px 0 0; font-weight: 550; letter-spacing: -.045em; }
+h1 span { color: #7d913b; }
+button { font: inherit; font-size: 13px; padding: 11px 17px; border: 1px solid #c9cec1; border-radius: 24px; background: transparent; cursor: pointer; }
+button:hover { background: #e5eadc; }
+main { position: relative; min-height: 200px; background: white; border: 1px solid #dedfd6; border-radius: 12px; overflow: hidden; }
+canvas { display: block; width: 100%; height: auto; outline: none; }
+canvas:fullscreen { width: 100%; height: 100%; object-fit: contain; background: white; }
+#status { position: absolute; inset: 0; display: grid; place-items: center; padding: 30px; background: #fff; z-index: 1; }
+#status[hidden] { display: none; }
+footer { display: flex; justify-content: space-between; gap: 15px; margin-top: 16px; font-size: 11px; color: #687061; line-height: 1.6; }
+@media (max-width: 600px) { body { padding: 20px 14px; } footer { flex-direction: column; gap: 2px; } }

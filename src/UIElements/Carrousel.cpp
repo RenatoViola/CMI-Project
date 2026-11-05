@@ -12,16 +12,18 @@ void Carrousel::setup(string directory, int verticalPos, bool isImageCarrousel) 
 	items.reserve(dir.size());
 
 	for (int i = 0; i < dir.size(); i++) {
-		unique_ptr<Media> item;
+		std::unique_ptr<Media> item;
 		if (isImageCarrousel)
-			item = make_unique<ImageMedia>();
-		else 
-			item = make_unique<VideoMedia>();
+			item = std::make_unique<ImageMedia>();
+		#ifndef CMI_WEB_DEMO
+		else
+			item = std::make_unique<VideoMedia>();
+		#endif
 
 		item->load(dir.getPath(i));
 		item->update();
 		item->getThumbnail();
-		items.push_back(move(item));
+		items.push_back(std::move(item));
 	}
 
 	startY = verticalPos;
@@ -43,6 +45,7 @@ void Carrousel::update() {
 
 
 void Carrousel::draw() {
+	if (items.empty()) return;
 	// Calculate progressive step 
 	step = ofLerp(step, space, 0.05);
 
@@ -83,6 +86,7 @@ void Carrousel::draw() {
 
 
 string Carrousel::getCurrentFilePath() {
+	if (items.empty()) return "";
 	return items[current].get()->getFilePath();
 }
 
@@ -98,6 +102,7 @@ void Carrousel::mousePressed(int x, int y, int button) {
 
 
 void Carrousel::mouseReleased(int x, int y, int button) {
+	if (items.empty()) return;
 
 	if (selectedFile.inside(x, y))
 	{

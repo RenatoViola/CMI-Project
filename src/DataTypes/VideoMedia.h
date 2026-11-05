@@ -46,7 +46,8 @@ public:
 
 
     ofPixels& getThumbnail() {
-        return extractFirstFrame(video);
+        thumbnail = extractFirstFrame(video);
+        return thumbnail;
     }
 
 
@@ -128,6 +129,7 @@ public:
 
 
 private:
+    ofPixels thumbnail;
     bool frameByframe = false;
     ofVideoPlayer video;
 };

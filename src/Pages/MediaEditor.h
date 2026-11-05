@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
-#include "ofApp.h"
+#include "screen_names.h"
+#include "UIElements/Button.h"
 #include "UIElements/FilterPanel.h"
 #include "DataTypes/Media.h"
 #include <ofxOpenCv.h>

@@ -3,7 +3,9 @@
 #include "screen_names.h"
 #include <DataTypes/Media.h>
 #include <DataTypes/ImageMedia.h>
+#ifndef CMI_WEB_DEMO
 #include <DataTypes/VideoMedia.h>
+#endif
 
 class Carrousel {
 public:
@@ -36,6 +38,6 @@ private:
 	bool loadFromTheRight = true, isImageCarrousel;
 
 	ofRectangle fullCarrousel, selectedFile;
-	vector<unique_ptr<Media>> items;
+	vector<std::unique_ptr<Media>> items;
 	ofTrueTypeFont myFont;
 };

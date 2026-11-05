@@ -43,6 +43,7 @@ void FilterPanel::draw()
 void FilterPanel::saveButtonPressed() {
 	ofXml xml;
 	string savePath = "versions/" + filePath + ".xml";
+	ofDirectory::createDirectory(ofFilePath::getEnclosingDirectory(ofToDataPath(savePath)), true, true);
 	bool fileExists = xml.load(savePath);
 
 	ofXml root;
